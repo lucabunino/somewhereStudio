@@ -1,5 +1,4 @@
-import { EarthGlobeIcon, ListIcon, InfoOutlineIcon, TagsIcon, ProjectsIcon, SparklesIcon, HomeIcon } from '@sanity/icons'
-
+import { EarthGlobeIcon, ListIcon, InfoOutlineIcon, TagsIcon, ProjectsIcon, HomeIcon } from '@sanity/icons'
 
 export const myStructure = (S, context) => {
   const entities = [
@@ -8,6 +7,7 @@ export const myStructure = (S, context) => {
       .title('Homepage')
       .icon(HomeIcon)
       .child(S.document().schemaType('homepage').documentId('homepage')),
+    // S.documentTypeListItem('homepage'),
     S.documentTypeListItem('project')
       .icon(ProjectsIcon)
       .title('Projects'),

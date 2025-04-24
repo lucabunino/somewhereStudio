@@ -19,6 +19,27 @@ export default {
       },
     },
     {
+      name: 'size',
+      type: 'string',
+      options: {
+        list: [
+          {title: 'XS', value: 'xs'},
+          {title: 'S', value: 's'},
+          {title: 'M', value: 'm'},
+          {title: 'L', value: 'l'},
+          {title: 'XL', value: 'xl'},
+        ],
+      },
+      initialValue: 'm',
+      validation: (Rule) => Rule.required(),
+    },
+    {
+      name: 'project',
+      description: 'Required if this serie is not referenced in any project',
+      type: 'reference',
+      to: [{ type: 'project' }]
+    },
+    {
       name: 'modules',
       type: 'array',
       of: [

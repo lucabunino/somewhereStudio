@@ -39,11 +39,11 @@ export default {
           options: { columns: 2,},
           fields: [
             {
-              name: 'socialName',
+              name: 'label',
               type: 'string'
             },
             {
-              name: 'socialUrl',
+              name: 'link',
               type: 'url'
             },
           ]

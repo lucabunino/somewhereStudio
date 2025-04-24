@@ -8,7 +8,7 @@ export default {
     {
       name: 'title',
       type: 'string',
-      hidden: true,
+      hidden: false,
     },
     {
       name: 'modules',

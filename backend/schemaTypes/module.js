@@ -24,9 +24,8 @@ export default {
   type: 'document',
   icon: BlockElementIcon,
   fieldsets: [
-    {
-      name: 'coordinates'      
-    }
+    { name: 'coordinates' },
+    { name: 'vimeo' },
   ],
   fields: [
     {
@@ -87,11 +86,23 @@ export default {
       type: 'array',
       of: [{ type: 'reference', to: [{ type: 'tag' }] }],
     },
+    {
+      name: 'project',
+      description: 'Required if this module is not referenced in any project',
+      type: 'reference',
+      to: [{ type: 'project' }]
+    },
     media,
     {
-      name: 'vimeoId',
-      title: 'Vimeo ID',
+      name: 'id',
       type: 'string',
+      fieldset: 'vimeo',
+      hidden: ({ parent }) => !['vimeo'].includes(parent?.kind)
+    },
+    {
+      name: 'cover',
+      type: 'image',
+      fieldset: 'vimeo',
       hidden: ({ parent }) => !['vimeo'].includes(parent?.kind)
     },
     {
@@ -106,7 +117,7 @@ export default {
       name: 'text1',
       type: 'text',
       rows: 6,
-      hidden: ({ parent }) => !['video', 'shortText', 'longText'].includes(parent?.kind)
+      hidden: ({ parent }) => !['video', 'shortText', 'longText', 'box'].includes(parent?.kind)
     },
     {
       name: 'text2',
