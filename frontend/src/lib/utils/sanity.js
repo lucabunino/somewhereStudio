@@ -99,7 +99,6 @@ export async function getModules(tags) {
 		);
 	}
 }
-
 export async function getTags() {
 	return await client.fetch(`
 		*[_type == "tag" && !(_id in path('drafts.**'))] {
@@ -108,7 +107,78 @@ export async function getTags() {
 		}|order(title)`
 	);
 }
+export async function getAbout() {
+	return await client.fetch(
+		`
+		*[_type == "about" && !(_id in path('drafts.**'))][0] {
+			...,
+			people[]->{
+				name,
+				surname,
+				bio
+			}
+		}
+		`
+	);
+}
+export async function getIndex() {
+	return await client.fetch(
+		`
+		*[_type == "project" && index == true && !(_id in path('drafts.**'))] {
+			...,
+			collaborations[]->{
+				title,
+			},
+			clients[]->{
+				title,
+			},
+			tags[]->{
+				title,
+			},
+			formats[]->{
+				title,
+			},
+			locations[]->{
+				title,
+			}
+		}|order(date)
+		`
+	);
+}
+export async function getProject(slug) {
+	return await client.fetch(
+		`
+		*[_type == "project" && slug.current == $slug] {
+			...,
+			modules[]->{
+				${module}
+			},
+			collaborations[]->{
+				title,
+			},
+			clients[]->{
+				title,
+			},
+			tags[]->{
+				title,
+			},
+			formats[]->{
+				title,
+			},
+			locations[]->{
+				title,
+			}
+		}
+		`, { slug });
+}
 
+
+
+
+
+
+
+// OLD
 
 
 export async function getProjects() {

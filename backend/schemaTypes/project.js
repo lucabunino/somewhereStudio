@@ -30,6 +30,13 @@ export default {
       validation: (Rule) => Rule.required(),
     },
     {
+      name: 'singlePage',
+      title: 'Display in single page',
+      type: 'boolean',
+      initialValue: true,
+      validation: (Rule) => Rule.required(),
+    },
+    {
       name: 'color',
       type: 'color',
       options: {
@@ -85,6 +92,7 @@ export default {
     {
       name: 'cover',
       type: 'image',
+      validation: (Rule) => Rule.required(),
     },
     {
       name: 'modules',

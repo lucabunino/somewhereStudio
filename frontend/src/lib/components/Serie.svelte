@@ -1,22 +1,24 @@
 <script>
+import Module from "$lib/components/Module.svelte";
 import { register } from 'swiper/element/bundle';register();
-let {
-  size,
-  project,
+let {
   slides,
-  hiddenProject = false
-} = $props()
+  project,
+  size,
+  hiddenProject = false,
+  link = true,
+ } = $props()
 </script>
 
 <swiper-container
+class="{size ? size : module.size}"
 pagination={{
   clickable: true
 }}
 >
-{#each slides as quote, i}
-  <swiper-slide class="text">
-    <h4 class="gaisyr-34">{quote.quotation}</h4>
-    <h5 class="ronzino-18">{quote.author.title}</h5>
+{#each slides as module, i}
+  <swiper-slide class="slide">
+      <Module module={module} i={i} size={size ? size : module.size} hiddenProject={hiddenProject ? true : false}/>
   </swiper-slide>
 {/each}
 </swiper-container>
@@ -24,26 +26,11 @@ pagination={{
   <p class="project ronzino-12 medium uppercase">{project.title}</p>
 {/if}
 {#if hiddenProject}
-  <div class="slider-bar {size ? size : ''}"></div>
+  <div class="slider-bar {size ? size : module.size}"></div>
 {/if}
 
 <style>
-/* Quote */
-.text {
-  padding: var(--gutter) calc(var(--gutter)/2);
-}
-.text > * {
-  text-indent: calc(var(--gutter)*6);
-}
-.text > h4::before {
-  content: "\2018";
-}
-.text > h4::after {
-  content: "\2019";
-}
-.text > h5 {
-  margin-top: 1em;
-}
+/* Serie */
 swiper-container::part(container) {
   overflow-x: clip;
   overflow-y: visible;

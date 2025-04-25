@@ -3,6 +3,7 @@ import { urlFor } from '$lib/utils/image';
 let {
   media,
   width = 1080,
+  cover = false,
 } = $props()
 
 let domLoaded = $state()
@@ -13,8 +14,8 @@ $effect(() => {
 })
 </script>
 
-<div>
-  <div class="media" class:loaded={domLoaded}>
+<div style="height: 100%;">
+  <div class="media" class:cover={cover} class:loaded={domLoaded}>
     {#if media.mp4}
       <video muted loop autoplay playsinline
       src={media.mp4.asset.url}
@@ -30,9 +31,14 @@ $effect(() => {
   {/if}
 </div>
 
+
 <style>
 .media {
   position: relative;
+}
+.media.cover {
+  width: 100%;
+  height: 100%;
 }
 .caption {
   text-indent: 3em;
@@ -42,6 +48,10 @@ img {
   display: block;
   width: 100%;
   height: auto;
+}
+.media.cover img {
+  height: 100%;
+  object-fit: cover;
 }
 .blur {
   position: absolute;

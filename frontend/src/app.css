@@ -85,17 +85,17 @@ button {
 #root, #__next {
   isolation: isolate;
 }
-a:-webkit-any-link {
+a:-webkit-any-link:not(.btn-link):not(.project-link) {
   color: inherit;
   cursor: pointer;
   text-decoration: none;
 }
-a:any-link {
+a:any-link:not(.btn-link):not(.project-link) {
   color: inherit;
   cursor: pointer;
   text-decoration: none;
 }
-a:not(.tag):not(.module):not(.menu-item a):hover {
+a:not(.project-link):not(.btn-link):not(.tag):not(.module):not(.menu-item a):hover {
   opacity: .3;
 }
 a:-webkit-any-link.underline,
@@ -122,11 +122,19 @@ a:any-link.underline,
   line-height: 1;
 }
 .gaisyr-14 {
+  font-family: Gaisyr, 'Times New Roman', Times, serif;
   font-size: 1rem;
   letter-spacing: -0.02em;
   line-height: 1.143;
 }
+.gaisyr-19 {
+  font-family: Gaisyr, 'Times New Roman', Times, serif;
+  font-size: 1.357rem;
+  letter-spacing: -0.01em;
+  line-height: 1.105;
+}
 .gaisyr-34 {
+  font-family: Gaisyr, 'Times New Roman', Times, serif;
   font-size: 2.428rem;
   letter-spacing: -0.03em;
   line-height: 0.970;
@@ -134,12 +142,56 @@ a:any-link.underline,
 .uppercase {
   text-transform: uppercase;
 }
+.normalcase {
+  text-transform: none;
+}
 .medium {
   font-weight: 500;
+}
+.btn {
+  transition: var(--transition);
+  width: fit-content;
+  font-size: 1rem;
+}
+.btn-link {
+  display: block;
+  padding: .5em 1em;
+  background-color: var(--white);
+  white-space: nowrap;
+  color: var(--darkGray);
+  text-decoration: none;
+  transition: var(--transition);
+}
+.btn:hover {
+  padding-left: 1em;
+}
+.btn:hover .btn-link {
+  color: var(--black);
 }
 .todo {
   border: solid red;
   padding: 2em;
+}
+.slider-bar {
+  width: 100%;
+  display: block;
+  height: calc(.857rem*1.143 + 1rem);
+  background-color: var(--white);
+}
+.xs {
+  width: 20vw;
+}
+.s {
+  width: 30vw;
+}
+.m {
+  width: 40vw;
+}
+.l {
+  width: 60vw;
+}
+.xl {
+  width: 90vw;
 }
 .hidden {
   display: none !important;

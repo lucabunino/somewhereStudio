@@ -124,7 +124,7 @@ function handleKey({key}) {if (key === 'G' && dev) {viewGrid = !viewGrid}}
 <header>
     <nav>
       <ul class="menu gaisyr-34"
-      class:blurred={scrollY > 100}
+      class:blurred={scrollY > 100 && $page.url.pathname !== '/index'}
       >
         <li class="menu-item">
           <a href="/">Somewhere<br>Studio</a>
@@ -138,39 +138,40 @@ function handleKey({key}) {if (key === 'G' && dev) {viewGrid = !viewGrid}}
       </ul>
     </nav>
 </header>
-
-<div class="tags"
-onmouseleave={handleMouseLeave}
-onmouseenter={handleMouseEnter}>
-  {#each data.tags
-    .slice()
-    .sort((a, b) => {
-      const activeTags = data.searchParams;
-      const aActive = activeTags.includes(a.slug.current);
-      const bActive = activeTags.includes(b.slug.current);
-      return aActive === bActive ? 0 : aActive ? -1 : 1;
-    }) as tag, i (tag._id)}
-    <div class="tag"
-    animate:flipVertical
-    class:active={data.searchParams.includes(tag.slug.current)}
-    style="--delay: {i*50}ms"
-    >
-      {#if openTags || i<maxTags}
-        <button onclick={() => toggleTag(tag.slug.current)}
-        in:slide={{ axis: "x", duration: 500, delay: i*30 }}
-        out:slide={{ axis: "x", duration: 500, delay: 500 + (data.tags.length)*30 - i*30 }}
-        >
-          <span class="prefix">×</span>{tag.title}
-        </button>
-      {/if}
-    </div>
-  {/each}
-  {#if !openTags}
-    <div class="tag">
-      <button onclick={() => {openTags = true}}>...</button>
-    </div>
-  {/if}
-</div>
+{#if domLoaded && $page.url.pathname === '/'}
+  <div class="tags"
+  onmouseleave={handleMouseLeave}
+  onmouseenter={handleMouseEnter}>
+    {#each data.tags
+      .slice()
+      .sort((a, b) => {
+        const activeTags = data.searchParams;
+        const aActive = activeTags.includes(a.slug.current);
+        const bActive = activeTags.includes(b.slug.current);
+        return aActive === bActive ? 0 : aActive ? -1 : 1;
+      }) as tag, i (tag._id)}
+      <div class="tag"
+      animate:flipVertical
+      class:active={data.searchParams.includes(tag.slug.current)}
+      style="--delay: {i*50}ms"
+      >
+        {#if openTags || i<maxTags}
+          <button onclick={() => toggleTag(tag.slug.current)}
+          in:slide={{ axis: "x", duration: 500, delay: i*30 }}
+          out:slide={{ axis: "x", duration: 500, delay: 500 + (data.tags.length)*30 - i*30 }}
+          >
+            <span class="prefix">×</span>{tag.title}
+          </button>
+        {/if}
+      </div>
+    {/each}
+    {#if !openTags}
+      <div class="tag">
+        <button onclick={() => {openTags = true}}>...</button>
+      </div>
+    {/if}
+  </div>
+{/if}
 
 {#if domLoaded}
   <main>
@@ -178,7 +179,7 @@ onmouseenter={handleMouseEnter}>
   </main>
 {/if}
 
-{#if $page.url.pathname !== '/'}
+{#if domLoaded && (data.searchParams.length > 0 || $page.url.pathname !== '/')}
 <footer class="ronzino-12 uppercase medium">
   <div>
     {#if data.info.email}<a href="mailto:{data.info.email}">{data.info.email}</a>{/if}
@@ -222,7 +223,7 @@ onmouseenter={handleMouseEnter}>
   align-items: flex-end;
   list-style: none;
   position: fixed;
-  top: 50vh;
+  top: calc(50vh - 2rem);
   left: 0;
   transform: translateY(-50%);
   width: -webkit-fill-available;
@@ -283,6 +284,7 @@ onmouseenter={handleMouseEnter}>
   width: fit-content;
   transition: var(--transition);
   transition-property: padding, transform;
+  line-height: 1rem;
 }
 .tag:hover {
   color: var(--darkGray);
@@ -299,7 +301,7 @@ onmouseenter={handleMouseEnter}>
   align-items: center;
   padding: .5em 1em;
   background-color: var(--white);
-  margin-bottom: .22em;
+  margin-bottom: .3rem;
   white-space: nowrap;
 }
 .prefix {
@@ -313,11 +315,18 @@ onmouseenter={handleMouseEnter}>
   transition-delay: 500ms;
 }
 
+/* Main */
+main {
+  min-height: calc(100vh - .857rem*1.166*3 - var(--gutter)*12.8);
+}
+
 /* Footer */
 footer {
   display: flex;
   align-items: flex-start;
   gap: var(--gutter);
+  margin-top: calc(var(--gutter)*10);
+  padding: calc(var(--gutter)*1.4) var(--gutter);
 }
 footer div {
   display: flex;

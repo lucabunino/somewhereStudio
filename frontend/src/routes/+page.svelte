@@ -1,45 +1,51 @@
 <script>
 // Imports
-import { slide } from "svelte/transition";
+import { blur } from "svelte/transition";
 import Module from "$lib/components/Module.svelte";
+import { flip } from "svelte/animate";
 
 // Variables
 let { data } = $props()
-$inspect(data)
+let domLoaded = $state(false)
 let innerWidth = $state(0)
 let innerHeight = $state(0)
+
+$effect(() => {
+  domLoaded = true
+})
 </script>
 
 <svelte:window bind:innerWidth bind:innerHeight></svelte:window>
 
-<section class="modules">
-  {#if data.searchParams.length > 0}
-    <div class="module intro gaisyr-34"
-    in:slide|global={{ axis: "y", duration: 500, delay: 500 }}
-    out:slide|global={{ axis: "y", duration: 500 }}
-    >{data.modules.length} Risultati per:
-      {#each data.searchParams as searchParam, i}
-        {#each data.tags.filter(tag => tag.slug.current === searchParam) as tag, j}{tag.title}{#if j < data.tags.filter(tag => tag.slug.current === searchParam).length - 1}{@html ', '}{/if}{/each}{#if data.searchParams.length - 1 > i}{@html ', '}{/if}
-      {/each}
-    </div>
-  {/if}
-
-  {#each data.modules as module, i (module._id)}
-    {#if module.modules}
-      <div class="slide">
-        {#each module.modules as slide, j}
-          <Module module={slide} i={j} size={module.size}/>
+<section id="modules">
+  {#key data.searchParams}
+    {#if data.searchParams.length > 0}
+      <div class="module intro gaisyr-34"
+      in:blur|global={{ duration: 500, delay: 1000 }}
+      out:blur|global={{ duration: 500}}
+      >{data.modules.length} Risultati per:
+        {#each data.searchParams as searchParam, i}
+          {#each data.tags.filter(tag => tag.slug.current === searchParam) as tag, j}{tag.title}{/each}{#if data.searchParams.length - 1 > i}{@html ', '}{/if}
         {/each}
-        {#if module.project}<p class="project ronzino-12 medium uppercase">{module.project.title}</p>{/if}
       </div>
-    {:else}
-      <Module module={module} i={i}/>
     {/if}
-  {/each}
+    {#each data.modules as module, i (module._id)}
+      {#if module.modules}
+        <div class="slide">
+          {#each module.modules as slide, j}
+            <Module module={slide} i={j} size={module.size}/>
+          {/each}
+          {#if module.project}<p class="project ronzino-12 medium uppercase">{module.project.title}</p>{/if}
+        </div>
+      {:else}
+        <Module module={module} i={i}/>
+      {/if}
+    {/each}
+  {/key}
 </section>
 
 <style>
-.modules {
+#modules {
   display: flex;
   flex-direction: column;
   align-items: center;
