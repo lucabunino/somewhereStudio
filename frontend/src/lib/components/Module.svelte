@@ -16,7 +16,7 @@ let {
 </script>
 
 {#if link}
-<a class="module {size ? size : module.size}" data-kind={module.kind}
+<a class="module {size ? size : module.size} {module.position ? module.position : 'left'}" data-kind={module.kind}
 href={module.project?.slug ? `/index/${module.project.slug.current}` : ``}
 in:blur|global={{ duration: 500, delay: 1000 + i*50 }}
 out:blur|global={{ duration: 500 }}
@@ -71,7 +71,7 @@ out:blur|global={{ duration: 500 }}
   {/if}
 </a>
 {:else}
-<div class="module {size ? size : module.size}" data-kind={module.kind}
+<div class="module {size ? size : module.size} {module.position ? module.position : 'left'}" data-kind={module.kind}
 in:blur|global={{ duration: 500, delay: 1000 + i*50 }}
 out:blur|global={{ duration: 500 }}
 >

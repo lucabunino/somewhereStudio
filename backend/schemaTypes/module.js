@@ -42,6 +42,19 @@ export default {
       },
     },
     {
+      name: 'search',
+      title: 'Display in search results',
+      type: 'boolean',
+      initialValue: true,
+      validation: (Rule) => Rule.required(),
+    },
+    {
+      name: 'hierarchy',
+      type: 'number',
+      initialValue: 1,
+      validation: (Rule) => Rule.required(),
+    },
+    {
       name: 'kind',
       type: 'string',
       options: {
@@ -63,6 +76,20 @@ export default {
         ],
       },
       initialValue: 'm',
+      validation: (Rule) => Rule.required(),
+    },
+    {
+      name: 'position',
+      description: 'Position of the module in single page. In search results it will always be centered',
+      type: 'string',
+      options: {
+        list: [
+          {title: 'Left', value: 'left'},
+          {title: 'Center', value: 'center'},
+          {title: 'Right', value: 'right'},
+        ],
+      },
+      initialValue: 'left',
       validation: (Rule) => Rule.required(),
     },
     {

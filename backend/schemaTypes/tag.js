@@ -18,5 +18,11 @@ export default {
         maxLength: 96,
       },
     },
+    {
+      name: 'hierarchy',
+      type: 'number',
+      initialValue: 1,
+      validation: (Rule) => Rule.required(),
+    },
   ],
 };

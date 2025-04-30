@@ -12,6 +12,7 @@ let {
 pagination={{
   clickable: true
 }}
+autoHeight={true}
 >
 {#each slides as quote, i}
   <swiper-slide class="text">

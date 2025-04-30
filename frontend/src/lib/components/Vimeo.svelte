@@ -13,13 +13,9 @@ let aspectRatio = $state(null)
 onMount(async () => {
   const response = await fetch(`https://vimeo.com/api/oembed.json?url=https://vimeo.com/${id}`);
   const data = await response.json();
-
   const width = data.width;
   const height = data.height;
-  
-  // Calculate aspect ratio
   aspectRatio = width / height;
-  console.log(aspectRatio);
 });
 </script>
 

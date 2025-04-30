@@ -85,17 +85,17 @@ export async function getInfo() {
 export async function getModules(tags) {
 	if (tags.length > 0) {
 		return await client.fetch(`
-			*[_type == "module"
+			*[_type in ["module", "serie"]
+			&& search == true
 			${tags?.length ? `&& count(tags[@->slug.current in $tags]) > 0` : ''}
 			&& !(_id in path('drafts.**'))] {
 				${module}
-			}`, { tags });	
+			}|order(hierarchy desc)`, { tags });
 	} else {
 		return await client.fetch(`
 			*[_type == "homepage" && !(_id in path('drafts.**'))][0].modules[]->{
 				${module}
-			}
-			`
+			}`
 		);
 	}
 }
@@ -104,12 +104,11 @@ export async function getTags() {
 		*[_type == "tag" && !(_id in path('drafts.**'))] {
 			...,
 			"homepage": count(*[_type == "homepage" && !(_id in path('drafts.**'))][0].modules[]->tags[@->_id == ^._id]) > 0
-		}|order(title)`
+		}|order(hierarchy desc, title asc)`
 	);
 }
 export async function getAbout() {
-	return await client.fetch(
-		`
+	return await client.fetch(`
 		*[_type == "about" && !(_id in path('drafts.**'))][0] {
 			...,
 			people[]->{
@@ -117,13 +116,11 @@ export async function getAbout() {
 				surname,
 				bio
 			}
-		}
-		`
+		}`
 	);
 }
 export async function getIndex() {
-	return await client.fetch(
-		`
+	return await client.fetch(`
 		*[_type == "project" && index == true && !(_id in path('drafts.**'))] {
 			...,
 			collaborations[]->{
@@ -141,13 +138,11 @@ export async function getIndex() {
 			locations[]->{
 				title,
 			}
-		}|order(date)
-		`
+		}|order(date)`
 	);
 }
 export async function getProject(slug) {
-	return await client.fetch(
-		`
+	return await client.fetch(`
 		*[_type == "project" && slug.current == $slug] {
 			...,
 			modules[]->{
@@ -168,8 +163,7 @@ export async function getProject(slug) {
 			locations[]->{
 				title,
 			}
-		}
-		`, { slug });
+		}`, { slug });
 }
 
 

@@ -50,6 +50,9 @@ onclick={() => {extraOpen ? extraOpen = false : ''}}
 <style>
 #singleProject {
   width: 90vw;
+  display: flex;
+  flex-direction: column;
+  flex-wrap: nowrap;
 }
 .project-title {
   margin-bottom: var(--gutter);

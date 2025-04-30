@@ -1,11 +1,13 @@
 <script>
 // Imports
 import { blur } from "svelte/transition";
-import Module from "$lib/components/Module.svelte";
 import { flip } from "svelte/animate";
+import Module from "$lib/components/Module.svelte";
+import Serie from "$lib/components/Serie.svelte";
 
 // Variables
 let { data } = $props()
+$inspect(data)
 let domLoaded = $state(false)
 let innerWidth = $state(0)
 let innerHeight = $state(0)
@@ -31,12 +33,7 @@ $effect(() => {
     {/if}
     {#each data.modules as module, i (module._id)}
       {#if module.modules}
-        <div class="slide">
-          {#each module.modules as slide, j}
-            <Module module={slide} i={j} size={module.size}/>
-          {/each}
-          {#if module.project}<p class="project ronzino-12 medium uppercase">{module.project.title}</p>{/if}
-        </div>
+        <Serie slides={module.modules} project={module.project} size={module.size} hiddenProject={true} link={false}/>
       {:else}
         <Module module={module} i={i}/>
       {/if}

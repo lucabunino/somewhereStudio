@@ -15,6 +15,7 @@ class="{size ? size : module.size}"
 pagination={{
   clickable: true
 }}
+autoHeight={true}
 >
 {#each slides as module, i}
   <swiper-slide class="slide">

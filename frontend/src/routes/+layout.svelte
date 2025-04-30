@@ -1,7 +1,6 @@
 <script>
 // Data
 let { data, children } = $props();
-$inspect(data)
 
 // Imports
 import "../app.css";
@@ -43,15 +42,16 @@ function toggleTag(tagSlug) {
     const newTags = tags.filter(t => t !== tagSlug);
     url.searchParams.delete('tag'); // clear all first
     newTags.forEach(t => url.searchParams.append('tag', t));
+    if (data.searchParams.length > firstMaxTags) {
+      maxTags--
+    }
   } else {
     // Add the tag
     url.searchParams.append('tag', tagSlug);
+    if (data.searchParams.length > firstMaxTags) {
+      maxTags = data.searchParams.length+1
+    }
   }
-
-  if (data.searchParams.length > firstMaxTags) {
-    maxTags = data.searchParams.length
-  }
-
   goto(`${url.pathname}?${url.searchParams.toString()}`, { preload: true, replaceState: false });
 }
 /**
@@ -291,6 +291,9 @@ function handleKey({key}) {if (key === 'G' && dev) {viewGrid = !viewGrid}}
   padding-left: 1em;
   transition-delay: 0ms;
 }
+.tag:hover .prefix {
+  color: var(--darkGray);
+}
 .tag.active {
   z-index: 999;
   padding-left: 1em;
@@ -309,6 +312,7 @@ function handleKey({key}) {if (key === 'G' && dev) {viewGrid = !viewGrid}}
   display: inline-flex;
   overflow-x: hidden;
   transition: var(--transition);
+  transition-property: width;
 }
 .tag.active .prefix {
   width: 1em;

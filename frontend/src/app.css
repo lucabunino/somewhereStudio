@@ -193,6 +193,15 @@ a:any-link.underline,
 .xl {
   width: 90vw;
 }
+#singleProject .left {
+  align-self: flex-start;
+}
+#singleProject .center {
+  align-self: center;
+}
+#singleProject .right {
+  align-self: flex-end;
+}
 .hidden {
   display: none !important;
 }
