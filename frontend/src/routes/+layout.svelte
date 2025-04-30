@@ -173,11 +173,11 @@ function handleKey({key}) {if (key === 'G' && dev) {viewGrid = !viewGrid}}
   </div>
 {/if}
 
-{#if domLoaded}
+<!-- {#if domLoaded}
   <main>
     {@render children()}
   </main>
-{/if}
+{/if} -->
 
 {#if domLoaded && (data.searchParams.length > 0 || $page.url.pathname !== '/')}
 <footer class="ronzino-12 uppercase medium">
