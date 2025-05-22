@@ -14,8 +14,9 @@ let tagger = getTags()
 tagger.setMaxTags(0)
 onMount(() => {
 	setTimeout(() => {
-	tagger.setTags(data.project[0].tags)
-	tagger.setMaxTags(data.project[0].tags.length)
+	// tagger.setTags(data.project[0].tags)
+	tagger.setTags(data.project[0].tags, { keepHierarchy: false, hierarchy: 99 });
+	tagger.setMaxTags(data.project[0].tags.length)	
 	}, 1000);
 })
 </script>

@@ -135,14 +135,23 @@ function handleKey({key}) {if (key === 'G' && dev) {viewGrid = !viewGrid}}
 	onmouseleave={() => handleMouseLeave()}
 	onmouseenter={() => handleMouseEnter()}>
 		<!-- {#if $page.url.pathname === "/" || $page.url.pathname !== "/" && tagger.open} -->
-			{#each tags
+			{#each tagger.tags
 				.slice()
 				.filter(tag => !tag.hidden)
 				.sort((a, b) => {
 					const activeTags = data.searchParams;
 					const aActive = activeTags.includes(a.slug.current);
 					const bActive = activeTags.includes(b.slug.current);
-					return aActive === bActive ? 0 : aActive ? -1 : 1;
+
+					// Active tags come first
+					if (aActive !== bActive) return aActive ? -1 : 1;
+
+					// Then by descending temp
+					const tempDiff = (b.temp ?? 0) - (a.temp ?? 0);
+					if (tempDiff !== 0) return tempDiff;
+
+					// Finally, alphabetical order by title (fallback to slug if needed)
+					return (a.title ?? a.slug.current).localeCompare(b.title ?? b.slug.current);
 				}) as tag, i (tag.slug.current)}
 				<div class="tag"
 				animate:flipVertical
@@ -162,7 +171,7 @@ function handleKey({key}) {if (key === 'G' && dev) {viewGrid = !viewGrid}}
 		<!-- {/if} -->
 		{#if !tagger.open}
 			<div class="tag">
-				<button onclick={() => {tagger.setTags(data.tags); tagger.setOpen(true)}}
+				<button onclick={() => {tagger.setTags(data.tags, { keepHierarchy: true }); tagger.setOpen(true)}}
 				in:slide|global={{ axis: "x", duration: 500, delay: (tagger.maxTags+1)*30 }}
 				out:slide|global={{ axis: "x", duration: 500, delay: 500 + (tagger.tags.length - tagger.maxTags)*30 }}
 				>...</button>

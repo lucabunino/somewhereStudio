@@ -129,7 +129,7 @@ export async function getIndex() {
 			clients[]->{
 				title,
 			},
-			tags[]->{
+			tags[]|order(hierarchy desc, title asc)->{
 				title, slug, hierarchy
 			},
 			formats[]->{
@@ -154,7 +154,7 @@ export async function getProject(slug) {
 			clients[]->{
 				title,
 			},
-			tags[]->{
+			tags[]|order(hierarchy desc, title asc)->{
 				title, slug, hierarchy
 			},
 			formats[]->{

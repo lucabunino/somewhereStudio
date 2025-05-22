@@ -16,7 +16,7 @@ let innerHeight = $state(0)
 import { getTags } from '$lib/stores/tag.svelte.js';
 let tagger = getTags()
 onMount(() => {
-	tagger.setTags(data.tags)
+	tagger.setTags(data.tags, { keepHierarchy: false })
 	tagger.setMaxTags(tagger.firstMaxTags)
 	if (data.searchParams.length > tagger.firstMaxTags) {
 		tagger.setMaxTags(data.searchParams.length)

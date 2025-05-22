@@ -30,14 +30,14 @@ $effect(() => {
 	{#if domLoaded}
 		<div class="contacts">
 			{#if data.info.email}
-				<div class="btn">
+				<div class="btn gaisyr-14">
 					<a class="btn-link" href="mailto:{data.info.email}"
 					in:slide|global={{ axis: "x", duration: 500 }}
 					>{data.info.email}</a>
 				</div>
 			{/if}
 			{#each data.info.socials ?? [] as social, i}
-				<div class="btn">
+				<div class="btn gaisyr-14">
 					<a class="btn-link" href={social.link} target="_blank" rel="noopener noreferrer"
 					in:slide|global={{ axis: "x", duration: 500, delay: i*30 }}
 					>{social.label}</a>
