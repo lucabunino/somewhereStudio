@@ -1,6 +1,7 @@
 <script>
 // Imports
 import Media from "$lib/components/Media.svelte";
+import { onMount } from "svelte";
 
 // Variables
 let { data } = $props()
@@ -11,91 +12,98 @@ let domLoaded = $state(false)
 let innerWidth = $state(0)
 let innerHeight = $state(0)
 
+// Tags
+import { getTags } from '$lib/stores/tag.svelte.js';
+let tagger = getTags()
+onMount(() => {
+	tagger.setMaxTags(0)
+})
+
 $effect(() => {
-  domLoaded = true
+	domLoaded = true
 })
 </script>
 
 <svelte:window bind:innerWidth bind:innerHeight></svelte:window>
 
 <section id="index" class="gaisyr-34">
-  <div class="img">
-    <Media media={projectHover.cover} cover={true} width={2560}/>
-  </div>
-  <ul class="index gaisyr-14">
-    <div class="labels ronzino-12 medium uppercase">
-      <label>Anno</label>
-      <label>Progetto</label>
-      <label>Cliente/i</label>
-      <label>In collaborazione con</label>
-      <label>Format</label>
-      <label>Argomento/i</label>
-      <label>Location</label>
-    </div>
-    {#each data.index as project, i}
-      <li class="project" class:singlePage={project.singlePage} class:active={indexHover === i}
-      onmouseenter={() => {indexHover = i}}
-      >
-        <a class="project-link" href={project.singlePage ? `/index/${project.slug.current}` : ``}>
-          <p class="year">{new Date(project.date).getFullYear()}</p>
-          <h2 class="title">{project.title}</h2>
-          <p class="client">{#each project.clients as client, j}{client.title}{#if project.clients?.length - 1 > j}{@html ', '}{/if}{/each}</p>
-          <p class="collaborations">{#each project.collaborations as collaboration, j}{collaboration.title}{#if project.collaborations?.length - 1 > j}{@html ', '}{/if}{/each}</p>
-          <p class="formats">{#each project.formats as format, j}{format.title}{#if project.formats?.length - 1 > j}{@html ', '}{/if}{/each}</p>
-          <p class="tags">{#each project.tags as tag, j}{tag.title}{#if project.tags?.length - 1 > j}{@html ', '}{/if}{/each}</p>
-          <p class="locations">{#each project.locations as location, j}{location.title}{#if project.locations?.length - 1 > j}{@html ', '}{/if}{/each}</p>
-        </a>
-      </li>
-    {/each}
-  </ul>
+	<div class="img">
+		<Media media={projectHover.cover} cover={true} width={2560}/>
+	</div>
+	<ul class="index gaisyr-14">
+		<div class="labels ronzino-12 medium uppercase">
+			<label>Anno</label>
+			<label>Progetto</label>
+			<label>Cliente/i</label>
+			<label>In collaborazione con</label>
+			<label>Format</label>
+			<label>Argomento/i</label>
+			<label>Location</label>
+		</div>
+		{#each data.index as project, i}
+			<li class="project" class:singlePage={project.singlePage} class:active={indexHover === i}
+			onmouseenter={() => {indexHover = i}}
+			>
+				<a class="project-link" href={project.singlePage ? `/index/${project.slug.current}` : ``}>
+					<p class="year">{new Date(project.date).getFullYear()}</p>
+					<h2 class="title">{project.title}</h2>
+					<p class="client">{#each project.clients as client, j}{client.title}{#if project.clients?.length - 1 > j}{@html ', '}{/if}{/each}</p>
+					<p class="collaborations">{#each project.collaborations as collaboration, j}{collaboration.title}{#if project.collaborations?.length - 1 > j}{@html ', '}{/if}{/each}</p>
+					<p class="formats">{#each project.formats as format, j}{format.title}{#if project.formats?.length - 1 > j}{@html ', '}{/if}{/each}</p>
+					<p class="tags">{#each project.tags as tag, j}{tag.title}{#if project.tags?.length - 1 > j}{@html ', '}{/if}{/each}</p>
+					<p class="locations">{#each project.locations as location, j}{location.title}{#if project.locations?.length - 1 > j}{@html ', '}{/if}{/each}</p>
+				</a>
+			</li>
+		{/each}
+	</ul>
 </section>
 
 <style>
 #index {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  width: 100vw;
+	display: flex;
+	flex-direction: column;
+	align-items: flex-start;
+	width: 100vw;
 }
 .img {
-  position: fixed;
-  top: 0;
-  height: calc(50vh + 1rem);
-  width: 100%;
+	position: fixed;
+	top: 0;
+	height: calc(50vh + 1rem);
+	width: 100%;
 }
 .index {
-  margin-top: calc(50vh + 1rem);
-  min-height: calc(50vh - 1rem - .857rem*1.166*3 - var(--gutter)*12.8);
-  width: 100%;
-  overflow-y: scroll;
-  padding: var(--gutter) calc(var(--gutter)/2);
-  display: flex;
-  flex-direction: column;
+	margin-top: calc(50vh + 1rem);
+	min-height: calc(50vh - 1rem - .857rem*1.166*3 - var(--gutter)*12.8);
+	width: 100%;
+	overflow-y: scroll;
+	padding: var(--gutter) calc(var(--gutter)/2);
+	display: flex;
+	flex-direction: column;
 }
 .project {
-  list-style: none;
-  padding: 0;
-  width: 100%;
-  padding: calc(var(--gutter)/4) calc(var(--gutter)/2);
+	list-style: none;
+	padding: 0;
+	width: 100%;
+	padding: calc(var(--gutter)/4) calc(var(--gutter)/2);
 }
 .project.singlePage, .project.singlePage > .project-link {
-  cursor: pointer;
+	cursor: pointer;
 }
 .project.singlePage.active {
-  background-color: var(--white);
+	background-color: var(--white);
 }
 .project-link,
 .labels {
-  display: grid;
-  grid-template-columns: 1fr 4fr 4fr 4fr 4fr 4fr 4fr;
-  gap: var(--gutter);
-  cursor: default;
-  color: inherit;
-  text-decoration: none;
+	display: grid;
+	grid-template-columns: 1fr 4fr 4fr 4fr 4fr 4fr 4fr;
+	gap: var(--gutter);
+	cursor: default;
+	color: inherit;
+	text-decoration: none;
 }
 .labels {
-  padding: calc(var(--gutter)/4) calc(var(--gutter)/2);
-  margin-bottom: 3em;
+	padding: calc(var(--gutter)/4) calc(var(--gutter)/2);
+	margin-bottom: 3em;
 }
 .project-link>*:nth-child(1),
 .project-link>*:nth-child(2),
@@ -105,7 +113,7 @@ $effect(() => {
 .labels>*:nth-child(2),
 .labels>*:nth-child(4),
 .labels>*:nth-child(6) {
-  text-align: left;
+	text-align: left;
 }
 .project-link>*:nth-child(3),
 .project-link>*:nth-child(5),
@@ -113,12 +121,12 @@ $effect(() => {
 .labels>*:nth-child(3),
 .labels>*:nth-child(5),
 .labels>*:nth-child(7) {
-  text-align: right;
+	text-align: right;
 }
 .project-link>*,
 .labels {
-  overflow: hidden;
-  white-space: nowrap;
-  text-overflow: ellipsis;
+	overflow: hidden;
+	white-space: nowrap;
+	text-overflow: ellipsis;
 }
 </style>

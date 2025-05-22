@@ -121,7 +121,7 @@ export async function getAbout() {
 }
 export async function getIndex() {
 	return await client.fetch(`
-		*[_type == "project" && index == true && !(_id in path('drafts.**'))] {
+		*[_type == "project" && index == true && !(_id in path('drafts.**'))]|order(date desc) {
 			...,
 			collaborations[]->{
 				title,
@@ -130,7 +130,7 @@ export async function getIndex() {
 				title,
 			},
 			tags[]->{
-				title,
+				title, slug, hierarchy
 			},
 			formats[]->{
 				title,
@@ -138,7 +138,7 @@ export async function getIndex() {
 			locations[]->{
 				title,
 			}
-		}|order(date)`
+		}`
 	);
 }
 export async function getProject(slug) {
@@ -155,14 +155,14 @@ export async function getProject(slug) {
 				title,
 			},
 			tags[]->{
-				title,
+				title, slug, hierarchy
 			},
 			formats[]->{
 				title,
 			},
 			locations[]->{
 				title,
-			}
+			},
 		}`, { slug });
 }
 
@@ -228,12 +228,12 @@ export async function getStudio() {
 				markDefs[] {
 					...,
 					image {
-            asset {
-    					_ref, _id, _type
-    				},
-            "info": asset->{
-    					title, description, altText, metadata {dimensions}
-    				},
+						asset {
+							_ref, _id, _type
+						},
+						"info": asset->{
+							title, description, altText, metadata {dimensions}
+						},
 					}
 				}
 			}
@@ -244,7 +244,7 @@ export async function getStudio() {
 export async function getWorks() {
 	return await client.fetch(
 		`
-		*[_type == "work" && !(_id in path('drafts.**'))]|order(orderRank) {
+		*[_type == "work" && !(_id in path('drafts.**'))]|order(date) {
 			...,
 			media[] {
 				mp4 {
@@ -299,7 +299,7 @@ export async function getWork(slug) {
 			tags[]->{title},
 			orderRank,
 			"prev": *[_type == "work" && orderRank < ^.orderRank] | order(orderRank desc)[0] { title, slug, media[] {type} },
-      "next": *[_type == "work" && orderRank > ^.orderRank] | order(orderRank asc)[0] { title, slug }
+			"next": *[_type == "work" && orderRank > ^.orderRank] | order(orderRank asc)[0] { title, slug }
 		}
 		`, { slug });
 }
@@ -376,7 +376,7 @@ export async function getPersonal(slug) {
 			moreInfo,
 			orderRank,
 			"prev": *[_type == "personal" && orderRank < ^.orderRank] | order(orderRank desc)[0] { title, slug, media[] {type} },
-      "next": *[_type == "personal" && orderRank > ^.orderRank] | order(orderRank asc)[0] { title, slug }
+			"next": *[_type == "personal" && orderRank > ^.orderRank] | order(orderRank asc)[0] { title, slug }
 		}
 		`, { slug });
 }

@@ -1,37 +1,31 @@
 <script>
-import Module from "$lib/components/Module.svelte";
 import { register } from 'swiper/element/bundle';register();
-let {
+import Media from '$lib/components/Media.svelte';register();
+let { 
 	slides,
-	project,
-	size,
-	hiddenProject = false,
-	link = true,
- } = $props()
+	size = "s",
+} = $props()
+
+const sizeMap = { xs: 5.5, s: 4.5, m: 3.5, l: 2.5, xl: 1.5 };
 </script>
 
 <swiper-container
-class="{size ? size : module.size}"
 pagination={{
 	clickable: true
 }}
-autoHeight={true}
+slides-per-view={sizeMap[size]}
+centered-slides={true}
+space-between={1}
 >
-{#each slides as module, i}
-	<swiper-slide class="slide">
-			<Module module={module} i={i} size={size ? size : module.size} hiddenProject={hiddenProject ? true : false}/>
+{#each slides as image, i}
+	<swiper-slide>
+		<Media media={image} i={i} />
 	</swiper-slide>
 {/each}
 </swiper-container>
-{#if project && !hiddenProject}
-	<p class="project ronzino-12 medium uppercase">{project.title}</p>
-{/if}
-{#if hiddenProject}
-	<div class="slider-bar {size ? size : module.size}"></div>
-{/if}
 
 <style>
-/* Serie */
+/* Slider */
 swiper-container::part(container) {
 	overflow-x: clip;
 	overflow-y: visible;

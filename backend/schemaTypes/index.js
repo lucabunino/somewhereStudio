@@ -13,17 +13,17 @@ import seo from './seo'
 import policy from './policy'
 
 export const schemaTypes = [
-  homepage,
-  about,
-  info,
-  project,
-  serie,
-  module,
-  tag,
-  company,
-  person,
-  format,
-  location,
-  seo,
-  policy
+	homepage,
+	about,
+	info,
+	project,
+	serie,
+	module,
+	tag,
+	company,
+	person,
+	format,
+	location,
+	seo,
+	policy
 ]

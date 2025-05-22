@@ -1,238 +1,238 @@
 /* Font import */
 @font-face {
-  font-family: Gaisyr;
-  src:  url('/fonts/ABCGaisyrSemi-Mono-Book-Trial.otf') format("opentype"),
-        url('/fonts/ABCGaisyrSemi-Mono-Book-Trial.woff') format("woff"),
-        url('/fonts/ABCGaisyrSemi-Mono-Book-Trial.woff2') format("woff2");
-  font-weight: 400;
-  font-style: normal;
+	font-family: Gaisyr;
+	src:	url('/fonts/ABCGaisyrSemi-Mono-Book-Trial.otf') format("opentype"),
+				url('/fonts/ABCGaisyrSemi-Mono-Book-Trial.woff') format("woff"),
+				url('/fonts/ABCGaisyrSemi-Mono-Book-Trial.woff2') format("woff2");
+	font-weight: 400;
+	font-style: normal;
 }
 @font-face {
-  font-family: Ronzino;
-  src:  url('/fonts/Ronzino-Regular.otf') format("opentype"),
-        url('/fonts/Ronzino-Regular.woff2') format("woff2");
-  font-weight: 400;
-  font-style: normal;
+	font-family: Ronzino;
+	src:	url('/fonts/Ronzino-Regular.otf') format("opentype"),
+				url('/fonts/Ronzino-Regular.woff2') format("woff2");
+	font-weight: 400;
+	font-style: normal;
 }
 @font-face {
-  font-family: Ronzino;
-  src:  url('/fonts/Ronzino-Medium.otf') format("opentype"),
-        url('/fonts/Ronzino-Medium.woff2') format("woff2");
-  font-weight: 500;
-  font-style: normal;
+	font-family: Ronzino;
+	src:	url('/fonts/Ronzino-Medium.otf') format("opentype"),
+				url('/fonts/Ronzino-Medium.woff2') format("woff2");
+	font-weight: 500;
+	font-style: normal;
 }
 
 *, *::before, *::after {
-  box-sizing: border-box;
-  -webkit-tap-highlight-color:transparent;
+	box-sizing: border-box;
+	-webkit-tap-highlight-color:transparent;
 }
 * {
-  margin: 0;
+	margin: 0;
 }
 :root{
-  --gutter: .714rem;
-  --transition: cubic-bezier(.77,0,.175,1) 500ms;
-  --white: #FFF;
-  --lightGray: #EEE;
-  --darkGray: #8A8A8A;
-  --black: #000;
+	--gutter: .714rem;
+	--transition: cubic-bezier(.77,0,.175,1) 500ms;
+	--white: #FFF;
+	--lightGray: #EEE;
+	--darkGray: #8A8A8A;
+	--black: #000;
 }
 html {
-  font-family: Gaisyr, 'Times New Roman', Times, serif;
-  font-weight: 400;
-  font-style: normal;
-  -webkit-font-smoothing: antialiased;
-  font-size: clamp(11px, 14px, 18px);
-  letter-spacing: -0.02em;
-  line-height: 1.143;
-  color: var(--black);
-  background-color: var(--lightGray);
+	font-family: Gaisyr, 'Times New Roman', Times, serif;
+	font-weight: 400;
+	font-style: normal;
+	-webkit-font-smoothing: antialiased;
+	font-size: clamp(11px, 14px, 18px);
+	letter-spacing: -0.02em;
+	line-height: 1.143;
+	color: var(--black);
+	background-color: var(--lightGray);
 }
 body {
-  overflow-x: hidden;
+	overflow-x: hidden;
 }
 body.dark {
-  --white: rgba(0, 0, 0, 1);
-  --black: rgba(255, 255, 255, 1);
+	--white: rgba(0, 0, 0, 1);
+	--black: rgba(255, 255, 255, 1);
 }
 p, h1, h2, h3, h4, h5, h6 {
-  overflow-wrap: break-word;
-  font-size: inherit;
-  font-weight: inherit;
-  line-height: inherit;
-  letter-spacing: inherit;
-  white-space: pre-line;
+	overflow-wrap: break-word;
+	font-size: inherit;
+	font-weight: inherit;
+	line-height: inherit;
+	letter-spacing: inherit;
+	white-space: pre-line;
 }
 img, picture, video, canvas, svg {
-  display: block;
-  max-width: 100%;
+	display: block;
+	max-width: 100%;
 }
 input, button, textarea, select {
-  font: inherit;
+	font: inherit;
 }
 button {
-  -webkit-appearance: none;
-  border-radius: 0;
-  text-align: inherit;
-  background: none;
-  box-shadow: none;
-  padding: 0;
-  cursor: pointer;
-  border: none;
-  color: inherit;
-  font: inherit;
+	-webkit-appearance: none;
+	border-radius: 0;
+	text-align: inherit;
+	background: none;
+	box-shadow: none;
+	padding: 0;
+	cursor: pointer;
+	border: none;
+	color: inherit;
+	font: inherit;
 }
 #root, #__next {
-  isolation: isolate;
+	isolation: isolate;
 }
 a:-webkit-any-link:not(.btn-link):not(.project-link) {
-  color: inherit;
-  cursor: pointer;
-  text-decoration: none;
+	color: inherit;
+	cursor: pointer;
+	text-decoration: none;
 }
 a:any-link:not(.btn-link):not(.project-link) {
-  color: inherit;
-  cursor: pointer;
-  text-decoration: none;
+	color: inherit;
+	cursor: pointer;
+	text-decoration: none;
 }
 a:not(.project-link):not(.btn-link):not(.tag):not(.module):not(.menu-item a):hover {
-  opacity: .3;
+	opacity: .3;
 }
 a:-webkit-any-link.underline,
 a:any-link.underline,
 .underline {
-  text-decoration: underline;
+	text-decoration: underline;
 }
 .ronzino-12 {
-  font-family: Ronzino, Arial, Helvetica, sans-serif;
-  font-size: .857rem;
-  letter-spacing: 0.01em;
-  line-height: 1.166;
+	font-family: Ronzino, Arial, Helvetica, sans-serif;
+	font-size: .857rem;
+	letter-spacing: 0.01em;
+	line-height: 1.166;
 }
 .ronzino-18 {
-  font-family: Ronzino, Arial, Helvetica, sans-serif;
-  font-size: 1.286rem;
-  letter-spacing: 0;
-  line-height: 1.1;
+	font-family: Ronzino, Arial, Helvetica, sans-serif;
+	font-size: 1.286rem;
+	letter-spacing: 0;
+	line-height: 1.1;
 }
 .ronzino-24 {
-  font-family: Ronzino, Arial, Helvetica, sans-serif;
-  font-size: 1.715rem;
-  letter-spacing: -0.01em;
-  line-height: 1;
+	font-family: Ronzino, Arial, Helvetica, sans-serif;
+	font-size: 1.715rem;
+	letter-spacing: -0.01em;
+	line-height: 1;
 }
 .gaisyr-14 {
-  font-family: Gaisyr, 'Times New Roman', Times, serif;
-  font-size: 1rem;
-  letter-spacing: -0.02em;
-  line-height: 1.143;
+	font-family: Gaisyr, 'Times New Roman', Times, serif;
+	font-size: 1rem;
+	letter-spacing: -0.02em;
+	line-height: 1.143;
 }
 .gaisyr-19 {
-  font-family: Gaisyr, 'Times New Roman', Times, serif;
-  font-size: 1.357rem;
-  letter-spacing: -0.01em;
-  line-height: 1.105;
+	font-family: Gaisyr, 'Times New Roman', Times, serif;
+	font-size: 1.357rem;
+	letter-spacing: -0.01em;
+	line-height: 1.105;
 }
 .gaisyr-34 {
-  font-family: Gaisyr, 'Times New Roman', Times, serif;
-  font-size: 2.428rem;
-  letter-spacing: -0.03em;
-  line-height: 0.970;
+	font-family: Gaisyr, 'Times New Roman', Times, serif;
+	font-size: 2.428rem;
+	letter-spacing: -0.03em;
+	line-height: 0.970;
 }
 .uppercase {
-  text-transform: uppercase;
+	text-transform: uppercase;
 }
 .normalcase {
-  text-transform: none;
+	text-transform: none;
 }
 .medium {
-  font-weight: 500;
+	font-weight: 500;
 }
 .btn {
-  transition: var(--transition);
-  width: fit-content;
-  font-size: 1rem;
+	transition: var(--transition);
+	width: fit-content;
+	font-size: 1rem;
 }
 .btn-link {
-  display: block;
-  padding: .5em 1em;
-  background-color: var(--white);
-  white-space: nowrap;
-  color: var(--darkGray);
-  text-decoration: none;
-  transition: var(--transition);
+	display: block;
+	padding: .5em 1em;
+	background-color: var(--white);
+	white-space: nowrap;
+	color: var(--darkGray);
+	text-decoration: none;
+	transition: var(--transition);
 }
 .btn:hover {
-  padding-left: 1em;
+	padding-left: 1em;
 }
 .btn:hover .btn-link {
-  color: var(--black);
+	color: var(--black);
 }
 .todo {
-  border: solid red;
-  padding: 2em;
+	border: solid red;
+	padding: 2em;
 }
 .slider-bar {
-  width: 100%;
-  display: block;
-  height: calc(.857rem*1.143 + 1rem);
-  background-color: var(--white);
+	width: 100%;
+	display: block;
+	height: calc(.857rem*1.143 + 1rem);
+	background-color: var(--white);
 }
 .xs {
-  width: 20vw;
+	width: 20vw;
 }
 .s {
-  width: 30vw;
+	width: 30vw;
 }
 .m {
-  width: 40vw;
+	width: 40vw;
 }
 .l {
-  width: 60vw;
+	width: 60vw;
 }
 .xl {
-  width: 90vw;
+	width: 90vw;
 }
 #singleProject .left {
-  align-self: flex-start;
+	align-self: flex-start;
 }
 #singleProject .center {
-  align-self: center;
+	align-self: center;
 }
 #singleProject .right {
-  align-self: flex-end;
+	align-self: flex-end;
 }
 .hidden {
-  display: none !important;
+	display: none !important;
 }
 .mobile-only {
-  display: none;
+	display: none;
 }
 @media screen and (max-width: 700px) {
-  :root {
-    --gutter: .909rem;
-  }
-  html {
-    font-size: 11px;
-  }
-  .ronzino-12 {
-    font-size: .857rem;
-    letter-spacing: 0.01em;
-    line-height: 1.166;
-  }
-  .ronzino-18 {
-    font-size: .857rem;
-    letter-spacing: 0;
-    line-height: 1.1;
-  }
-  .gaisyr-14 {
-    font-size: 1.285rem;
-    letter-spacing: -0.02em;
-    line-height: 1.143;
-  }
-  .gaisyr-34 {
-    font-size: 2.428rem;
-    letter-spacing: -0.03em;
-    line-height: 0.970;
-  }
+	:root {
+		--gutter: .909rem;
+	}
+	html {
+		font-size: 11px;
+	}
+	.ronzino-12 {
+		font-size: .857rem;
+		letter-spacing: 0.01em;
+		line-height: 1.166;
+	}
+	.ronzino-18 {
+		font-size: .857rem;
+		letter-spacing: 0;
+		line-height: 1.1;
+	}
+	.gaisyr-14 {
+		font-size: 1.285rem;
+		letter-spacing: -0.02em;
+		line-height: 1.143;
+	}
+	.gaisyr-34 {
+		font-size: 2.428rem;
+		letter-spacing: -0.03em;
+		line-height: 0.970;
+	}
 }
