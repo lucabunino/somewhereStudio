@@ -223,7 +223,7 @@ a:any-link.underline,
 	width: 60vw;
 }
 .xl {
-	width: 90vw;
+	width: 100%;
 }
 #singleProject .left {
 	align-self: flex-start;

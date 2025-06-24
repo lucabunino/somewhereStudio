@@ -274,6 +274,7 @@ class:scattered={data.searchParams.length === 0}
 }
 .module {
 	display: block;
+	height: 100%;
 	background-color: var(--white);
 }
 .intro {
@@ -288,11 +289,14 @@ class:scattered={data.searchParams.length === 0}
 }
 .scattered .module-container {
 	position: absolute;
-	width: 100vw;
-	height: 100vh;
+	max-width: 90vw;
+	max-height: 90vh;
 	display: flex;
 	align-items: center;
 	justify-content: center;
+}
+.module-container div {
+	max-height: 90vh;
 }
 .slide {
 	background-color: var(--white);

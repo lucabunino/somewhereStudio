@@ -17,17 +17,18 @@ let {
 	link = true,
 	delayed = true
 } = $props()
+let linkHeight = $state(0)
 </script>
 
 {#snippet moduleContent(module)}
 	{#if ['image', 'shortVideo'].includes(module.kind)}
 		<div class="media-container">
-			<Media media={module.media[0]} />
+			<Media media={module.media[0]} linkHeight={linkHeight}/>
 		</div>
 	{:else if ['composition'].includes(module.kind)}
 		<div class="media-container" style="grid-template-columns: repeat({module.media.length}, 1fr)">
 			{#each module.media as media, i}
-				<Media media={media} />
+				<Media media={media} linkHeight={linkHeight}/>
 			{/each}
 		</div>
 	{:else if ['slider'].includes(module.kind)}
@@ -58,7 +59,7 @@ let {
                 {/if}
 			</div>
 			<div class="img">
-				<Media media={module.media[0]}/>
+				<Media media={module.media[0]} linkHeight={linkHeight}/>
 			</div>
             {#if module.project?.slug}
                 <p class="project ronzino-12 medium uppercase">{module.project.title}</p>
@@ -123,7 +124,7 @@ let {
 	{/if}
 	{#if !hiddenProject}
         {#if !['box'].includes(module.kind)}
-            <div class="project ronzino-12 medium uppercase">{#if module.project?.slug}{module.project.title}{:else}<span style="color: red;">No linked project</span>{/if}</div>
+            <div class="project ronzino-12 medium uppercase" bind:clientHeight={linkHeight}>{#if module.project?.slug}{module.project.title}{:else}<span style="color: red;">No linked project</span>{/if}</div>
         {/if}
 	{/if}
 {/snippet}
@@ -140,6 +141,7 @@ let {
 	<div class="module {size ? size : module.size} {module.position ? module.position : 'left'}" data-kind={module.kind}
 	in:blur|global={{ duration: 200, delay: delayed ? 500 + i*50 : 500 }}
 	out:blur|global={{ duration: 200 }}
+	
 	>
 		{@render moduleContent(module)}
 	</div>
@@ -148,6 +150,7 @@ let {
 <style>
 .module {
 	display: block;
+	/* height: 100%; */
 	background-color: var(--white);
 }
 .project {
@@ -155,8 +158,9 @@ let {
 	text-align: right;
 }
 .media-container {
-	max-height: 80vh;
+	height: 100%;
 	overflow: hidden;
+	position: relative;
 }
 /* Composition */
 [data-kind="composition"] .media-container {

@@ -1,16 +1,22 @@
 <script>
 import { urlFor } from '$lib/utils/image';
+import { page } from '$app/stores';
+
 let {
 	media,
 	width = 1080,
 	cover = false,
 	captionExtra = false,
+	linkHeight = 0,
 } = $props();
 
 let domLoaded = $state(false);
 let imgEl;
 let videoEl;
 let fullresUrl = media.asset ? urlFor(media.asset).width(width) : null;
+let captionHeight = $state(0)
+
+$inspect(captionHeight, linkHeight)
 
 $effect(() => {
 	if (imgEl && fullresUrl) {
@@ -27,8 +33,8 @@ $effect(() => {
 </script>
 
 
-<div style="height: 100%;">
-	<div class="media" class:cover={cover} class:loaded={domLoaded}>
+<div style="height: 100%;" class:homepage={$page.url.pathname === "/"}>
+	<div class="media" class:cover={cover} class:loaded={domLoaded} style={$page.url.pathname === "/" ? `height: calc(90vh - ${captionHeight}px - ${linkHeight}px);` : ''}>
 		{#if media.mp4}
 			<video
 				muted
@@ -51,7 +57,7 @@ $effect(() => {
 	</div>
 
 	{#if media.caption}
-		<p class="caption" class:ronzino-12={!captionExtra} class:extra={captionExtra}>
+		<p class="caption" class:ronzino-12={!captionExtra} class:extra={captionExtra} bind:clientHeight={captionHeight}>
 			{media.caption}
 		</p>
 	{/if}
@@ -63,8 +69,8 @@ $effect(() => {
 	position: relative;
 }
 .media.cover {
-	width: 100%;
-	height: 100%;
+	/* width: 100%;
+	height: 100%; */
 }
 .caption {
 	text-indent: 3em;
@@ -76,12 +82,12 @@ $effect(() => {
 }
 img, video {
 	display: block;
-	width: 100%;
-	height: auto;
 	height: 100%;
     width: 100%;
-    max-height: 80vh;
     object-fit: cover;
+}
+.homepage img, .homepage .video {
+	max-height: 90vh;
 }
 .media.cover img {
 	height: 100%;

@@ -21,7 +21,6 @@ onMount(async () => {
 </script>
 
 {#if cover}
-{$inspect(cover)}
 	<div class="vimeo-container" onclick={(e) => {e.preventDefault(); isPlaying = true}}>
 			<Media media={cover} width={1920}/>
 			<button id="player-icon">
