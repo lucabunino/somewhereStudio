@@ -5,30 +5,55 @@ let {
 	width = 1080,
 	cover = false,
 	captionExtra = false,
-} = $props()
+} = $props();
 
-let domLoaded = $state()
+let domLoaded = $state(false);
+let imgEl;
+let videoEl;
+let fullresUrl = media.asset ? urlFor(media.asset).width(width) : null;
+
 $effect(() => {
-	setTimeout(() => {
-		domLoaded = true;
-	}, 1000);
-})
+	if (imgEl && fullresUrl) {
+		const fullres = new Image();
+		fullres.src = fullresUrl;
+		fullres.onload = () => {
+			if (imgEl) {
+				imgEl.src = fullres.src;
+				domLoaded = true;
+			}
+		};
+	}
+});
 </script>
+
 
 <div style="height: 100%;">
 	<div class="media" class:cover={cover} class:loaded={domLoaded}>
 		{#if media.mp4}
-			<video muted loop autoplay playsinline
-			src={media.mp4.asset.url}
-			placeholder={media.cover ? urlFor(media.cover.asset).width(1080) : ""}
+			<video
+				muted
+				loop
+				autoplay
+				playsinline
+				bind:this={videoEl}
+				src={media.mp4.asset.url}
+				poster={media.cover ? urlFor(media.cover.asset).width(1080) : ""}
+				on:playing={() => {domLoaded = true}}
 			></video>
 		{:else if media.asset}
-			<img src={domLoaded ? urlFor(media.asset).width(width) : urlFor(media.asset).width(100)} alt="">
+			<img
+				src={media.asset.metadata?.lqip}
+				alt=""
+				bind:this={imgEl}
+			/>
 		{/if}
 		<div class="blur"></div>
 	</div>
+
 	{#if media.caption}
-		<p class="caption" class:ronzino-12={!captionExtra} class:extra={captionExtra}>{media.caption}</p>
+		<p class="caption" class:ronzino-12={!captionExtra} class:extra={captionExtra}>
+			{media.caption}
+		</p>
 	{/if}
 </div>
 
@@ -49,10 +74,14 @@ $effect(() => {
 .caption.extra {
 	padding-bottom: 4rem;
 }
-img {
+img, video {
 	display: block;
 	width: 100%;
 	height: auto;
+	height: 100%;
+    width: 100%;
+    max-height: 80vh;
+    object-fit: cover;
 }
 .media.cover img {
 	height: 100%;

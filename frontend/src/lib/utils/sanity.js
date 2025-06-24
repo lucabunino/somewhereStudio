@@ -23,14 +23,20 @@ media[]{
 	mp4 {
 		asset->{url}
 	},
-	cover {
+	cover{
 		asset->{
-			_ref, _id, _type
+			_ref, _id, _type, metadata {dimensions, lqip}
 		},
 	},
 	asset->{
-		_ref, _id, _type, metadata {dimensions}
+		_ref, _id, _type, metadata {dimensions, lqip}
 	},
+},
+id,
+cover{
+  asset->{
+    _ref, _id, _type, metadata {dimensions, lqip}
+  }
 },
 modules[]->{
 	...,
@@ -41,14 +47,20 @@ modules[]->{
 		mp4 {
 			asset->{url}
 		},
-		cover {
+		cover{
 			asset->{
-				_ref, _id, _type
+				_ref, _id, _type, metadata {dimensions, lqip}
 			},
 		},
 		asset->{
-			_ref, _id, _type, metadata {dimensions}
+			_ref, _id, _type, metadata {dimensions, lqip}
 		},
+	},
+	id,
+	cover{
+		asset->{
+			_ref, _id, _type, metadata {dimensions, lqip}
+		}
 	},
 }
 `
@@ -164,231 +176,4 @@ export async function getProject(slug) {
 				title,
 			},
 		}`, { slug });
-}
-
-
-
-
-
-
-
-// OLD
-
-
-export async function getProjects() {
-	return await client.fetch(
-		`
-		*[_type == "homepage" && !(_id in path('drafts.**'))][0].projects[] {
-			video {
-				mp4 {
-					asset-> {url}
-				},
-				cover {
-					asset {
-						_ref, _id, _type
-					},
-					"info": asset->{
-						title, description, altText, metadata {dimensions}
-					},
-				},
-			},
-			desktop {
-				asset {
-					_ref, _id, _type
-				},
-				"info": asset->{
-					title, description, altText, metadata {dimensions}
-				},
-			},
-			mobile {
-				asset {
-					_ref, _id, _type
-				},
-				"info": asset->{
-					title, description, altText, metadata {dimensions}
-				},
-			},
-			reference->{
-				_type,
-				title,
-				slug,
-				tags[]->{title},
-			},
-		}
-		`
-	);
-}
-export async function getStudio() {
-	return await client.fetch(
-		`
-		*[_type == "studio" && !(_id in path('drafts.**'))][0] {
-			...,
-			body[] {
-				...,
-				markDefs[] {
-					...,
-					image {
-						asset {
-							_ref, _id, _type
-						},
-						"info": asset->{
-							title, description, altText, metadata {dimensions}
-						},
-					}
-				}
-			}
-		}
-		`
-	);
-}
-export async function getWorks() {
-	return await client.fetch(
-		`
-		*[_type == "work" && !(_id in path('drafts.**'))]|order(date) {
-			...,
-			media[] {
-				mp4 {
-					asset-> {url}
-				},
-				cover {
-					asset {
-						_ref, _id, _type
-					},
-					"info": asset->{
-						title, description, altText, metadata {dimensions}
-					},
-				},
-				asset {
-					_ref, _id, _type
-				},
-				"info": asset->{
-					title, description, altText, metadata {dimensions}
-				},
-			},
-			tags[]->{title, slug, colour}
-		}
-		`
-	);
-}
-export async function getWork(slug) {
-	return await client.fetch(
-		`
-		*[_type == "work" && slug.current == $slug] {
-			slug,
-			title,
-			description,
-			media[] {
-				mp4 {
-					asset-> {url}
-				},
-				cover {
-					asset {
-						_ref, _id, _type
-					},
-					"info": asset->{
-						title, description, altText, metadata {dimensions}
-					},
-				},
-				asset {
-					_ref, _id, _type
-				},
-				"info": asset->{
-					title, description, altText, metadata {dimensions}
-				},
-			},
-			tags[]->{title},
-			orderRank,
-			"prev": *[_type == "work" && orderRank < ^.orderRank] | order(orderRank desc)[0] { title, slug, media[] {type} },
-			"next": *[_type == "work" && orderRank > ^.orderRank] | order(orderRank asc)[0] { title, slug }
-		}
-		`, { slug });
-}
-export async function getWorkIndexes() {
-	return await client.fetch(
-		`
-		*[_type == "work" && !(_id in path('drafts.**'))]|order(orderRank) {
-			slug,
-			media[] {
-				_key,
-			},
-		}
-		`
-	);
-}
-export async function getPersonals() {
-	return await client.fetch(
-		`
-		*[_type == "personal" && !(_id in path('drafts.**'))]|order(orderRank) {
-			...,
-			media[] {
-				video {
-					mp4 {
-						asset-> {url}
-					},
-					cover {
-						asset {
-							_ref, _id, _type
-						},
-						"info": asset->{
-							title, description, altText, metadata {dimensions}
-						},
-					},
-				},
-				asset {
-					_ref, _id, _type
-				},
-				"info": asset->{
-					title, description, altText, metadata {dimensions}
-				},
-			},
-			tags[]->{title}
-		}
-		`
-	);
-}
-export async function getPersonal(slug) {
-	return await client.fetch(
-		`
-		*[_type == "personal" && slug.current == $slug] {
-			slug,
-			title,
-			description,
-			media[] {
-				mp4 {
-					asset-> {url}
-				},
-				cover {
-					asset {
-						_ref, _id, _type
-					},
-					"info": asset->{
-						title, description, altText, metadata {dimensions}
-					},
-				},
-				asset {
-					_ref, _id, _type
-				},
-				"info": asset->{
-					title, description, altText, metadata {dimensions}
-				},
-			},
-			tags[]->{title},
-			moreInfo,
-			orderRank,
-			"prev": *[_type == "personal" && orderRank < ^.orderRank] | order(orderRank desc)[0] { title, slug, media[] {type} },
-			"next": *[_type == "personal" && orderRank > ^.orderRank] | order(orderRank asc)[0] { title, slug }
-		}
-		`, { slug });
-}
-export async function getPersonalIndexes() {
-	return await client.fetch(
-		`
-		*[_type == "personal" && !(_id in path('drafts.**'))]|order(orderRank) {
-			slug,
-			media[] {
-				_key,
-			},
-		}
-		`
-	);
 }

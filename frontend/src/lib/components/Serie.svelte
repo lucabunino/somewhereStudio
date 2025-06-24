@@ -1,34 +1,48 @@
 <script>
 import Module from "$lib/components/Module.svelte";
 import { register } from 'swiper/element/bundle';register();
-let {
+import { blur } from "svelte/transition";
+
+let {
 	slides,
 	project,
 	size,
 	hiddenProject = false,
 	link = true,
+	delayed = true,
  } = $props()
 </script>
 
-<swiper-container
-class="{size ? size : module.size}"
-pagination={{
-	clickable: true
-}}
-autoHeight={true}
->
-{#each slides as module, i}
-	<swiper-slide class="slide">
-			<Module module={module} i={i} size={size ? size : module.size} hiddenProject={hiddenProject ? true : false}/>
-	</swiper-slide>
-{/each}
-</swiper-container>
-{#if project && !hiddenProject}
-	<p class="project ronzino-12 medium uppercase">{project.title}</p>
-{/if}
-{#if hiddenProject}
-	<div class="slider-bar {size ? size : module.size}"></div>
-{/if}
+<div>
+	<swiper-container
+	class="{size ? size : module.size}"
+	pagination={{
+		clickable: true
+	}}
+	autoHeight={true}
+	in:blur|global={{ duration: 200, delay: delayed ? 500 : 500 }}
+	out:blur|global={{ duration: 200 }}
+	>
+	{#each slides as module, i}
+		<swiper-slide class="slide">
+				<Module module={module} i={i} size={size ? size : module.size} hiddenProject={hiddenProject ? true : false} delayed={delayed}/>
+		</swiper-slide>
+	{/each}
+	</swiper-container>
+	{#if project && !hiddenProject}
+		<p
+		in:blur|global={{ duration: 200, delay: delayed ? 500 : 500 }}
+		out:blur|global={{ duration: 200 }}
+		class="project ronzino-12 medium uppercase">{project.title}</p>
+	{/if}
+	{#if hiddenProject}
+		<div
+		in:blur|global={{ duration: 200, delay: delayed ? 500 : 500 }}
+		out:blur|global={{ duration: 200 }}
+		class="slider-bar {size ? size : module.size}"></div>
+	{/if}
+</div>
+
 
 <style>
 /* Serie */

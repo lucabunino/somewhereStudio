@@ -1,5 +1,5 @@
 <script>
-import { blur, fade, fly } from "svelte/transition";
+import { blur } from "svelte/transition";
 import { isDark } from "$lib/utils/color";
 import Media from "$lib/components/Media.svelte";
 import Vimeo from "$lib/components/Vimeo.svelte";
@@ -15,12 +15,15 @@ let {
 	size,
 	hiddenProject = false,
 	link = true,
+	delayed = true
 } = $props()
 </script>
 
 {#snippet moduleContent(module)}
 	{#if ['image', 'shortVideo'].includes(module.kind)}
-		<Media media={module.media[0]} />
+		<div class="media-container">
+			<Media media={module.media[0]} />
+		</div>
 	{:else if ['composition'].includes(module.kind)}
 		<div class="media-container" style="grid-template-columns: repeat({module.media.length}, 1fr)">
 			{#each module.media as media, i}
@@ -34,7 +37,7 @@ let {
 			<Vimeo id={module.id} cover={module.cover}/>
 		</div>
 	{:else if ['box'].includes(module.kind)}
-		<div class="media-container" style="background-color: {module.color.hex}; color: {isDark(module.color.hex) ? "var(--white)" : ""}">
+		<div class="media-container" style="background-color: {module.color?.hex}; color: {isDark(module.color?.hex) ? "var(--white)" : ""}">
 			<div class="text">
                 <h3 class="ronzino-24">{module.title}</h3>
                 {#if module.text1}
@@ -128,15 +131,15 @@ let {
 {#if link}
 	<a class="module {size ? size : module.size} {module.position ? module.position : 'left'}" data-kind={module.kind}
 	href={module.project?.slug ? `/index/${module.project.slug.current}` : ``}
-	in:blur|global={{ duration: 500, delay: 1000 + i*50 }}
-	out:blur|global={{ duration: 500 }}
+	in:blur|global={{ duration: 200, delay: delayed ? 500 + i*50 : 500 }}
+	out:blur|global={{ duration: 200 }}
 	>
 		{@render moduleContent(module)}
 	</a>
 {:else}
 	<div class="module {size ? size : module.size} {module.position ? module.position : 'left'}" data-kind={module.kind}
-	in:blur|global={{ duration: 500, delay: 1000 + i*50 }}
-	out:blur|global={{ duration: 500 }}
+	in:blur|global={{ duration: 200, delay: delayed ? 500 + i*50 : 500 }}
+	out:blur|global={{ duration: 200 }}
 	>
 		{@render moduleContent(module)}
 	</div>
@@ -151,6 +154,10 @@ let {
 	padding: .5em;
 	text-align: right;
 }
+.media-container {
+	max-height: 80vh;
+	overflow: hidden;
+}
 /* Composition */
 [data-kind="composition"] .media-container {
 	display: grid;
@@ -158,7 +165,7 @@ let {
 }
 /* Slider */
 [data-kind="slider"] {
-	width: 100%;
+	width: 100vw;
 }
 /* Vimeo */
 [data-kind="vimeo"] .media-container {
@@ -175,7 +182,7 @@ let {
 	position: relative;
 }
 [data-kind="longText"] .text {
-	padding: var(--gutter) calc(var(--gutter)/2);
+	padding: calc(2.428rem*.970*3 - 1.3rem) calc(var(--gutter)/2) var(--gutter);
 }
 [data-kind="longText"] .text-big {
 	float: right;
@@ -186,7 +193,7 @@ let {
 }
 [data-kind="longText"] .text-small {
 	clear: inline-start;
-	margin-top: calc(2.428rem*.970*3 - 1.3rem)
+	/* margin-top: calc(2.428rem*.970*3 - 1.3rem); */
 }
 /* Box */
 [data-kind="box"] .media-container {

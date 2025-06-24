@@ -61,5 +61,5 @@ export default {
 	options: {
 		layout: 'grid'
 	},
-	hidden: ({ parent }) => !['image', 'imageSequence', 'shortVideo', 'socialMedia', 'box'].includes(parent?.kind)
+	hidden: ({ parent }) => !['image', 'composition', 'slider', 'shortVideo', 'socialMedia', 'box'].includes(parent?.kind)
 };

@@ -7,7 +7,7 @@ import { urlFor } from '$lib/utils/image';
 import { cubicOut } from 'svelte/easing';
 import { goto } from '$app/navigation';
 import { writable, derived } from 'svelte/store';
-import { slide } from "svelte/transition";
+import { slide, blur } from "svelte/transition";
 import { onMount } from "svelte";
 
 // Variables
@@ -17,12 +17,25 @@ let domLoaded = $state(false)
 let innerWidth = $state(0)
 let innerHeight = $state(0)
 let scrollY = $state(0)
+let oldScroll = $state(0)
+let blurredHeader = $state(false)
+let search = $state("")
+let searchActive = $state(false)
 
 // Tags
 import { getTags } from '$lib/stores/tag.svelte.js';
 let tagger = getTags()
 let timeout;
 let tags = $derived(data.tags.filter(tag => tagger.tags.some(t => t.slug.current === tag.slug.current)))
+
+// Zoom
+import { getZoom } from '$lib/stores/zoom.svelte.js';
+let zoomer = getZoom()
+
+// Coordinates
+import { getCoordinates } from '$lib/stores/coordinates.svelte.js';
+let coordinater = getCoordinates()
+$inspect(coordinater)
 
 // Lifecycle
 $effect(() => {
@@ -66,19 +79,35 @@ export function flipVertical(node, { from, to }) {
 	const dy = fromTop - toTop;
 	return {
 		delay: 0,
-		duration: 300,
+		duration: 200,
 		easing: cubicOut,
-		// css: t => `transform: translateY(${(1 - t) * dy}px);`
+		css: t => `transform: translateY(${(1 - t) * dy}px);`
 	};
 }
 function handleMouseLeave() {
 	clearTimeout(timeout);
 	timeout = setTimeout(() => {
 		tagger.setOpen(false);
-	}, 2000);
+	}, 1000);
 }
 function handleMouseEnter() {
 	clearTimeout(timeout);
+}
+function handleScroll() {
+	const delta = 50;
+	const diff = scrollY - oldScroll;
+	if (scrollY < delta) {
+		blurredHeader = false;
+		oldScroll = scrollY;
+	}
+	if (Math.abs(diff) > delta) {
+		if (diff > 0) {
+			blurredHeader = true;
+		} else {
+			blurredHeader = false;
+		}
+		oldScroll = scrollY;
+	}
 }
 
 // Dev
@@ -88,7 +117,7 @@ const gridColumnsMobile = 8
 function handleKey({key}) {if (key === 'G' && dev) {viewGrid = !viewGrid}}
 </script>
 
-<svelte:window bind:innerWidth bind:innerHeight bind:scrollY={scrollY} onkeyup={handleKey} onmousemove={handleMousemove}></svelte:window>
+<svelte:window bind:innerWidth bind:innerHeight bind:scrollY={scrollY} onkeyup={handleKey} onmousemove={handleMousemove} onscroll={handleScroll}></svelte:window>
 
 {#if viewGrid}
 <div id="layout"
@@ -116,24 +145,50 @@ function handleKey({key}) {if (key === 'G' && dev) {viewGrid = !viewGrid}}
 <header>
 		<nav>
 			<ul class="menu gaisyr-34"
-			class:blurred={scrollY > 100 && $page.url.pathname !== '/index'}
+			class:blurred={blurredHeader && $page.url.pathname !== '/index'}
 			>
-				<li class="menu-item">
-					<a href="/">Somewhere<br>Studio</a>
+				<li class="menu-item" class:active={$page.url.pathname === "/"}>
+					<a href="/">Som<span class="ls-7">e</span><span class="ls-15">w</span><span class="ls-30">h</span><span class="ls-70">e</span><span class="ls-120">r</span>e<br>Studio</a>
 				</li>
-				<li class="menu-item">
-					<a href="/index">Index</a>
+				<li class="menu-item" class:active={$page.url.pathname === "/index" || $page.url.pathname.includes("/index/")}>
+					<a href="/index">In<span class="ls-7">d</span><span class="ls-30">e</span>x</a>
 				</li>
-				<li class="menu-item">
-					<a href="/about">About</a>
+				<li class="menu-item" class:active={$page.url.pathname === "/about"}>
+					<a href="/about"><span class="ls-30">A</span><span class="ls-70">b</span><span class="ls-30">o</span><span class="ls-7">u</span>t</a>
 				</li>
 			</ul>
 		</nav>
+		<a href="/map" id="coordinates" class="btn tag ronzino-12">
+			<span>{coordinater.formattedCoordinates.latitude}N, {coordinater.formattedCoordinates.longitude}E</span>
+			<span class="cta uppercase">Vedi mappa</span>
+		</a>
+		<div class="zoom">
+			<button id="zoom-out" class="btn" class:off={zoomer.zoom == zoomer.minZoom} onclick={() => {zoomer.decreaseZoom()}}>
+				<svg width="18" height="18" fill="none" xmlns="http://www.w3.org/2000/svg">
+					<path d="M7.5 14a6.5 6.5 0 1 0 0-13 6.5 6.5 0 0 0 0 13Z"/>
+					<path d="M10 7.5H5" stroke-miterlimit="10"/>
+					<path d="M16.9 17 12 12.2"/>
+				</svg>
+			</button>
+			<button id="zoom-in" class="btn" class:off={zoomer.zoom == zoomer.maxZoom} onclick={() => {zoomer.increaseZoom()}}>
+				<svg width="18" height="18" fill="none" xmlns="http://www.w3.org/2000/svg">
+					<path d="M7.5 14a6.5 6.5 0 1 0 0-13 6.5 6.5 0 0 0 0 13Z"/>
+					<path d="M10 7.5H5M7.5 10V5" stroke-miterlimit="10"/>
+					<path d="M16.9 17 12 12.2"/>
+				</svg>
+			</button>
+		</div>
 </header>
 {#if domLoaded}
 	<div class="tags"
 	onmouseleave={() => handleMouseLeave()}
 	onmouseenter={() => handleMouseEnter()}>
+	<div id="search-bar">
+		<input id="search" type="text" class="btn" placeholder="Cerca nel sito" bind:value={search} onclick={() => {searchActive = true}}>
+		{#if searchActive}
+			<button class="btn ronzino-12 uppercase" onclick={() => {searchActive = false; search = ""}}>× Chiudi</button>
+		{/if}
+	</div>
 		<!-- {#if $page.url.pathname === "/" || $page.url.pathname !== "/" && tagger.open} -->
 			{#each tagger.tags
 				.slice()
@@ -181,9 +236,14 @@ function handleKey({key}) {if (key === 'G' && dev) {viewGrid = !viewGrid}}
 {/if}
 
 {#if domLoaded}
-	<main>
-		{@render children()}
-	</main>
+	{#key data.pathname}
+		<main
+		in:blur|global={{ duration: 200, delay: 500 }}
+		out:blur|global={{ duration: 200, delay: 0 }}
+		>
+			{@render children()}
+		</main>
+	{/key}
 {/if}
 
 {#if domLoaded && (data.searchParams.length > 0 || $page.url.pathname !== '/')}
@@ -247,12 +307,78 @@ function handleKey({key}) {if (key === 'G' && dev) {viewGrid = !viewGrid}}
 	pointer-events: all;
 	transition: var(--transition);
 }
+.menu-item span {
+	transition: var(--transition);
+}
+.menu-item:hover .ls-7, .menu-item.active .ls-7 {letter-spacing: .07em;}
+.menu-item:hover .ls-15, .menu-item.active .ls-15 {letter-spacing: .15em;}
+.menu-item:hover .ls-30, .menu-item.active .ls-30 {letter-spacing: .30em;}
+.menu-item:hover .ls-70, .menu-item.active .ls-70 {letter-spacing: .70em;}
+.menu-item:hover .ls-120, .menu-item.active .ls-120 {letter-spacing: 1.20em;}
 .menu.blurred:not(:hover) .menu-item a {
 	color: var(--darkGray);
 	filter: blur(30px);
 }
 
+/* ui */
+#coordinates {
+	position: fixed;
+	top: calc(var(--gutter)*1.4);
+	left: 50%;
+	transform: translateX(-50%);
+	z-index: 1;
+	font-variant-numeric: tabular-nums;
+	width: 180px;
+	justify-content: center;
+	color: var(--darkGray);
+}
+#coordinates .cta {
+	opacity: 0;
+	width: 0;
+	color: var(--black);
+}
+#coordinates:hover span {
+	opacity: 0;
+	width: 0;
+}
+#coordinates:hover .cta {
+	opacity: 1;
+	width: auto;
+}
+.zoom {
+	position: fixed;
+	top: calc(var(--gutter)*1.4);
+	right: var(--gutter);
+	display: flex;
+	justify-content: flex-end;
+	gap: .3rem;
+	z-index: 1;
+}
+.zoom svg {
+	stroke: var(--darkGray);
+}
+.zoom button:hover svg {
+	stroke: var(--black);
+}
+.zoom button.off {
+	cursor: default;
+}
+.zoom button.off svg {
+	stroke: var(--lightGray);
+}
+
 /* Tags */
+#search-bar {
+	display: flex;
+	gap: .3em;
+}
+#search {
+	outline: none;
+	border: none;
+}
+#search::placeholder {
+	color: var(--darkGray);
+}
 .tags {
 	position: fixed;
 	top: 0;
@@ -263,7 +389,6 @@ function handleKey({key}) {if (key === 'G' && dev) {viewGrid = !viewGrid}}
 	overflow-y: scroll;
 	z-index: 9;
 }
-
 @keyframes openTag {
 	0% {padding-left: 0;}
 	50% {padding-left: 0;}
@@ -284,36 +409,6 @@ function handleKey({key}) {if (key === 'G' && dev) {viewGrid = !viewGrid}}
 	50% {width: 1em;opacity: 1;}
 	100% {width: 0;opacity: 0;}
 }
-
-.tag {
-	cursor: pointer;
-	display: block;
-	width: fit-content;
-	transition: var(--transition);
-	transition-property: padding, transform;
-	line-height: 1rem;
-}
-.tag:hover {
-	color: var(--darkGray);
-	padding-left: 1em;
-	transition-delay: 0ms;
-}
-.tag:hover .prefix {
-	color: var(--darkGray);
-}
-.tag.active {
-	z-index: 999;
-	padding-left: 1em;
-	transition-delay: 500ms;
-}
-.tag button {
-	display: flex;
-	align-items: center;
-	padding: .5em 1em;
-	background-color: var(--white);
-	margin-bottom: .3rem;
-	white-space: nowrap;
-}
 .prefix {
 	width: 0;
 	display: inline-flex;
@@ -329,6 +424,7 @@ function handleKey({key}) {if (key === 'G' && dev) {viewGrid = !viewGrid}}
 /* Main */
 main {
 	min-height: calc(100vh - .857rem*1.166*3 - var(--gutter)*12.8);
+	min-height: 100vh;
 }
 
 /* Footer */

@@ -8,6 +8,8 @@ import { onMount } from "svelte";
 let { data } = $props();
 let extraOpen = $state(false)
 
+$inspect(data)
+
 // Tags
 import { getTags } from '$lib/stores/tag.svelte.js';
 let tagger = getTags()
@@ -71,33 +73,36 @@ onMount(() => {
 		{/if}
 	{/each}
 </section>
-<section id="extra"
-class:open={extraOpen}
-onclick={() => {extraOpen ? '' : extraOpen = true}}
->
-	<h4 class="ronzino-12 medium uppercase">Extra</h4>
-	{#if data.project[0].extra}
-		<div class="extra-container">
-			{#each data.project[0].extra as extra, i}
-				{#if extra._type === "extraText"}
-					<p>{extra.text}</p>
-				{:else if extra._type === "image"}
-					<Media media={extra} captionExtra={true}/>
-				{/if}
-			{/each}
-		</div>
-	{/if}
-</section>
-<div id="extraSwitch" class:open={extraOpen}
-onclick={() => {extraOpen ? extraOpen = false : ''}}
-></div>
+{#if data.project[0].extra}
+	<section id="extra"
+	class:open={extraOpen}
+	onclick={() => {extraOpen ? '' : extraOpen = true}}
+	>
+		<h4 class="ronzino-12 medium uppercase">Extra</h4>
+			<div class="extra-container">
+				{#each data.project[0].extra as extra, i}
+					{#if extra._type === "extraText"}
+						<p>{extra.text}</p>
+					{:else if extra._type === "image"}
+						<Media media={extra} captionExtra={true}/>
+					{/if}
+				{/each}
+			</div>
+	</section>
+	<div id="extraSwitch" class:open={extraOpen}
+	onclick={() => {extraOpen ? extraOpen = false : ''}}
+	></div>
+{/if}
 
 <style>
 #singleProject {
-	width: 90vw;
+	width: 100vw;
 	display: flex;
 	flex-direction: column;
 	flex-wrap: nowrap;
+}
+#singleProject.extra {
+	width: 90vw;
 }
 .project-title {
 	margin-bottom: var(--gutter);
