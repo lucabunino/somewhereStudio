@@ -15,8 +15,11 @@ let {
 	size,
 	hiddenProject = false,
 	link = true,
-	delayed = true
+	delayed = true,
+	// color = null
 } = $props()
+
+let color = null
 let linkHeight = $state(0)
 </script>
 
@@ -61,7 +64,7 @@ let linkHeight = $state(0)
 			<div class="img">
 				<Media media={module.media[0]} linkHeight={linkHeight}/>
 			</div>
-            {#if module.project?.slug}
+            {#if module.project?.slug && !hiddenProject}
                 <p class="project ronzino-12 medium uppercase">{module.project.title}</p>
             {/if}
 		</div>
@@ -132,6 +135,7 @@ let linkHeight = $state(0)
 {#if link}
 	<a class="module {size ? size : module.size} {module.position ? module.position : 'left'}" data-kind={module.kind}
 	href={module.project?.slug ? `/index/${module.project.slug.current}` : ``}
+	style="background-color: {color ? color.hex : module.color?.hex}; color: {isDark(color ? color.hex : module.color?.hex) ? "var(--white)" : ""}"
 	in:blur|global={{ duration: 200, delay: delayed ? 500 + i*50 : 500 }}
 	out:blur|global={{ duration: 200 }}
 	>
@@ -139,6 +143,7 @@ let linkHeight = $state(0)
 	</a>
 {:else}
 	<div class="module {size ? size : module.size} {module.position ? module.position : 'left'}" data-kind={module.kind}
+	style="background-color: {color ? color.hex : module.color?.hex}; color: {isDark(color ? color.hex : module.color?.hex) ? "var(--white)" : ""}"
 	in:blur|global={{ duration: 200, delay: delayed ? 500 + i*50 : 500 }}
 	out:blur|global={{ duration: 200 }}
 	

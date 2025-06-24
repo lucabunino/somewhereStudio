@@ -21,11 +21,13 @@ autoHeight={false}
 	</swiper-slide>
 {/each}
 </swiper-container>
-{#if project && !hiddenProject}
-	<p class="project ronzino-12 medium uppercase">{project.title}</p>
-{/if}
-{#if hiddenProject}
-	<div class="slider-bar {size ? size : ''}"></div>
+{#if slides.length > 1}
+	{#if project && !hiddenProject}
+		<p class="project ronzino-12 medium uppercase">{project.title}</p>
+	{/if}
+	{#if hiddenProject}
+		<div class="slider-bar {size ? size : ''}"></div>
+	{/if}
 {/if}
 
 <style>

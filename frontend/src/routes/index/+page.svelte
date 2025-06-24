@@ -2,6 +2,7 @@
 // Imports
 import Media from "$lib/components/Media.svelte";
 import { onMount } from "svelte";
+import { blur } from "svelte/transition";
 
 // Variables
 let { data } = $props()
@@ -27,9 +28,14 @@ $effect(() => {
 <svelte:window bind:innerWidth bind:innerHeight></svelte:window>
 
 <section id="index" class="gaisyr-34">
-	<div class="img">
-		<Media media={projectHover.cover} cover={true} width={2560}/>
-	</div>
+	{#key projectHover}
+		<div class="cover"
+		in:blur|global={{ duration: 200}}
+		out:blur|global={{ duration: 200, delay: 500}}
+		>
+			<Media media={projectHover.cover} cover={true} width={2560}/>
+		</div>
+	{/key}
 	<ul class="index gaisyr-14">
 		<div class="labels ronzino-12 medium uppercase">
 			<label>Anno</label>
@@ -42,7 +48,7 @@ $effect(() => {
 		</div>
 		{#each data.index as project, i}
 			<li class="project" class:singlePage={project.singlePage} class:active={indexHover === i}
-			onmouseenter={() => {indexHover = i}}
+			onmouseenter={() => {indexHover = i; console.log(projectHover)}}
 			>
 				<a class="project-link" href={project.singlePage ? `/index/${project.slug.current}` : ``}>
 					<p class="year">{new Date(project.date).getFullYear()}</p>
@@ -65,7 +71,7 @@ $effect(() => {
 	align-items: flex-start;
 	width: 100vw;
 }
-.img {
+.cover {
 	position: fixed;
 	top: 0;
 	height: calc(50vh + 1rem);

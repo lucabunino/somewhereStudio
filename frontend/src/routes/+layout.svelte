@@ -158,10 +158,15 @@ function handleKey({key}) {if (key === 'G' && dev) {viewGrid = !viewGrid}}
 				</li>
 			</ul>
 		</nav>
-		<a href="/map" id="coordinates" class="btn tag ronzino-12">
-			<span>{coordinater.formattedCoordinates.latitude}N, {coordinater.formattedCoordinates.longitude}E</span>
-			<span class="cta uppercase">Vedi mappa</span>
-		</a>
+		{#if $page.url.pathname === "/"}
+			<a href="/map" id="coordinates" class="btn tag ronzino-12"
+			in:slide|global={{ axis: "x", duration: 200 }}
+			out:slide|global={{ axis: "x", duration: 200, delay: 500 }}
+			>
+				<span>{coordinater.formattedCoordinates.latitude}N, {coordinater.formattedCoordinates.longitude}E</span>
+				<span class="cta uppercase">Vedi mappa</span>
+			</a>
+		{/if}
 		<div class="zoom">
 			<button id="zoom-out" class="btn" class:off={zoomer.zoom == zoomer.minZoom} onclick={() => {zoomer.decreaseZoom()}}>
 				<svg width="18" height="18" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -331,6 +336,11 @@ function handleKey({key}) {if (key === 'G' && dev) {viewGrid = !viewGrid}}
 	width: 180px;
 	justify-content: center;
 	color: var(--darkGray);
+	overflow: hidden;
+}
+#coordinates.off {
+	width: 0;
+	padding: 0;
 }
 #coordinates .cta {
 	opacity: 0;

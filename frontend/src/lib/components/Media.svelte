@@ -34,7 +34,7 @@ $effect(() => {
 
 
 <div style="height: 100%;" class:homepage={$page.url.pathname === "/"}>
-	<div class="media" class:cover={cover} class:loaded={domLoaded} style={$page.url.pathname === "/" ? `height: calc(90vh - ${captionHeight}px - ${linkHeight}px);` : ''}>
+	<div class="media" class:cover={cover} class:loaded={domLoaded} style={$page.url.pathname === "/" ? `height: 100%; max-height: calc(90vh - ${captionHeight}px - ${linkHeight}px);` : 'height: 100%'}>
 		{#if media.mp4}
 			<video
 				muted

@@ -289,11 +289,12 @@ class:scattered={data.searchParams.length === 0}
 }
 .scattered .module-container {
 	position: absolute;
-	max-width: 90vw;
-	max-height: 90vh;
+	width: 90vw;
+	height: 90vh;
 	display: flex;
 	align-items: center;
 	justify-content: center;
+	overflow: scroll;
 }
 .module-container div {
 	max-height: 90vh;

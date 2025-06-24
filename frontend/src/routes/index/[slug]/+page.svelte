@@ -4,6 +4,7 @@ import Module from "$lib/components/Module.svelte";
 import Media from "$lib/components/Media.svelte";
 import { blur } from "svelte/transition";
 import { onMount } from "svelte";
+import { isDark } from "$lib/utils/color";
 
 let { data } = $props();
 let extraOpen = $state(false)
@@ -13,17 +14,19 @@ $inspect(data)
 // Tags
 import { getTags } from '$lib/stores/tag.svelte.js';
 let tagger = getTags()
-tagger.setMaxTags(0)
+
 onMount(() => {
+	tagger.setMaxTags(0)
 	setTimeout(() => {
-	// tagger.setTags(data.project[0].tags)
-	tagger.setTags(data.project[0].tags, { keepHierarchy: false, hierarchy: 99 });
-	tagger.setMaxTags(data.project[0].tags.length)	
-	}, 1000);
+		tagger.setTags(data.project[0].tags, { keepHierarchy: false, hierarchy: 99 });
+	}, 2000);
+	setTimeout(() => {
+		tagger.setMaxTags(data.project[0].tags.length)
+	}, 3000);
 })
 </script>
 
-<section id="singleProject">
+<section id="singleProject" class:extra={data.project[0].extra} style={data.project[0].color ? `background-color: ${data.project[0].color.hex}` : ""}>
 	<!-- <div class="intro ronzino-12 medium uppercase">
 		<h1 class="project-title gaisyr-34 normalcase">{data.project[0].title}</h1>
 		{#if data.project[0].collaborations}
@@ -67,9 +70,9 @@ onMount(() => {
 	</div>
 	{#each data.project[0].modules as module, i (module._id)}
 		{#if module.modules}
-			<Serie slides={module.modules} project={module.project} size={module.size} hiddenProject={true} link={false}/>
+			<Serie slides={module.modules} project={module.project} size={module.size} showProject={false} hiddenProject={true} link={false} color={data.project[0].color ? data.project[0].color : null}/>
 		{:else}
-			<Module module={module} i={i} hiddenProject={true} link={false}/>
+			<Module module={module} i={i} hiddenProject={true} link={false} showProject={false} color={data.project[0].color ? data.project[0].color : null}/>
 		{/if}
 	{/each}
 </section>

@@ -1,20 +1,21 @@
 <script>
 import { slide } from 'svelte/transition';
 
-// Imports
-
 
 // Variables
 let { data } = $props()
-$inspect(data)
 let domLoaded = $state(false)
 let innerWidth = $state(0)
 let innerHeight = $state(0)
+import { onMount } from "svelte";
 
 // Tags
 import { getTags } from '$lib/stores/tag.svelte.js';
 let tagger = getTags()
-tagger.setTags([])
+
+onMount(() => {
+	tagger.setMaxTags(0)
+})
 
 $effect(() => {
 	domLoaded = true
