@@ -61,10 +61,6 @@ $effect(() => {
 
 	if (data.searchParams.length !== lastLength) {
 		lastLength = data.searchParams.length;
-		// setTimeout(() => {
-		// 	positionX = 0;
-		// 	positionY = 0;
-		// }, 500);
 	}
 	
 	if (data.searchParams.length == 0) {
@@ -194,7 +190,6 @@ function getSpiralCoords(range) {
 	return coords;
 }
 function handleMouseEnter(latitude, longitude) {
-	console.log(latitude, longitude);
 	if (latitude && longitude) {
 		coordinater.setCoordinates(latitude, longitude)
 	}
@@ -240,16 +235,17 @@ class:scattered={data.searchParams.length === 0}
 				{@const startingPositionX = calculateStartingPositionX(module.gridX)}
 				{@const startingPositionY = calculateStartingPositionY(module.gridY)}
 				<div class="module-container"
+				onmouseenter={() => {handleMouseEnter(module.latitude, module.longitude)}}
 				class:scattered={data.searchParams.length === 0}
 				use:gsapTransform={getTransformFn(module)}
 				>
-					<div onmouseenter={() => {handleMouseEnter(module.latitude, module.longitude)}}>
+					<!-- <div onmouseenter={() => {handleMouseEnter(module.latitude, module.longitude)}}> -->
 						{#if module.modules}
 								<Serie slides={module.modules} project={module.project} size={module.size} hiddenProject={true} link={false} delayed={false}/>
 						{:else}
 								<Module module={module} i={i} delayed={false}/>
 						{/if}
-					</div>
+					<!-- </div> -->
 				</div>
 			{/each}
 		{/if}
@@ -289,7 +285,7 @@ class:scattered={data.searchParams.length === 0}
 }
 .scattered .module-container {
 	position: absolute;
-	width: 90vw;
+	width: 100vw;
 	height: 90vh;
 	display: flex;
 	align-items: center;

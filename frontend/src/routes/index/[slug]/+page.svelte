@@ -15,14 +15,34 @@ $inspect(data)
 import { getTags } from '$lib/stores/tag.svelte.js';
 let tagger = getTags()
 
-onMount(() => {
+// Extra
+import { getExtra } from '$lib/stores/extra.svelte.js';
+let extraer = getExtra()
+if (data.project[0].extra) {
+	extraer.setExtra(true)
+}
+
+// onMount(() => {
+// 	tagger.setMaxTags(0)
+// 	setTimeout(() => {
+// 		tagger.setTags(data.project[0].tags, { keepHierarchy: false, hierarchy: 99 });
+// 	}, 2000);
+// 	setTimeout(() => {
+// 		tagger.setMaxTags(data.project[0].tags.length)
+// 	}, 3000);
+// })
+
+$effect(() => {
 	tagger.setMaxTags(0)
 	setTimeout(() => {
 		tagger.setTags(data.project[0].tags, { keepHierarchy: false, hierarchy: 99 });
-	}, 2000);
+	}, 500);
 	setTimeout(() => {
 		tagger.setMaxTags(data.project[0].tags.length)
-	}, 3000);
+	}, 500);
+	return () => {
+		extraer.setExtra(false)
+	};
 })
 </script>
 
@@ -47,8 +67,8 @@ onMount(() => {
 		{/if}
 	</div> -->
 	<div class="module intro ronzino-12 medium uppercase"
-	in:blur|global={{ duration: 500, delay: 1000 }}
-	out:blur|global={{ duration: 500}}
+	in:blur|global={{ duration: 200, delay: 500 }}
+	out:blur|global={{ duration: 200}}
 	>
 		<h1 class="project-title gaisyr-34 normalcase">{data.project[0].title}</h1>
 		{#if data.project[0].collaborations}
@@ -105,7 +125,7 @@ onMount(() => {
 	flex-wrap: nowrap;
 }
 #singleProject.extra {
-	width: 90vw;
+	width: 96vw;
 }
 .project-title {
 	margin-bottom: var(--gutter);
@@ -131,8 +151,8 @@ onMount(() => {
 	flex-direction: column;
 }
 #extra {
-	width: 30vw;
-	transform: translateX(20vw);
+	width: 20vw;
+	transform: translateX(16vw);
 	position: fixed;
 	top: 0;
 	right: 0;
@@ -147,7 +167,7 @@ onMount(() => {
 	cursor: pointer;
 }
 #extra:not(.open):hover {
-	transform: translateX(18vw);
+	transform: translateX(14vw);
 }
 #extra.open {
 	transform: translateX(0);
@@ -157,8 +177,8 @@ onMount(() => {
 	top: 0;
 	left: 0;
 	height: 100vh;
-	width: 70vw;
-	transform: translateX(-70vw);
+	width: 80vw;
+	transform: translateX(-80vw);
 	cursor: pointer;
 }
 #extraSwitch.open {

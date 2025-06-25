@@ -38,12 +38,14 @@ let linkHeight = $state(0)
 		<Slider slides={module.media} size={module.size}/>
 	{:else if ['vimeo'].includes(module.kind)}
 		<div class="media-container">
-			<Vimeo id={module.id} cover={module.cover}/>
+			<Vimeo id={module.id} hash={module.hash} cover={module.cover}/>
 		</div>
 	{:else if ['box'].includes(module.kind)}
 		<div class="media-container" style="background-color: {module.color?.hex}; color: {isDark(module.color?.hex) ? "var(--white)" : ""}">
 			<div class="text">
-                <h3 class="ronzino-24">{module.title}</h3>
+                {#if module.textTitle}
+					<h3 class="ronzino-24">{module.textTitle}</h3>
+				{/if}
                 {#if module.text1}
                     <div>
                         <PortableText

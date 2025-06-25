@@ -10,11 +10,11 @@ const sizeMap = { xs: 5.5, s: 4.5, m: 3.5, l: 2.5, xl: 1.5 };
 </script>
 
 <swiper-container
-pagination={{
+navigation={{
 	clickable: true
 }}
 slides-per-view={sizeMap[size]}
-centered-slides={true}
+centered-slides={false}
 space-between={1}
 >
 {#each slides as image, i}

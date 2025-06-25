@@ -35,7 +35,6 @@ let zoomer = getZoom()
 // Coordinates
 import { getCoordinates } from '$lib/stores/coordinates.svelte.js';
 let coordinater = getCoordinates()
-$inspect(coordinater)
 
 // Lifecycle
 $effect(() => {
@@ -108,6 +107,14 @@ function handleScroll() {
 		}
 		oldScroll = scrollY;
 	}
+}
+
+function openTagger() {
+	tagger.setTags(data.tags, { keepHierarchy: true });
+	tagger.setOpen(true)
+}
+function closeTagger() {
+	tagger.setOpen(false)
 }
 
 // Dev
@@ -229,14 +236,12 @@ function handleKey({key}) {if (key === 'G' && dev) {viewGrid = !viewGrid}}
 				</div>
 			{/each}
 		<!-- {/if} -->
-		{#if !tagger.open}
-			<div class="tag">
-				<button onclick={() => {tagger.setTags(data.tags, { keepHierarchy: true }); tagger.setOpen(true)}}
-				in:slide|global={{ axis: "x", duration: 500, delay: (tagger.maxTags+1)*30 }}
-				out:slide|global={{ axis: "x", duration: 500, delay: 500 + (tagger.tags.length - tagger.maxTags)*30 }}
-				>...</button>
-			</div>
-		{/if}
+		<div class="tag">
+			<button onclick={() => {!tagger.open ? openTagger() : closeTagger()}}
+			in:slide|global={{ axis: "x", duration: 500, delay: (tagger.maxTags+1)*30 }}
+			out:slide|global={{ axis: "x", duration: 500, delay: 500 + (tagger.tags.length - tagger.maxTags)*30 }}
+			>{#if !tagger.open}...{:else}× Chiudi{/if}</button>
+		</div>
 	</div>
 {/if}
 

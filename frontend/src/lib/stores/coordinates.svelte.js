@@ -13,7 +13,7 @@ export function getCoordinates() {
 
 	async function animateCoordinate(key, value) {
 		const formatted = formatNumber(value);
-		coordinates[key] = value; // Store raw number
+		coordinates[key] = value;
 
 		for (let i = 1; i <= formatted.length; i++) {
 			formattedCoordinates[key] = formatted.slice(0, i);

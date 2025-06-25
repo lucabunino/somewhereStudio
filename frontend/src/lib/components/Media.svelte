@@ -4,7 +4,9 @@ import { page } from '$app/stores';
 
 let {
 	media,
-	width = 1080,
+	thumbnail = undefined,
+	aspectRatio = undefined,
+	width = 1920,
 	cover = false,
 	captionExtra = false,
 	linkHeight = 0,
@@ -13,10 +15,8 @@ let {
 let domLoaded = $state(false);
 let imgEl;
 let videoEl;
-let fullresUrl = media.asset ? urlFor(media.asset).width(width) : null;
+let fullresUrl = media?.asset ? urlFor(media.asset).width(width) : null;
 let captionHeight = $state(0)
-
-$inspect(captionHeight, linkHeight)
 
 $effect(() => {
 	if (imgEl && fullresUrl) {
@@ -29,13 +29,17 @@ $effect(() => {
 			}
 		};
 	}
+	if (thumbnail) {
+		setTimeout(() => {
+			domLoaded = true;
+		}, 500);
+	}
 });
 </script>
 
-
 <div style="height: 100%;" class:homepage={$page.url.pathname === "/"}>
 	<div class="media" class:cover={cover} class:loaded={domLoaded} style={$page.url.pathname === "/" ? `height: 100%; max-height: calc(90vh - ${captionHeight}px - ${linkHeight}px);` : 'height: 100%'}>
-		{#if media.mp4}
+		{#if media?.mp4}
 			<video
 				muted
 				loop
@@ -44,19 +48,29 @@ $effect(() => {
 				bind:this={videoEl}
 				src={media.mp4.asset.url}
 				poster={media.cover ? urlFor(media.cover.asset).width(1080) : ""}
+				style="aspect-ratio: {aspectRatio}"
 				on:playing={() => {domLoaded = true}}
 			></video>
-		{:else if media.asset}
+		{:else if media?.asset}
 			<img
 				src={media.asset.metadata?.lqip}
 				alt=""
+				style="aspect-ratio: {aspectRatio}"
+				bind:this={imgEl}
+			/>
+		{/if}
+		{#if thumbnail}
+			<img
+				src={thumbnail}
+				alt=""
+				style="aspect-ratio: {aspectRatio}"
 				bind:this={imgEl}
 			/>
 		{/if}
 		<div class="blur"></div>
 	</div>
 
-	{#if media.caption}
+	{#if media?.caption}
 		<p class="caption" class:ronzino-12={!captionExtra} class:extra={captionExtra} bind:clientHeight={captionHeight}>
 			{media.caption}
 		</p>

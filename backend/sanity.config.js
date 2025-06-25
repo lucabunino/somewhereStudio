@@ -4,6 +4,7 @@ import {visionTool} from '@sanity/vision'
 import {schemaTypes} from './schemaTypes'
 import {myStructure} from './structure.js'
 import {colorInput} from '@sanity/color-input'
+import {media, mediaAssetSource} from 'sanity-plugin-media'
 
 const singletonActions = new Set(['publish', 'discardChanges', 'restore'])
 const singletonTypes = new Set(['homepage', 'about', 'info', 'seo'])
@@ -19,6 +20,7 @@ export default defineConfig({
 		structureTool({
 			structure: myStructure,
 		}),
+		media(),
 		visionTool(),
 		colorInput(),
 	],
@@ -33,4 +35,8 @@ export default defineConfig({
 				? input.filter(({ action }) => action && singletonActions.has(action))
 				: input,
 	},
+	form: {
+		file: { assetSources: sources => sources.filter(s => s === mediaAssetSource) },
+		image: { assetSources: sources => sources.filter(s => s === mediaAssetSource) }
+	}
 })

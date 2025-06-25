@@ -127,17 +127,29 @@ export default {
 			hidden: ({ parent }) => !['vimeo'].includes(parent?.kind)
 		},
 		{
-			name: 'cover',
-			type: 'image',
+			name: 'hash',
+			description: 'Required only for unlisted videos. It’s the code after “?h=” in Vimeo’s embed scripts',
+			type: 'string',
 			fieldset: 'vimeo',
 			hidden: ({ parent }) => !['vimeo'].includes(parent?.kind)
 		},
+		// {
+		// 	name: 'cover',
+		// 	type: 'image',
+		// 	fieldset: 'vimeo',
+		// 	hidden: ({ parent }) => !['vimeo'].includes(parent?.kind)
+		// },
 		{
 			name: 'color',
 			type: 'color',
 			options: {
 				disableAlpha: true
 			},
+			hidden: ({ parent }) => !['box'].includes(parent?.kind)
+		},
+		{
+			name: 'textTitle',
+			type: 'string',
 			hidden: ({ parent }) => !['box'].includes(parent?.kind)
 		},
 		{

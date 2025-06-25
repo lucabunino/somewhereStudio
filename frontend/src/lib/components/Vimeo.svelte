@@ -1,28 +1,35 @@
 <script>
 import { onMount } from "svelte";
 import Media from "$lib/components/Media.svelte";
+
 let {
 	id,
+	hash = null,
 	autoplay = true,
 	loop = false,
-	cover
 } = $props()
 
-let aspectRatio = $state(null)
+let domLoaded = $state(false);
 let isPlaying = $state(false);
+let aspectRatio = $state(undefined);
+let thumbnail = $state(undefined);
+let embed = $state(undefined);
 
 onMount(async () => {
-	const response = await fetch(`https://vimeo.com/api/oembed.json?url=https://vimeo.com/${id}`);
+	const response = await fetch(`/api/vimeo/${id}`);
 	const data = await response.json();
-	const width = data.width;
-	const height = data.height;
-	aspectRatio = width / height;
+	aspectRatio = data.width / data.height;
+	thumbnail = data.thumbnail
+	embed = data.embed
+	console.log(aspectRatio, thumbnail, embed);
+	
+	domLoaded = true
 });
 </script>
 
-{#if cover}
-	<div class="vimeo-container" onclick={(e) => {e.preventDefault(); isPlaying = true}}>
-			<Media media={cover} width={1920}/>
+{#if domLoaded}
+	<div class="vimeo-container" onclick={(e) => {e.preventDefault(); isPlaying = true}} style="aspect-ratio: {aspectRatio};">
+			<Media thumbnail={thumbnail}/>
 			<button id="player-icon">
 				<svg width="45" height="47" xmlns="http://www.w3.org/2000/svg">
 					<g filter="url(#a)">
@@ -32,9 +39,8 @@ onMount(async () => {
 			</button>
 		{#if isPlaying}
 			<iframe
-				src={`https://player.vimeo.com/video/${id}?autoplay=${autoplay ? 1 : 0}&loop=${loop ? 1 : 0}`}
+				src={embed}
 				width="100%"
-				style="aspect-ratio: {aspectRatio};"
 				frameborder="0"
 				allow="autoplay; fullscreen; picture-in-picture"
 				allowfullscreen

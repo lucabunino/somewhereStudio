@@ -33,11 +33,12 @@ media[]{
 	},
 },
 id,
-cover{
-  asset->{
-    _ref, _id, _type, metadata {dimensions, lqip}
-  }
-},
+hash,
+// cover{
+//   asset->{
+//     _ref, _id, _type, metadata {dimensions, lqip}
+//   }
+// },
 modules[]->{
 	...,
 	tags[]->{title, slug},
@@ -57,11 +58,12 @@ modules[]->{
 		},
 	},
 	id,
-	cover{
-		asset->{
-			_ref, _id, _type, metadata {dimensions, lqip}
-		}
-	},
+	hash,
+	// cover{
+	// 	asset->{
+	// 		_ref, _id, _type, metadata {dimensions, lqip}
+	// 	}
+	// },
 }
 `
 

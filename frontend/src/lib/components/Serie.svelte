@@ -16,7 +16,7 @@ let {
 <div>
 	<swiper-container
 	class="{size ? size : module.size}"
-	pagination={{
+	navigation={{
 		clickable: true
 	}}
 	autoHeight={true}
@@ -35,12 +35,12 @@ let {
 		out:blur|global={{ duration: 200 }}
 		class="project ronzino-12 medium uppercase">{project.title}</p>
 	{/if}
-	{#if hiddenProject}
+	<!-- {#if hiddenProject}
 		<div
 		in:blur|global={{ duration: 200, delay: delayed ? 500 : 500 }}
 		out:blur|global={{ duration: 200 }}
 		class="slider-bar {size ? size : module.size}"></div>
-	{/if}
+	{/if} -->
 </div>
 
 
