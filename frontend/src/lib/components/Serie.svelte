@@ -10,6 +10,7 @@ let {
 	hiddenProject = false,
 	link = true,
 	delayed = true,
+	homepage = false,
  } = $props()
 </script>
 

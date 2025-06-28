@@ -1,6 +1,11 @@
 <script>
 import { onMount } from "svelte";
 import Media from "$lib/components/Media.svelte";
+import { page } from '$app/stores';
+
+// Header
+import { getHeader } from '$lib/stores/header.svelte.js';
+let header = getHeader()
 
 let {
 	id,
@@ -28,8 +33,8 @@ onMount(async () => {
 </script>
 
 {#if domLoaded}
-	<div class="vimeo-container" onclick={(e) => {e.preventDefault(); isPlaying = true}} style="aspect-ratio: {aspectRatio};">
-			<Media thumbnail={thumbnail}/>
+	<div class="vimeo-container" class:homepage={$page.url.pathname === "/"} onclick={(e) => {e.preventDefault(); isPlaying = true; header.setBlurred(true)}} style="aspect-ratio: {aspectRatio};">
+			<Media thumbnail={thumbnail} cover={true}/>
 			<button id="player-icon">
 				<svg width="45" height="47" xmlns="http://www.w3.org/2000/svg">
 					<g filter="url(#a)">
@@ -53,6 +58,9 @@ onMount(async () => {
 .vimeo-container {
 	position: relative;
 	width: 100%;
+}
+.homepage {
+	max-height: 90vh;
 }
 iframe {
 	position: absolute;

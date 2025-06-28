@@ -7,18 +7,14 @@ let { data } = $props()
 let domLoaded = $state(false)
 let innerWidth = $state(0)
 let innerHeight = $state(0)
-import { onMount } from "svelte";
 
 // Tags
 import { getTags } from '$lib/stores/tag.svelte.js';
 let tagger = getTags()
 
-onMount(() => {
-	tagger.setMaxTags(0)
-})
-
 $effect(() => {
 	domLoaded = true
+	tagger.setMaxTags(0)
 })
 </script>
 
@@ -29,18 +25,18 @@ $effect(() => {
 		<p class="about">{data.about.about}</p>
 	{/if}
 	{#if domLoaded}
-		<div class="contacts">
+		<div class="contacts ronzino-12 uppercase">
 			{#if data.info.email}
-				<div class="btn gaisyr-14">
-					<a class="btn-link" href="mailto:{data.info.email}"
-					in:slide|global={{ axis: "x", duration: 500 }}
+				<div class="tag">
+					<a class="btn" href="mailto:{data.info.email}"
+					in:slide|global={{ axis: "x", duration: 500, delay: 500 }}
 					>{data.info.email}</a>
 				</div>
 			{/if}
 			{#each data.info.socials ?? [] as social, i}
-				<div class="btn gaisyr-14">
-					<a class="btn-link" href={social.link} target="_blank" rel="noopener noreferrer"
-					in:slide|global={{ axis: "x", duration: 500, delay: i*30 }}
+				<div class="tag">
+					<a class="btn" href={social.link} target="_blank" rel="noopener noreferrer"
+					in:slide|global={{ axis: "x", duration: 500, delay: 500 + i*100 }}
 					>{social.label}</a>
 				</div>
 			{/each}
@@ -69,11 +65,11 @@ $effect(() => {
 	flex-direction: column;
 	align-items: flex-start;
 	width: 100vw;
-	padding: calc(var(--gutter)*5.3) var(--gutter) 0;
+	padding: calc(var(--gutter) + .2rem) var(--gutter) 0;
 }
 .about, .clients {
 	margin-left: 30vw;
-	text-indent: -30vw;
+	text-indent: calc(-30vw + 14.2rem + var(--gutter));
 }
 .contacts {
 	margin-top: .5em;
@@ -82,6 +78,11 @@ $effect(() => {
 }
 .contacts .btn {
 	margin-bottom: .3rem;
+	color: var(--darkGray);
+	text-decoration: none;
+}
+.contacts .btn:hover {
+	color: var(--black);
 }
 .people {
 	display: grid;

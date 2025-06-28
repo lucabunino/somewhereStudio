@@ -7,18 +7,23 @@ let {
 	thumbnail = undefined,
 	aspectRatio = undefined,
 	width = 1920,
+	autoWidth = false,
 	cover = false,
 	captionExtra = false,
 	linkHeight = 0,
 } = $props();
 
 let domLoaded = $state(false);
+let minimumDomLoaded = $state(false);
 let imgEl;
 let videoEl;
 let fullresUrl = media?.asset ? urlFor(media.asset).width(width) : null;
 let captionHeight = $state(0)
 
 $effect(() => {
+	setTimeout(() => {
+		minimumDomLoaded = true
+	}, 1000);
 	if (imgEl && fullresUrl) {
 		const fullres = new Image();
 		fullres.src = fullresUrl;
@@ -37,8 +42,9 @@ $effect(() => {
 });
 </script>
 
-<div style="height: 100%;" class:homepage={$page.url.pathname === "/"}>
-	<div class="media" class:cover={cover} class:loaded={domLoaded} style={$page.url.pathname === "/" ? `height: 100%; max-height: calc(90vh - ${captionHeight}px - ${linkHeight}px);` : 'height: 100%'}>
+<div class="media-wrapper" class:autoWidth={autoWidth} class:homepage={$page.url.pathname === "/"}>
+	<!-- <div class="media" class:cover={cover} class:loaded={domLoaded && minimumDomLoaded} style={$page.url.pathname === "/" ? `height: 100%; max-height: calc(90vh - ${captionHeight}px - ${linkHeight}px);` : 'height: 100%'}> -->
+	<div class="media" class:cover={cover} class:loaded={domLoaded && minimumDomLoaded}>
 		{#if media?.mp4}
 			<video
 				muted
@@ -79,12 +85,22 @@ $effect(() => {
 
 
 <style>
+.media-wrapper {
+	height: 100%;
+}
+.media-wrapper.autoWidth {
+	width: auto;
+}
 .media {
 	position: relative;
 }
+.autoWidth .media {
+	height: 100%;
+	width: auto;
+}
 .media.cover {
-	/* width: 100%;
-	height: 100%; */
+	width: 100%;
+	height: 100%;
 }
 .caption {
 	text-indent: 3em;
@@ -99,6 +115,9 @@ img, video {
 	height: 100%;
     width: 100%;
     object-fit: cover;
+}
+.autoWidth img, .autoWidth .video {
+	width: auto;
 }
 .homepage img, .homepage .video {
 	max-height: 90vh;

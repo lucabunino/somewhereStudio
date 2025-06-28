@@ -1,7 +1,7 @@
 import { tick } from 'svelte';
 
-let coordinates = $state({ latitude: '0', longitude: '0' });
-let formattedCoordinates = $state({ latitude: '00.00000', longitude: '00.00000' });
+let coordinates = $state({ latitude: '10', longitude: '10' });
+let animatedCoordinates = $state({ latitude: '10.00000', longitude: '10.00000' });
 
 export function getCoordinates() {
 	function formatNumber(num) {
@@ -16,7 +16,7 @@ export function getCoordinates() {
 		coordinates[key] = value;
 
 		for (let i = 1; i <= formatted.length; i++) {
-			formattedCoordinates[key] = formatted.slice(0, i);
+			animatedCoordinates[key] = formatted.slice(0, i);
 			await tick();
 			await new Promise(r => setTimeout(r, 30));
 		}
@@ -27,12 +27,20 @@ export function getCoordinates() {
 		animateCoordinate('longitude', newLng);
 	}
 
+	function resetCoordinates(newLat, newLng) {
+		animateCoordinate('latitude', newLat);
+		animateCoordinate('longitude', newLng);
+	}
+
 	return {
 		get coordinates() {
 			return coordinates;
 		},
+		get animatedCoordinates() {
+			return animatedCoordinates;
+		},
 		get formattedCoordinates() {
-			return formattedCoordinates;
+			return { latitude: formatNumber(coordinates.latitude), longitude: formatNumber(coordinates.longitude) };
 		},
 		setCoordinates,
 	};

@@ -2,12 +2,16 @@
 import Serie from "$lib/components/Serie.svelte";
 import Module from "$lib/components/Module.svelte";
 import Media from "$lib/components/Media.svelte";
-import { blur } from "svelte/transition";
+import { blur, slide } from "svelte/transition";
 import { onMount } from "svelte";
 import { isDark } from "$lib/utils/color";
 
 let { data } = $props();
 let extraOpen = $state(false)
+let domLoaded = $state(false)
+let innerWidth = $state()
+let innerHeight = $state()
+let singleProjectHeight = $state()
 
 $inspect(data)
 
@@ -15,22 +19,16 @@ $inspect(data)
 import { getTags } from '$lib/stores/tag.svelte.js';
 let tagger = getTags()
 
+// Zoom
+import { getZoom } from '$lib/stores/zoom.svelte.js';
+let zoomer = getZoom()
+
 // Extra
 import { getExtra } from '$lib/stores/extra.svelte.js';
 let extraer = getExtra()
 if (data.project[0].extra) {
 	extraer.setExtra(true)
 }
-
-// onMount(() => {
-// 	tagger.setMaxTags(0)
-// 	setTimeout(() => {
-// 		tagger.setTags(data.project[0].tags, { keepHierarchy: false, hierarchy: 99 });
-// 	}, 2000);
-// 	setTimeout(() => {
-// 		tagger.setMaxTags(data.project[0].tags.length)
-// 	}, 3000);
-// })
 
 $effect(() => {
 	tagger.setMaxTags(0)
@@ -40,89 +38,87 @@ $effect(() => {
 	setTimeout(() => {
 		tagger.setMaxTags(data.project[0].tags.length)
 	}, 500);
+	domLoaded = true;
 	return () => {
 		extraer.setExtra(false)
 	};
 })
 </script>
 
-<section id="singleProject" class:extra={data.project[0].extra} style={data.project[0].color ? `background-color: ${data.project[0].color.hex}` : ""}>
-	<!-- <div class="intro ronzino-12 medium uppercase">
-		<h1 class="project-title gaisyr-34 normalcase">{data.project[0].title}</h1>
-		{#if data.project[0].collaborations}
-			<p class="collaborations">In collaborazione con {#each data.project[0].collaborations as collaboration, j}{collaboration.title}{#if data.project[0].collaborations?.length - 1 > j}{@html ', '}{/if}{/each}</p>
-		{/if}
-		{#if data.project[0].date || data.project[0].locations}
-			<p class="date-and-location">
-				{#if data.project[0].date}
-					<span class="date">{new Date(data.project[0].date).getFullYear()}{#if data.project[0].locations}{@html ', '}{/if}</span>
-				{/if}
-				{#if data.project[0].locations}
-					<span class="locations">{#each data.project[0].locations as location, j}{location.title}{#if data.project[0].locations?.length - 1 > j}{@html ', '}{/if}{/each}</span>
-				{/if}
-			</p>
-		{/if}
-		{#if data.project[0].tags}
-			<ul class="tags">{#each data.project[0].tags as tag, j}<li>{tag.title}{#if data.project[0].tags?.length - 1 > j}{@html ', '}{/if}</li>{/each}</ul>
-		{/if}
-	</div> -->
-	<div class="module intro ronzino-12 medium uppercase"
-	in:blur|global={{ duration: 200, delay: 500 }}
-	out:blur|global={{ duration: 200}}
+<svelte:window bind:innerWidth bind:innerHeight></svelte:window>
+
+{#if domLoaded}
+	<!-- <section id="singleProject" class:extra={data.project[0].extra}
+	bind:clientHeight={singleProjectHeight}
+	style={data.project[0].color ? `background-color: ${data.project[0].color.hex}; margin-bottom: ${(singleProjectHeight - singleProjectHeight*zoomer.scale)*-1}px; transform: scale(${zoomer.scale}); transform-origin: left top; width: ${innerWidth*zoomer.scale}px` : `margin-bottom: ${(singleProjectHeight - singleProjectHeight*zoomer.scale)*-1}px; transform: scale(${zoomer.scale}); transform-origin: left top; width: ${innerWidth/zoomer.scale}px`}
+	> -->
+	<section id="singleProject" class:extra={data.project[0].extra}
+	bind:clientHeight={singleProjectHeight}
+	style={data.project[0].color ? `background-color: ${data.project[0].color.hex}; margin-bottom: ${(singleProjectHeight - singleProjectHeight*zoomer.scale)*-1}px; transform: scale(${zoomer.scale}); transform-origin: center top;` : `margin-bottom: ${(singleProjectHeight - singleProjectHeight*zoomer.scale)*-1}px; transform: scale(${zoomer.scale}); transform-origin: center top;`}
 	>
-		<h1 class="project-title gaisyr-34 normalcase">{data.project[0].title}</h1>
-		{#if data.project[0].collaborations}
-			<p class="collaborations">In collaborazione con {#each data.project[0].collaborations as collaboration, j}{collaboration.title}{#if data.project[0].collaborations?.length - 1 > j}{@html ', '}{/if}{/each}</p>
-		{/if}
-		{#if data.project[0].date || data.project[0].locations}
-			<p class="date-and-location">
-				{#if data.project[0].date}
-					<span class="date">{new Date(data.project[0].date).getFullYear()}{#if data.project[0].locations}{@html ', '}{/if}</span>
-				{/if}
-				{#if data.project[0].locations}
-					<span class="locations">{#each data.project[0].locations as location, j}{location.title}{#if data.project[0].locations?.length - 1 > j}{@html ', '}{/if}{/each}</span>
-				{/if}
-			</p>
-		{/if}
-		<!-- {#if data.project[0].tags}
-			<ul class="tags">{#each data.project[0].tags as tag, j}<li>{tag.title}{#if data.project[0].tags?.length - 1 > j}{@html ', '}{/if}</li>{/each}</ul>
-		{/if} -->
-	</div>
-	{#each data.project[0].modules as module, i (module._id)}
-		{#if module.modules}
-			<Serie slides={module.modules} project={module.project} size={module.size} showProject={false} hiddenProject={true} link={false} color={data.project[0].color ? data.project[0].color : null}/>
-		{:else}
-			<Module module={module} i={i} hiddenProject={true} link={false} showProject={false} color={data.project[0].color ? data.project[0].color : null}/>
-		{/if}
-	{/each}
-</section>
-{#if data.project[0].extra}
-	<section id="extra"
-	class:open={extraOpen}
-	onclick={() => {extraOpen ? '' : extraOpen = true}}
-	>
-		<h4 class="ronzino-12 medium uppercase">Extra</h4>
-			<div class="extra-container">
-				{#each data.project[0].extra as extra, i}
-					{#if extra._type === "extraText"}
-						<p>{extra.text}</p>
-					{:else if extra._type === "image"}
-						<Media media={extra} captionExtra={true}/>
+		<div class="module intro ronzino-12 medium uppercase"
+		in:blur|global={{ duration: 200, delay: 500 }}
+		out:blur|global={{ duration: 200}}
+		>
+			<h1 class="project-title gaisyr-34 normalcase">{data.project[0].title}</h1>
+			{#if data.project[0].collaborations}
+				<p class="collaborations">In collaborazione con {#each data.project[0].collaborations as collaboration, j}{collaboration.title}{#if data.project[0].collaborations?.length - 1 > j}{@html ', '}{/if}{/each}</p>
+			{/if}
+			{#if data.project[0].date || data.project[0].locations}
+				<p class="date-and-location">
+					{#if data.project[0].date}
+						<span class="date">{new Date(data.project[0].date).getFullYear()}{#if data.project[0].locations}{@html ', '}{/if}</span>
 					{/if}
-				{/each}
+					{#if data.project[0].locations}
+						<span class="locations">{#each data.project[0].locations as location, j}{location.title}{#if data.project[0].locations?.length - 1 > j}{@html ', '}{/if}{/each}</span>
+					{/if}
+				</p>
+			{/if}
+		</div>
+		{#each data.project[0].modules as module, i (module._id)}
+			<div class="module-container"
+			in:blur|global={{ duration: 200, delay: 500 + 100*i }}
+			out:blur|global={{ duration: 200}}>
+				{#if module.modules}
+					<Serie slides={module.modules} project={module.project} size={module.size} showProject={false} hiddenProject={true} link={false} color={data.project[0].color ? data.project[0].color : null}/>
+				{:else}
+					<Module module={module} i={i} hiddenProject={true} link={false} showProject={false} color={data.project[0].color ? data.project[0].color : null}/>
+				{/if}
 			</div>
+		{/each}
 	</section>
-	<div id="extraSwitch" class:open={extraOpen}
-	onclick={() => {extraOpen ? extraOpen = false : ''}}
-	></div>
+	{#if data.project[0].extra}
+		<section id="extra"
+		class:open={extraOpen}
+		onclick={() => {extraOpen ? '' : extraOpen = true}}
+		in:slide|global={{ axis: 'x', duration: 200, delay: 500 }}
+		out:slide|global={{ axis: 'x', duration: 200}}
+		>
+			<h4 class="ronzino-12 medium uppercase">Extra</h4>
+				<div class="extra-container">
+					{#each data.project[0].extra as extra, i}
+						{#if extra._type === "extraText"}
+							<p class="gaisyr-19">{extra.text}</p>
+						{:else if extra._type === "image"}
+							<Media media={extra} captionExtra={false} cover={true}/>
+						{/if}
+					{/each}
+				</div>
+		</section>
+		<div id="extraSwitch" class:open={extraOpen}
+		onclick={() => {extraOpen ? extraOpen = false : ''}}
+		></div>
+	{/if}
 {/if}
 
 <style>
 #singleProject {
-	width: 100vw;
+	width: 100%;
 	display: flex;
 	flex-direction: column;
 	flex-wrap: nowrap;
+	transition: var(--transition);
+	transition-property: margin, transform;
 }
 #singleProject.extra {
 	width: 96vw;
@@ -186,11 +182,11 @@ $effect(() => {
 	transform: translateX(0);
 }
 #extra h4 {
-	margin-bottom: 10rem;
+	margin-bottom: 6rem;
 }
 .extra-container {
 	display: flex;
 	flex-direction: column;
-	gap: 2rem;
+	gap: 3rem;
 }
 </style>

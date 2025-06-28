@@ -7,6 +7,7 @@ import { quadOut } from 'svelte/easing';
 import { blur } from "svelte/transition";
 import { flip } from "svelte/animate";
 import { gsapTransform } from "$lib/utils/gsapTransform.js";
+import { gsapScale } from "$lib/utils/gsapScale.js";
 
 // Zoom
 import { getZoom } from '$lib/stores/zoom.svelte.js';
@@ -17,6 +18,14 @@ let oldScale = zoomer.scale;
 import { getCoordinates } from '$lib/stores/coordinates.svelte.js';
 let coordinater = getCoordinates()
 
+// Header
+import { getHeader } from '$lib/stores/header.svelte.js';
+let header = getHeader()
+
+// Tags
+import { getTags } from '$lib/stores/tag.svelte.js';
+let tagger = getTags()
+
 // Variables
 let { data } = $props()
 let domLoaded = $state(false)
@@ -25,6 +34,7 @@ let innerHeight = $state(0)
 let enableAnimation = $state(false)
 let mouse = $state({ x: 0, y: 0 });
 let index = -1
+let modulesHeight = $state()
 let activeModules = $state([])
 let positionX = $state(0)
 let positionY = $state(0)
@@ -44,25 +54,20 @@ let bufferX = $derived(innerWidth / zoomer.zoom * preloadFactor * sizer)
 let bufferY = $derived(innerHeight / zoomer.zoom * preloadFactor * sizer)
 const sizer = 1
 
-// Tags
-import { getTags } from '$lib/stores/tag.svelte.js';
-let tagger = getTags()
+// Lifecycle
 onMount(() => {
+	zoomer.setZoom(zoomer.initialZoom)
 	tagger.setTags(data.tags, { keepHierarchy: false })
 	tagger.setMaxTags(tagger.firstMaxTags)
 	if (data.searchParams.length > tagger.firstMaxTags) {
 		tagger.setMaxTags(data.searchParams.length)
 	}
 })
-
-// Lifecycle
 $effect(() => {
 	domLoaded = true;
-
 	if (data.searchParams.length !== lastLength) {
 		lastLength = data.searchParams.length;
 	}
-	
 	if (data.searchParams.length == 0) {
 		if (checkCellTimer) return;
 		checkCellTimer = requestAnimationFrame(() => {
@@ -115,6 +120,7 @@ function updatePosition(deltaX, deltaY, baseSpeed = 1) {
 function handleScroll(e) {
 	if (data.searchParams.length === 0) {
 		updatePosition(-e.deltaX, -e.deltaY, 1);
+		header.setBlurred(false)
 	}
 	enableAnimation = false
 }
@@ -153,7 +159,7 @@ function isInView(gridX, gridY) {
 		y - bufferY < innerHeight
 	);
 }
-function getTransformFn(module) {
+function getTransformFn(module, index = 0) {
 	return () => {
 		const x = (calculateStartingPositionX(module.gridX) + positionX) * zoomer.scale;
 		const y = (calculateStartingPositionY(module.gridY) + positionY) * zoomer.scale;
@@ -201,56 +207,67 @@ function handleMouseEnter(latitude, longitude) {
 
 <!-- svelte-ignore a11y_no_static_element_interactions -->
 <!-- <p style="position: fixed; top:50%; left:50%; background-color:white; z-index:999;">{positionX} / {modules.length}</p> -->
-<section id="modules"
-onmousewheel={(e) => {handleScroll(e)}}
-onmousedown={(e) => {handleMouseDown(e)}}
-onmousemove={(e) => {handleMouseMove(e)}}
-onmouseup={(e) => {handleMouseUp(e)}}
-style={data.searchParams.length === 0 ? `height: 100vh; position:fixed;` : `height: auto;`}
-class:scattered={data.searchParams.length === 0}
->
-	{#key data.searchParams}
-		{#if data.searchParams.length > 0}
-			<div class="module intro gaisyr-34"
-			in:blur|global={{ duration: 200, delay: 500 }}
-			out:blur|global={{ duration: 200}}
-			>{data.modules.length} Risultati per:
-				{#each data.searchParams as searchParam, i}
-					{#each data.tags.filter(tag => tag.slug.current === searchParam) as tag, j}{tag.title}{/each}{#if data.searchParams.length - 1 > i}{@html ', '}{/if}
-				{/each}
-			</div>
-			{#each data.modules as module, i}
-				<div class="module-container">
-					<div onmouseenter={() => {handleMouseEnter(module.latitude, module.longitude)}}>
-						{#if module.modules}
-								<Serie slides={module.modules} project={module.project} size={module.size} hiddenProject={true} link={false}/>
-						{:else}
-								<Module module={module} i={i} delayed={false}/>
-						{/if}
+{#key data.searchParams}
+	<section id="modules"
+	bind:clientHeight={modulesHeight}
+	onmousewheel={(e) => {handleScroll(e)}}
+	onmousedown={(e) => {handleMouseDown(e)}}
+	onmousemove={(e) => {handleMouseMove(e)}}
+	onmouseup={(e) => {handleMouseUp(e)}}
+	style={data.searchParams.length === 0 ? `height: 100vh; position:fixed;` : `height: auto; margin-bottom: ${(modulesHeight - modulesHeight*zoomer.scale)*-1}px; transform: scale(${zoomer.scale}); transform-origin: top;`}
+	class:scattered={data.searchParams.length === 0}
+	>
+	<!-- <section id="modules"
+	bind:clientHeight={modulesHeight}
+	onmousewheel={(e) => {handleScroll(e)}}
+	onmousedown={(e) => {handleMouseDown(e)}}
+	onmousemove={(e) => {handleMouseMove(e)}}
+	onmouseup={(e) => {handleMouseUp(e)}}
+	style={data.searchParams.length === 0 ? `height: 100vh; position:fixed;` : `height: auto; margin-bottom: -${modulesHeight - modulesHeight*zoomer.scale}px;`}
+	class:scattered={data.searchParams.length === 0}
+	use:gsapScale={data.searchParams.length > 0 ? zoomer.scale : 1}
+	> -->
+			{#if data.searchParams.length > 0}
+				<div class="module intro gaisyr-34"
+				in:blur|global={{ duration: 200, delay: 500 }}
+				out:blur|global={{ duration: 200}}
+				>{data.modules.length} Risultati per:
+					{#each data.searchParams as searchParam, i}
+						{#each data.tags.filter(tag => tag.slug.current === searchParam) as tag, j}{tag.title}{/each}{#if data.searchParams.length - 1 > i}{@html ', '}{/if}
+					{/each}
+				</div>
+				{#each data.modules as module, i}
+					<div class="module-container">
+						<div onmouseenter={() => {handleMouseEnter(module.latitude, module.longitude)}}>
+							{#if module.modules}
+									<Serie slides={module.modules} project={module.project} size={module.size} hiddenProject={true} link={false}/>
+							{:else}
+									<Module module={module} i={i} delayed={false}/>
+							{/if}
+						</div>
 					</div>
-				</div>
-			{/each}
-		{:else}
-			{#each activeModules as module, i (module.gridX + '-' + module.gridY)}
-				{@const startingPositionX = calculateStartingPositionX(module.gridX)}
-				{@const startingPositionY = calculateStartingPositionY(module.gridY)}
-				<div class="module-container"
-				onmouseenter={() => {handleMouseEnter(module.latitude, module.longitude)}}
-				class:scattered={data.searchParams.length === 0}
-				use:gsapTransform={getTransformFn(module)}
-				>
-					<!-- <div onmouseenter={() => {handleMouseEnter(module.latitude, module.longitude)}}> -->
-						{#if module.modules}
-								<Serie slides={module.modules} project={module.project} size={module.size} hiddenProject={true} link={false} delayed={false}/>
-						{:else}
-								<Module module={module} i={i} delayed={false}/>
-						{/if}
-					<!-- </div> -->
-				</div>
-			{/each}
-		{/if}
-	{/key}
-</section>
+				{/each}
+			{:else}
+				{#each activeModules as module, i (module.gridX + '-' + module.gridY)}
+					{@const startingPositionX = calculateStartingPositionX(module.gridX)}
+					{@const startingPositionY = calculateStartingPositionY(module.gridY)}
+					<div class="module-container"
+					onmouseenter={() => {handleMouseEnter(module.latitude, module.longitude)}}
+					class:scattered={data.searchParams.length === 0}
+					use:gsapTransform={getTransformFn(module)}
+					>
+						<!-- <div onmouseenter={() => {handleMouseEnter(module.latitude, module.longitude)}}> -->
+							{#if module.modules}
+									<Serie slides={module.modules} project={module.project} size={module.size} hiddenProject={true} link={false} delayed={false}/>
+							{:else}
+									<Module module={module} i={i} delayed={false}/>
+							{/if}
+						<!-- </div> -->
+					</div>
+				{/each}
+			{/if}
+	</section>
+{/key}
 
 <style>
 #modules {
@@ -258,6 +275,9 @@ class:scattered={data.searchParams.length === 0}
 	flex-direction: column;
 	align-items: center;
 	width: 100vw;
+	justify-self: center;
+	transition: var(--transition);
+	transition-property: margin, transform;
 }
 #modules.scattered {
 	overscroll-behavior-x: contain;
@@ -286,14 +306,15 @@ class:scattered={data.searchParams.length === 0}
 .scattered .module-container {
 	position: absolute;
 	width: 100vw;
-	height: 90vh;
+	/* height: 90vh; */
+	height: 100vh;
 	display: flex;
 	align-items: center;
 	justify-content: center;
 	overflow: scroll;
 }
-.module-container div {
-	max-height: 90vh;
+.scattered .module-container div {
+	/* max-height: 90vh; */
 }
 .slide {
 	background-color: var(--white);

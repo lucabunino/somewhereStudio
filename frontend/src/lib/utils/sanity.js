@@ -95,7 +95,6 @@ export async function getInfo() {
 		}`
 	);
 }
-// Archive
 export async function getModules(tags) {
 	if (tags.length > 0) {
 		return await client.fetch(`
@@ -113,13 +112,36 @@ export async function getModules(tags) {
 		);
 	}
 }
+export async function getMapModules(tags) {
+	return await client.fetch(`
+		*[_type in ["module", "serie"]
+		&& search == true
+		&& defined(longitude) && defined(latitude)
+		${tags?.length ? `&& count(tags[@->slug.current in $tags]) > 0` : ''}
+		&& !(_id in path('drafts.**'))] {
+			${module}
+		}|order(hierarchy desc)`, { tags });
+}
+// export async function getTags() {
+// 	return await client.fetch(`
+// 		*[_type == "tag" && !(_id in path('drafts.**'))] {
+// 			...,
+// 			"homepage": count(*[_type == "homepage" && !(_id in path('drafts.**'))][0].modules[]->tags[@->_id == ^._id]) > 0
+// 		}|order(hierarchy desc, title asc)`
+// 	);
+// }
 export async function getTags() {
 	return await client.fetch(`
-		*[_type == "tag" && !(_id in path('drafts.**'))] {
+		*[_type == "tag" && !(_id in path('drafts.**')) 
+		  && count(*[_type in ["module", "serie"] 
+		             && !(_id in path('drafts.**')) 
+		             && references(^._id)]) > 0] 
+		{
 			...,
 			"homepage": count(*[_type == "homepage" && !(_id in path('drafts.**'))][0].modules[]->tags[@->_id == ^._id]) > 0
-		}|order(hierarchy desc, title asc)`
-	);
+		}
+		| order(hierarchy desc, title asc)
+	`);
 }
 export async function getAbout() {
 	return await client.fetch(`

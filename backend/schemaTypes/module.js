@@ -16,7 +16,7 @@ const kindList = [
 
 function getKindTitle(kindValue) {
 	const kind = kindList.find(item => item.value === kindValue);
-	return kind ? kind.title : kindValue; // Fallback to the value if no match found
+	return kind ? kind.title : kindValue;
 }
 
 export default {
@@ -35,7 +35,7 @@ export default {
 		{
 			name: 'slug',
 			type: 'slug',
-			validation: (Rule) => Rule.required(),
+			// validation: (Rule) => Rule.required(),
 			options: {
 				source: 'title',
 				maxLength: 96,
@@ -133,12 +133,25 @@ export default {
 			fieldset: 'vimeo',
 			hidden: ({ parent }) => !['vimeo'].includes(parent?.kind)
 		},
-		// {
-		// 	name: 'cover',
-		// 	type: 'image',
-		// 	fieldset: 'vimeo',
-		// 	hidden: ({ parent }) => !['vimeo'].includes(parent?.kind)
-		// },
+		{
+			name: 'side',
+			type: 'string',
+			options: {
+				list: [
+					{title: 'Left', value: 'left'},
+					{title: 'Right', value: 'right'},
+				],
+			},
+			initialValue: 'right',
+			hidden: ({ parent }) => !['box', 'longText'].includes(parent?.kind),
+		},
+		{
+			name: 'fixedHeight',
+			title: 'Display images with fixed heights',
+			type: 'boolean',
+			initialValue: false,
+			hidden: ({ parent }) => !['composition'].includes(parent?.kind),
+		},
 		{
 			name: 'color',
 			type: 'color',

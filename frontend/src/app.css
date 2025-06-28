@@ -83,23 +83,28 @@ button {
 	border: none;
 	color: inherit;
 	font: inherit;
+	text-transform: inherit;
 }
 #root, #__next {
 	isolation: isolate;
 }
-a:-webkit-any-link:not(.btn-link):not(.project-link) {
-	color: inherit;
-	cursor: pointer;
+a:-webkit-any-link {
 	text-decoration: none;
 }
-a:any-link:not(.btn-link):not(.project-link) {
-	color: inherit;
-	cursor: pointer;
+a:any-link {
 	text-decoration: none;
 }
-a:not(.project-link):not(.btn-link):not(.tag):not(#coordinates):not(.module):not(.menu-item a):hover {
+a:-webkit-any-link:not(.btn):not(.project-link) {
+	color: inherit;
+	cursor: pointer;
+}
+a:any-link:not(.btn):not(.project-link) {
+	color: inherit;
+	cursor: pointer;
+}
+/* a:not(.project-link):not(.btn-link):not(.tag):not(#coordinates):not(.module):not(.menu-item a):hover {
 	opacity: .3;
-}
+} */
 a:-webkit-any-link.underline,
 a:any-link.underline,
 .underline {
@@ -127,7 +132,7 @@ a:any-link.underline,
 .gaisyr-14 {
 	font-family: Gaisyr, 'Times New Roman', Times, serif;
 	font-size: 1rem;
-	letter-spacing: -0.02em;
+	letter-spacing: 0em;
 	line-height: 1.143;
 }
 .gaisyr-19 {
@@ -180,24 +185,16 @@ a:any-link.underline,
 	margin-bottom: .3rem;
 	white-space: nowrap;
 	transition: var(--transition);
+	transition-property: padding, transform;
 	width: fit-content;
-	font-size: 1rem;
 	line-height: 1;
 	height: 2rem;
 }
-.btn-link {
-	display: block;
-	padding: .5em 1em;
-	background-color: var(--white);
-	white-space: nowrap;
+.btn {
 	color: var(--darkGray);
-	text-decoration: none;
-	transition: var(--transition);
 }
 .btn:hover {
 	padding-left: 1em;
-}
-.btn:hover .btn-link {
 	color: var(--black);
 }
 .todo {
@@ -224,6 +221,26 @@ a:any-link.underline,
 }
 .xl {
 	width: 100%;
+}
+.fixedHeight.xs {
+	width: unset;
+	height: 20vh;
+}
+.fixedHeight.s {
+	width: unset;
+	height: 30vh;
+}
+.fixedHeight.m {
+	width: unset;
+	height: 40vh;
+}
+.fixedHeight.l {
+	width: unset;
+	height: 60vh;
+}
+.fixedHeight.xl {
+	width: unset;
+	height: 90vh;
 }
 #singleProject .left {
 	align-self: flex-start;

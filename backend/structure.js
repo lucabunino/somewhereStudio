@@ -22,7 +22,7 @@ export const myStructure = (S, context) => {
 					.child((projectId) =>
 					S.documentList()
 						.title('Modules')
-						.filter('_type == "module" && _id in *[_type == "project" && _id == $projectId][0].modules[]._ref || references($projectId)')
+						.filter('_type == "module" && _id in *[_type == "project" && _id == $projectId][0].modules[]._ref || _type == "module" && references($projectId)')
 						.params({ projectId })
 					)
 			),
@@ -36,8 +36,8 @@ export const myStructure = (S, context) => {
 					.title('Projects')
 					.child((projectId) =>
 					S.documentList()
-						.title('Modules')
-						.filter('_type == "serie" && _id in *[_type == "project" && _id == $projectId][0].modules[]._ref || references($projectId)')
+						.title('Series')
+						.filter('_type == "serie" && _id in *[_type == "project" && _id == $projectId][0].modules[]._ref || _type == "serie" && references($projectId)')
 						.params({ projectId })
 					)
 			),

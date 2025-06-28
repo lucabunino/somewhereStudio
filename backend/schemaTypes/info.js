@@ -5,6 +5,9 @@ export default {
 	name: 'info',
 	type: 'document',
 	icon: InfoFilledIcon,
+	fieldsets: [
+		{ name: 'adress' },
+	],
 	fields: [
 		{
 			name: 'title',
@@ -20,13 +23,29 @@ export default {
 			type: 'string',
 		},
 		{
-			name: 'adress',
+			name: 'adressLabel',
+			title: 'Label',
 			type: 'text',
 			rows: 2,
+			fieldset: 'adress',
 		},
 		{
-			name: 'adressLink',
+			name: 'adressGoogleMaps',
+			title: 'GoogleMaps',
 			type: 'url',
+			fieldset: 'adress',
+		},
+		{
+			name: 'adressLatitude',
+			title: 'Latitude',
+			type: 'number',
+			fieldset: 'adress',
+		},
+		{
+			name: 'adressLongitude',
+			title: 'Longitude',
+			type: 'number',
+			fieldset: 'adress',
 		},
 		{
 			name: 'socials',
