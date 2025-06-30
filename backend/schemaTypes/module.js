@@ -10,7 +10,6 @@ const kindList = [
 	{title: 'Composition', value: 'composition'},
 	{title: 'Short text', value: 'shortText'},
 	{title: 'Long text', value: 'longText'},
-	{title: 'List', value: 'list'},
 	{title: 'Quote', value: 'quote'},
 ];
 
@@ -163,7 +162,7 @@ export default {
 		{
 			name: 'textTitle',
 			type: 'string',
-			hidden: ({ parent }) => !['box'].includes(parent?.kind)
+			hidden: ({ parent }) => !['box', 'vimeo'].includes(parent?.kind)
 		},
 		{
 			name: 'text1',
@@ -207,7 +206,7 @@ export default {
 					},
 				},
 			],
-			hidden: ({ parent }) => !['video', 'shortText', 'longText', 'box'].includes(parent?.kind)
+			hidden: ({ parent }) => !['video', 'shortText', 'longText', 'box', 'vimeo'].includes(parent?.kind)
 		},
 		{
 			name: 'text2',

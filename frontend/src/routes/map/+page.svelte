@@ -47,8 +47,10 @@ onMount(() => {
 	  localFontFamily: 'Ronzino, Arial, Helvetica, sans-serif',
     });
 	map.on('moveend', () => {
-		updateData();
+		// updateData();
 	});
+	map.on('dragend', updateData);
+	map.on('zoomend', updateData);
 	data.modules.forEach((module, i) => {
 		if (module.latitude != null && module.longitude != null) {
 			new mapboxgl.Marker(els[i])
@@ -62,7 +64,7 @@ onMount(() => {
 });
 
 $effect(() => {
-	if (suppressFlyTo || !map) {
+	if (!map) {
 		return
 	} else {
 		map.flyTo({
@@ -78,6 +80,8 @@ onDestroy(() => {
 	map.remove();
 });
 
+let moveEndTimeout;
+const moveEndDelay = 200
 function panHandler(e) {
   const trackPadSensitivity = 0.6;
   const mouseSensitivity = 0.1;
@@ -88,6 +92,11 @@ function panHandler(e) {
     map.panBy([e.deltaX * sensitivity, e.deltaY * sensitivity], {
       duration: 0
     });
+	// Debounced move end trigger
+	clearTimeout(moveEndTimeout);
+	moveEndTimeout = setTimeout(() => {
+		updateData();
+	}, moveEndDelay);
   }
 }
 
@@ -107,19 +116,19 @@ function handleClickOutside() {
 // }
 function updateData() {
 	// suppressFlyTo = true;
-	// zoomer.setMapZoom(map.getZoom());
-	// coordinater.setCoordinates(map.getCenter().lat, map.getCenter().lng);
+	zoomer.setMapZoom(map.getZoom());
+	coordinater.setCoordinates(map.getCenter().lat, map.getCenter().lng);
 
 	// setTimeout(() => {
 	// 	suppressFlyTo = false;
-	// }, 0);
+	// }, 500);
 }
 
 function handleClick(i, lat, lng) {
 	activeModule = i;
 	setTimeout(() => {
 		coordinater.setCoordinates(lat, lng)
-	}, 100);
+	}, 0);
 }
 </script>
 

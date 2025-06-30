@@ -126,6 +126,10 @@ $effect(() => {
 .project-title {
 	margin-bottom: var(--gutter);
 }
+.module-container {
+	display: flex;
+	flex-direction: column;
+}
 .module {
 	display: block;
 	background-color: var(--white);

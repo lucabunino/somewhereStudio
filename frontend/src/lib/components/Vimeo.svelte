@@ -2,6 +2,9 @@
 import { onMount } from "svelte";
 import Media from "$lib/components/Media.svelte";
 import { page } from '$app/stores';
+import { PortableText } from '@portabletext/svelte'
+import VimeoStyle from "$lib/components/portableTextStyles/VimeoStyle.svelte";
+import {toPlainText} from '@portabletext/svelte'
 
 // Header
 import { getHeader } from '$lib/stores/header.svelte.js';
@@ -12,7 +15,12 @@ let {
 	hash = null,
 	autoplay = true,
 	loop = false,
+	title = null,
+	text1 =  null,
 } = $props()
+
+$inspect(title)
+$inspect(text1)
 
 let domLoaded = $state(false);
 let isPlaying = $state(false);
@@ -25,17 +33,37 @@ onMount(async () => {
 	const data = await response.json();
 	aspectRatio = data.width / data.height;
 	thumbnail = data.thumbnail
-	embed = data.embed
-	console.log(aspectRatio, thumbnail, embed);
-	
+	embed = data.embed	
 	domLoaded = true
 });
 </script>
 
 {#if domLoaded}
-	<div class="vimeo-container" class:homepage={$page.url.pathname === "/"} onclick={(e) => {e.preventDefault(); isPlaying = true; header.setBlurred(true)}} style="aspect-ratio: {aspectRatio};">
+	<div class="vimeo-container" class:homepage={$page.url.pathname === "/"} style="aspect-ratio: {aspectRatio};">
 			<Media thumbnail={thumbnail} cover={true}/>
-			<button id="player-icon">
+			{#if title || text1}
+				<div class="vimeo-info">
+					{#if title}<h3 class="gaisyr-19">{title}</h3>{/if}
+					{#if text1}
+						<!-- <div>
+							<PortableText
+							value={text1}
+							components={{
+							block: {
+								normal: VimeoStyle,
+								h3: VimeoStyle,
+							},
+							listItem: VimeoStyle,
+							marks: {
+								link: VimeoStyle,
+							},
+							}}/>
+						</div> -->
+						<p class="ronzino-12">{toPlainText(text1)}</p>
+					{/if}
+				</div>
+			{/if}
+			<button id="player-icon" onclick={(e) => {e.preventDefault(); isPlaying = true; header.setBlurred(true)}}>
 				<svg width="45" height="47" xmlns="http://www.w3.org/2000/svg">
 					<g filter="url(#a)">
 						<path d="M41 19.501 4.25 38.986V.016L41 19.5Z"/>
@@ -74,8 +102,31 @@ iframe {
 	top: 50%;
 	left: 50%;
 	transform: translateX(-50%) translateY(-50%);
+	z-index: 4;
 }
 #player-icon svg {
 	filter: drop-shadow(0 0 5px rgba(0, 0, 0, 0.5));
+}
+#player-icon:hover svg {
+	fill: var(--lightGray);
+}
+.vimeo-info {
+	position: absolute;
+	left: 0;
+	top: 0;
+	z-index: 3;
+	width: 100%;
+	height: 100%;
+	color: var(--white);
+	padding: var(--gutter);
+	background: linear-gradient(to right, rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0));
+}
+.vimeo-info h3 {
+	margin-bottom: .3em;
+	max-width: 450px;
+}
+.vimeo-info p {
+	text-indent: 5rem;
+	max-width: 450px;
 }
 </style>
