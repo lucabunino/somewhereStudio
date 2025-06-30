@@ -4,8 +4,9 @@ const minZoom = 2
 const step = 0.2
 let zoom = $state(initialZoom)
 let scale = $derived(zoom*step)
+
 const mapInitialZoom = 6
-const mapMaxZoom = 12
+const mapMaxZoom = 20
 const mapMinZoom = 5
 let mapZoom = $state(mapInitialZoom)
 

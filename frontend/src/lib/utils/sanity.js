@@ -34,11 +34,14 @@ media[]{
 },
 id,
 hash,
-// cover{
-//   asset->{
-//     _ref, _id, _type, metadata {dimensions, lqip}
-//   }
-// },
+latitude,
+longitude,
+location->{
+	latitude,
+	longitude
+},
+"latitude": coalesce(latitude, location->latitude),
+"longitude": coalesce(longitude, location->longitude),
 modules[]->{
 	...,
 	tags[]->{title, slug},
@@ -59,11 +62,14 @@ modules[]->{
 	},
 	id,
 	hash,
-	// cover{
-	// 	asset->{
-	// 		_ref, _id, _type, metadata {dimensions, lqip}
-	// 	}
-	// },
+	latitude,
+	longitude,
+	location->{
+		latitude,
+		longitude
+	},
+	"latitude": coalesce(latitude, location->latitude),
+	"longitude": coalesce(longitude, location->longitude),
 }
 `
 
@@ -116,7 +122,10 @@ export async function getMapModules(tags) {
 	return await client.fetch(`
 		*[_type in ["module", "serie"]
 		&& search == true
-		&& defined(longitude) && defined(latitude)
+		&& (
+			(defined(longitude) && defined(latitude)) ||
+			(defined(location->longitude) && defined(location->latitude))
+		)
 		${tags?.length ? `&& count(tags[@->slug.current in $tags]) > 0` : ''}
 		&& !(_id in path('drafts.**'))] {
 			${module}

@@ -4,6 +4,9 @@ export default {
 	name: 'location',
 	type: 'document',
 	icon: MarkerIcon,
+	fieldsets: [
+		{ name: 'coordinates' },
+	],
 	fields: [
 		{
 			name: 'title',
@@ -17,6 +20,16 @@ export default {
 				source: 'title',
 				maxLength: 96,
 			},
+		},
+		{
+			name: 'latitude',
+			type: 'number',
+			fieldset: 'coordinates',
+		},
+		{
+			name: 'longitude',
+			type: 'number',
+			fieldset: 'coordinates',
 		},
 	],
 };
