@@ -41,35 +41,6 @@ onMount(async () => {
 {#if domLoaded}
 	<div class="vimeo-container" class:homepage={$page.url.pathname === "/"} style="aspect-ratio: {aspectRatio};">
 			<Media thumbnail={thumbnail} cover={true}/>
-			{#if title || text1}
-				<div class="vimeo-info">
-					{#if title}<h3 class="gaisyr-19">{title}</h3>{/if}
-					{#if text1}
-						<!-- <div>
-							<PortableText
-							value={text1}
-							components={{
-							block: {
-								normal: VimeoStyle,
-								h3: VimeoStyle,
-							},
-							listItem: VimeoStyle,
-							marks: {
-								link: VimeoStyle,
-							},
-							}}/>
-						</div> -->
-						<p class="ronzino-12">{toPlainText(text1)}</p>
-					{/if}
-				</div>
-			{/if}
-			<button id="player-icon" onclick={(e) => {e.preventDefault(); isPlaying = true; header.setBlurred(true)}}>
-				<svg width="45" height="47" xmlns="http://www.w3.org/2000/svg">
-					<g filter="url(#a)">
-						<path d="M41 19.501 4.25 38.986V.016L41 19.5Z"/>
-					</g>
-				</svg>
-			</button>
 		{#if isPlaying}
 			<iframe
 				src={embed}
@@ -78,6 +49,22 @@ onMount(async () => {
 				allow="autoplay; fullscreen; picture-in-picture"
 				allowfullscreen
 			></iframe>
+		{:else}
+			<button id="player-icon" onclick={(e) => {e.preventDefault(); isPlaying = true; header.setBlurred(true)}}>
+				<svg width="45" height="47" xmlns="http://www.w3.org/2000/svg">
+					<g filter="url(#a)">
+						<path d="M41 19.501 4.25 38.986V.016L41 19.5Z"/>
+					</g>
+				</svg>
+			</button>
+			{#if title || text1}
+				<div class="vimeo-info">
+					{#if title}<h3 class="gaisyr-19">{title}</h3>{/if}
+					{#if text1}
+						<p class="ronzino-12">{toPlainText(text1)}</p>
+					{/if}
+				</div>
+			{/if}
 		{/if}
 	</div>
 {/if}
@@ -103,6 +90,7 @@ iframe {
 	left: 50%;
 	transform: translateX(-50%) translateY(-50%);
 	z-index: 4;
+	padding: 1rem;
 }
 #player-icon svg {
 	filter: drop-shadow(0 0 5px rgba(0, 0, 0, 0.5));
