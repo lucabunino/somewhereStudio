@@ -3,7 +3,7 @@ import { onMount } from "svelte";
 import Media from "$lib/components/Media.svelte";
 import { page } from '$app/stores';
 import { PortableText } from '@portabletext/svelte'
-import VimeoStyle from "$lib/components/portableTextStyles/VimeoStyle.svelte";
+import VimeoStyle from "$lib/components/portableTextStyles/VimeoTextStyle.svelte";
 import {toPlainText} from '@portabletext/svelte'
 
 // Header
@@ -19,14 +19,12 @@ let {
 	text1 =  null,
 } = $props()
 
-$inspect(title)
-$inspect(text1)
-
 let domLoaded = $state(false);
 let isPlaying = $state(false);
 let aspectRatio = $state(undefined);
 let thumbnail = $state(undefined);
 let embed = $state(undefined);
+let iframe = $state(undefined);
 
 onMount(async () => {
 	const response = await fetch(`/api/vimeo/${id}`);
@@ -40,7 +38,9 @@ onMount(async () => {
 
 {#if domLoaded}
 	<div class="vimeo-container" class:homepage={$page.url.pathname === "/"} style="aspect-ratio: {aspectRatio};">
+		<div class="media-container">
 			<Media thumbnail={thumbnail} cover={true}/>
+		</div>
 		{#if isPlaying}
 			<iframe
 				src={embed}
@@ -77,6 +77,10 @@ onMount(async () => {
 .homepage {
 	max-height: 90vh;
 }
+.media-container {
+	width: 100%;
+	height: 100%;
+}
 iframe {
 	position: absolute;
 	top: 0;
@@ -91,9 +95,10 @@ iframe {
 	transform: translateX(-50%) translateY(-50%);
 	z-index: 4;
 	padding: 1rem;
+	pointer-events: auto;
 }
 #player-icon svg {
-	filter: drop-shadow(0 0 5px rgba(0, 0, 0, 0.5));
+	filter: drop-shadow(0 0 5px rgba(0, 0, 0, 0.3));
 }
 #player-icon:hover svg {
 	fill: var(--lightGray);

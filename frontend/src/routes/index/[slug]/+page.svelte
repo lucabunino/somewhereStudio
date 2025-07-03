@@ -30,7 +30,8 @@ if (data.project[0].extra) {
 	extraer.setExtra(true)
 }
 
-$effect(() => {
+onMount(() => {
+	zoomer.setZoom(zoomer.initialZoom)
 	tagger.setMaxTags(0)
 	setTimeout(() => {
 		tagger.setTags(data.project[0].tags, { keepHierarchy: false, hierarchy: 99 });
@@ -38,6 +39,8 @@ $effect(() => {
 	setTimeout(() => {
 		tagger.setMaxTags(data.project[0].tags.length)
 	}, 500);
+})
+$effect(() => {
 	domLoaded = true;
 	return () => {
 		extraer.setExtra(false)
@@ -80,7 +83,7 @@ $effect(() => {
 			in:blur|global={{ duration: 200, delay: 500 + 100*i }}
 			out:blur|global={{ duration: 200}}>
 				{#if module.modules}
-					<Serie slides={module.modules} project={module.project} size={module.size} showProject={false} hiddenProject={true} link={false} color={data.project[0].color ? data.project[0].color : null}/>
+					<Serie slides={module.modules} position={module.position} project={module.project} size={module.size} showProject={false} hiddenProject={true} link={false} color={data.project[0].color ? data.project[0].color : null} key={i}/>
 				{:else}
 					<Module module={module} i={i} hiddenProject={true} link={false} showProject={false} color={data.project[0].color ? data.project[0].color : null}/>
 				{/if}

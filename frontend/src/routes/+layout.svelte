@@ -15,12 +15,15 @@ import { clickOutside } from '$lib/utils/clickOutside.js';
 let { data, children } = $props();
 let mouse = $state([])
 let domLoaded = $state(false)
+let mainLoaded = $state(false)
 let innerWidth = $state(0)
 let innerHeight = $state(0)
 let scrollY = $state(0)
 let oldScroll = $state(0)
 let search = $state("")
 let searchActive = $state(false)
+let searchActiveMobile = $state(false)
+let menuActive = $state(false)
 
 // Tags
 import { getTags } from '$lib/stores/tag.svelte.js';
@@ -51,7 +54,10 @@ onMount(() => {
 $effect(() => {
 	setTimeout(() => {
 		domLoaded = true
-	}, 1000);
+	}, 1500);
+	setTimeout(() => {
+		mainLoaded = true
+	}, 3000);
 })
 
 // Functions
@@ -130,6 +136,9 @@ function closeTagger() {
 function handleClickOutside() {
 	searchActive = false
 }
+function handleClickOutsideMobile() {
+	searchActiveMobile = false
+}
 
 function handleReset(e) {
 	e.preventDefault();
@@ -155,6 +164,8 @@ function handleKey({key}) {if (key === 'G' && dev) {viewGrid = !viewGrid}}
 </div>
 {/if}
 
+
+
 <svelte:head>
 	{#if data.seo.SEOTitle}<title>{data.seo.SEOTitle}</title>{/if}
 	{#if data.seo.SEODescription}<meta name="description" content={data.seo.SEODescription}>{/if}
@@ -169,59 +180,102 @@ function handleKey({key}) {if (key === 'G' && dev) {viewGrid = !viewGrid}}
 	{#if data.seo.SEOTitle}<meta property="og:site_name" content={data.seo.SEOTitle}>{/if}
 </svelte:head>
 
+
 <header>
-		<nav>
-			<ul class="menu gaisyr-34"
-			class:blurred={header.blurred && $page.url.pathname !== '/index'}
+	<!-- Menu -->
+	<nav aria-label="menu">
+		<ul class="menu gaisyr-34"
+		class:blurred={header.blurred && $page.url.pathname !== '/index'}
+		>
+			<li class="menu-item" class:active={$page.url.pathname === "/"}>
+				<a href="/{$page.url.search}">Som<span class="ls-7">e</span><span class="ls-15">w</span><span class="ls-30">h</span><span class="ls-70">e</span><span class="ls-120">r</span>e<br>Studio</a>
+			</li>
+			<li class="menu-item" class:active={$page.url.pathname === "/index" || $page.url.pathname.includes("/index/")}>
+				<a href="/index">In<span class="ls-7">d</span><span class="ls-30">e</span>x</a>
+			</li>
+			<li class="menu-item" class:active={$page.url.pathname === "/about"}>
+				<a href="/about"><span class="ls-30">A</span><span class="ls-70">b</span><span class="ls-30">o</span><span class="ls-7">u</span>t</a>
+			</li>
+		</ul>
+	</nav>
+
+	<!-- UI desktop -->
+	<nav aria-label="ui-desktop">
+		{#if domLoaded}
+			{#if $page.url.pathname === "/" || $page.url.pathname === "/map"}
+				<a href="/map{$page.url.search}" id="coordinates-desktop" class="btn tag ronzino-12"
+				in:slide|global={{ axis: "x", duration: 200 }}
+				out:slide|global={{ axis: "x", duration: 200, delay: 500 }}
+				onclick={(e) => {$page.url.pathname === "/map" ? handleReset(e) : ''}}
+				>
+					<span>{$page.url.pathname === "/map" ? coordinater.formattedCoordinates.latitude : coordinater.animatedCoordinates.latitude}N, {$page.url.pathname === "/map" ? coordinater.formattedCoordinates.longitude : coordinater.animatedCoordinates.longitude}E</span>
+					{#if $page.url.pathname !== "/map"}
+						<span class="cta uppercase">Vedi mappa</span>
+					{:else}
+						<span class="cta uppercase">Reset position</span>
+					{/if}
+				</a>
+			{/if}
+			<div id="zoom" class:extra={extraer.extra}>
+				<button id="zoom-out" class="btn" class:off={zoomer.zoom == zoomer.minZoom || zoomer.mapZoom <= zoomer.mapMinZoom + .1}
+				onclick={() => {$page.url.pathname === "/map" ? zoomer.decreaseMapZoom() : zoomer.decreaseZoom()}}
+				in:slide|global={{ axis: "-x", duration: 200, delay: 50 }}
+				out:slide|global={{ axis: "-x", duration: 200, delay: 500 }}
+				>
+					<svg width="18" height="18" fill="none" xmlns="http://www.w3.org/2000/svg">
+						<path d="M7.5 14a6.5 6.5 0 1 0 0-13 6.5 6.5 0 0 0 0 13Z"/>
+						<path d="M10 7.5H5" stroke-miterlimit="10"/>
+						<path d="M16.9 17 12 12.2"/>
+					</svg>
+				</button>
+				<button id="zoom-in" class="btn" class:off={zoomer.zoom == zoomer.maxZoom || zoomer.mapZoom >= zoomer.mapMaxZoom - .1}
+				onclick={() => {$page.url.pathname === "/map" ? zoomer.increaseMapZoom() : zoomer.increaseZoom()}}
+				in:slide|global={{ axis: "-x", duration: 200 }}
+				out:slide|global={{ axis: "-x", duration: 200, delay: 500 }}
+				>
+					<svg width="18" height="18" fill="none" xmlns="http://www.w3.org/2000/svg">
+						<path d="M7.5 14a6.5 6.5 0 1 0 0-13 6.5 6.5 0 0 0 0 13Z"/>
+						<path d="M10 7.5H5M7.5 10V5" stroke-miterlimit="10"/>
+						<path d="M16.9 17 12 12.2"/>
+					</svg>
+				</button>
+			</div>
+		{/if}
+	</nav>
+
+	<!-- UI mobile -->
+	<nav aria-label="ui-mobile" class="ronzino-12 uppercase" use:clickOutside onclick_outside={() => handleClickOutsideMobile()}>
+		{#if searchActiveMobile}
+			<input id="search-mobile" type="text" class="btn search gaisyr-14"
+			placeholder="Cerca nel sito"
+			bind:value={search}
 			>
-				<li class="menu-item" class:active={$page.url.pathname === "/"}>
-					<a href="/{$page.url.search}">Som<span class="ls-7">e</span><span class="ls-15">w</span><span class="ls-30">h</span><span class="ls-70">e</span><span class="ls-120">r</span>e<br>Studio</a>
-				</li>
-				<li class="menu-item" class:active={$page.url.pathname === "/index" || $page.url.pathname.includes("/index/")}>
-					<a href="/index">In<span class="ls-7">d</span><span class="ls-30">e</span>x</a>
-				</li>
-				<li class="menu-item" class:active={$page.url.pathname === "/about"}>
-					<a href="/about"><span class="ls-30">A</span><span class="ls-70">b</span><span class="ls-30">o</span><span class="ls-7">u</span>t</a>
-				</li>
-			</ul>
-		</nav>
-		{#if domLoaded && ($page.url.pathname === "/" || $page.url.pathname === "/map")}
-			<a href="/map{$page.url.search}" id="coordinates" class="btn tag ronzino-12"
-			in:slide|global={{ axis: "x", duration: 200 }}
-			out:slide|global={{ axis: "x", duration: 200, delay: 500 }}
+		{:else}
+			<a href="/map{$page.url.search}" id="coordinates-mobile" class="btn"
 			onclick={(e) => {$page.url.pathname === "/map" ? handleReset(e) : ''}}
 			>
 				<span>{$page.url.pathname === "/map" ? coordinater.formattedCoordinates.latitude : coordinater.animatedCoordinates.latitude}N, {$page.url.pathname === "/map" ? coordinater.formattedCoordinates.longitude : coordinater.animatedCoordinates.longitude}E</span>
-				{#if $page.url.pathname !== "/map"}
-					<span class="cta uppercase">Vedi mappa</span>
-				{:else}
-					<span class="cta uppercase">Reset position</span>
-				{/if}
 			</a>
+			<button id="menuSwitch" class="btn" onclick={(e) => {menuActive = !menuActive}}>
+				{#if !menuActive}Menu{:else}Chiudi{/if}
+			</button>
 		{/if}
-		<div class="zoom" class:extra={extraer.extra}>
-			<button id="zoom-out" class="btn" class:off={zoomer.zoom == zoomer.minZoom || zoomer.mapZoom <= zoomer.mapMinZoom + .1} onclick={() => {$page.url.pathname === "/map" ? zoomer.decreaseMapZoom() : zoomer.decreaseZoom()}}>
-				<svg width="18" height="18" fill="none" xmlns="http://www.w3.org/2000/svg">
-					<path d="M7.5 14a6.5 6.5 0 1 0 0-13 6.5 6.5 0 0 0 0 13Z"/>
-					<path d="M10 7.5H5" stroke-miterlimit="10"/>
-					<path d="M16.9 17 12 12.2"/>
-				</svg>
-			</button>
-			<button id="zoom-in" class="btn" class:off={zoomer.zoom == zoomer.maxZoom || zoomer.mapZoom >= zoomer.mapMaxZoom - .1} onclick={() => {$page.url.pathname === "/map" ? zoomer.increaseMapZoom() : zoomer.increaseZoom()}}>
-				<svg width="18" height="18" fill="none" xmlns="http://www.w3.org/2000/svg">
-					<path d="M7.5 14a6.5 6.5 0 1 0 0-13 6.5 6.5 0 0 0 0 13Z"/>
-					<path d="M10 7.5H5M7.5 10V5" stroke-miterlimit="10"/>
-					<path d="M16.9 17 12 12.2"/>
-				</svg>
-			</button>
-		</div>
+		<button id="search-btn-mobile" class="btn" onclick={() => {searchActiveMobile ? console.log("search" + search) : searchActiveMobile = true;
+		}}
+		in:slide|global={{ axis: "x", duration: 200 }}
+		out:slide|global={{ axis: "x", duration: 200 }}
+		>Cerca</button>
+	</nav>
 </header>
+
+<!-- Tags -->
 {#if domLoaded}
 	<div class="tags"
 	onmouseleave={() => handleMouseLeave()}
-	onmouseenter={() => handleMouseEnter()}>
-	<div id="search-bar">
-		<input id="search" type="text" class="btn"
+	onmouseenter={() => handleMouseEnter()}
+	>
+	<div id="search-bar-desktop">
+		<input id="search-desktop" type="text" class="btn search"
 		placeholder="Cerca nel sito"
 		use:clickOutside onclick_outside={() => handleClickOutside()}
 		bind:value={search}
@@ -230,13 +284,26 @@ function handleKey({key}) {if (key === 'G' && dev) {viewGrid = !viewGrid}}
 		out:slide|global={{ axis: "x", duration: 200 }}
 		>
 		{#if searchActive}
-			<button class="btn ronzino-12 uppercase" onclick={() => {searchActive = false; search = ""}}
+			<button id="search-btn-desktop" class="btn ronzino-12 uppercase" onclick={() => {searchActive = false; search = ""}}
 			in:slide|global={{ axis: "x", duration: 200 }}
 			out:slide|global={{ axis: "x", duration: 200 }}
 			>× Chiudi</button>
 		{/if}
 	</div>
 		<!-- {#if $page.url.pathname === "/" || $page.url.pathname !== "/" && tagger.open} -->
+		 	<div id="more-tags-mobile" class="tag ronzino-12 uppercase">
+				{#if !tagger.open}
+					<button class="btn" onclick={() => {!tagger.open ? openTagger() : closeTagger()}}
+					in:slide|global={{ axis: "x", duration: 200, delay: 50 }}
+					out:slide|global={{ axis: "x", duration: 200, delay: 0 }}
+					>...</button>
+				{:else}
+					<button class="btn" onclick={() => {!tagger.open ? openTagger() : closeTagger()}}
+					in:slide|global={{ axis: "x", duration: 200, delay: 50 }}
+					out:slide|global={{ axis: "x", duration: 200, delay: 0 }}
+					>× Chiudi</button>
+				{/if}
+			</div>
 			{#each tagger.tags
 				.slice()
 				.filter(tag => !tag.hidden)
@@ -271,7 +338,7 @@ function handleKey({key}) {if (key === 'G' && dev) {viewGrid = !viewGrid}}
 				</div>
 			{/each}
 		<!-- {/if} -->
-			<div class="tag ronzino-12 uppercase">
+			<div id="more-tags-desktop" class="tag ronzino-12 uppercase">
 				{#if !tagger.open}
 					<button class="btn" onclick={() => {!tagger.open ? openTagger() : closeTagger()}}
 					in:slide|global={{ axis: "x", duration: 200, delay: 200 + (tagger.maxTags+1)*30 }}
@@ -287,6 +354,7 @@ function handleKey({key}) {if (key === 'G' && dev) {viewGrid = !viewGrid}}
 	</div>
 {/if}
 
+<!-- Main -->
 {#if domLoaded}
 	{#key data.pathname}
 		<main
@@ -298,6 +366,7 @@ function handleKey({key}) {if (key === 'G' && dev) {viewGrid = !viewGrid}}
 	{/key}
 {/if}
 
+<!-- Footer -->
 {#if domLoaded && (data.searchParams.length > 0 || $page.url.pathname !== '/')}
 <footer class="ronzino-12 uppercase medium">
 	<div>
@@ -333,7 +402,9 @@ function handleKey({key}) {if (key === 'G' && dev) {viewGrid = !viewGrid}}
 	</div>
 </footer>
 {/if}
-	
+
+
+
 <style>
 /* Header */
 .menu {
@@ -371,77 +442,43 @@ function handleKey({key}) {if (key === 'G' && dev) {viewGrid = !viewGrid}}
 	color: var(--darkGray);
 	filter: blur(30px);
 }
+@media screen and (max-width: 700px) {
+	.menu {
+		padding: 0;
+		display: flex;
+		align-items: flex-end;
+		list-style: none;
+		position: fixed;
+		top: calc(50vh - 2rem);
+		left: 0;
+		transform: translateY(-50%);
+		width: -webkit-fill-available;
+		z-index: 9;
+		pointer-events: none;
+		color: var(--white);
+		mix-blend-mode: difference;
+		top: var(--gutter);
+		transform: unset;
+	}
+	.menu-item {
+		width: 100%;
+		padding: 0 var(--gutter);
+	}
+}
 
-/* ui */
-#coordinates {
-	position: fixed;
-	top: calc(var(--gutter)*1.4);
-	left: 50%;
-	transform: translateX(-50%);
-	z-index: 1;
-	font-variant-numeric: tabular-nums;
-	width: 180px;
-	justify-content: center;
-	color: var(--darkGray);
-	overflow: hidden;
-}
-#coordinates.off {
-	width: 0;
-	padding: 0;
-}
-#coordinates .cta {
-	opacity: 0;
-	width: 0;
-	color: var(--black);
-}
-#coordinates:hover span {
-	opacity: 0;
-	width: 0;
-}
-#coordinates:hover .cta {
-	opacity: 1;
-	width: auto;
-}
-.zoom {
-	position: fixed;
-	top: calc(var(--gutter)*1.4);
-	right: var(--gutter);
+/* UI desktop */
+#search-bar-desktop {
 	display: flex;
-	justify-content: flex-end;
 	gap: .3rem;
-	z-index: 1;
-	transition: var(--transition);
-	transition-delay: 500ms;
-}
-.zoom.extra {
-	right: calc(4vw + var(--gutter));
-}
-.zoom svg {
-	stroke: var(--darkGray);
-}
-.zoom button:hover svg {
-	stroke: var(--black);
-}
-.zoom button.off {
-	cursor: default;
-}
-.zoom button.off svg {
-	stroke: var(--lightGray);
-}
-
-/* Tags */
-#search-bar {
-	display: flex;
-	gap: .3em;
-	display: flex;
 	align-items: center;
 	width: 100%;
+	margin-bottom: .3rem;
 }
-#search {
+.search {
 	outline: none;
 	border: none;
 }
-#search::placeholder {
+.search::placeholder {
 	color: var(--darkGray);
 }
 .tags {
@@ -454,36 +491,114 @@ function handleKey({key}) {if (key === 'G' && dev) {viewGrid = !viewGrid}}
 	overflow-y: scroll;
 	z-index: 9;
 }
-@keyframes openTag {
-	0% {padding-left: 0;}
-	50% {padding-left: 0;}
-	100% {padding-left: 1em;}
+#more-tags-mobile {
+	display: none;
 }
-@keyframes closeTag {
-	0% {padding-left: 1em;}
-	50% {padding-left: 1em;}
-	100% {padding-left: 0;}
+#coordinates-desktop {
+	position: fixed;
+	top: calc(var(--gutter)*1.4);
+	left: 50%;
+	transform: translateX(-50%);
+	z-index: 1;
+	font-variant-numeric: tabular-nums;
+	width: 180px;
+	justify-content: center;
+	color: var(--darkGray);
+	overflow: hidden;
 }
-@keyframes openPrefix {
-	0% {width: 0;}
-	50% {width: 0;}
-	100% {width: 1em;}
-}
-@keyframes closePrefix {
-	0% {width: 1em;opacity: 1;}
-	50% {width: 1em;opacity: 1;}
-	100% {width: 0;opacity: 0;}
-}
-.prefix {
+#coordinates-desktop.off {
 	width: 0;
-	display: inline-flex;
-	overflow-x: hidden;
-	transition: var(--transition);
-	transition-property: width;
+	padding: 0;
 }
-.tag.active .prefix {
-	width: 1em;
+#coordinates-desktop .cta {
+	opacity: 0;
+	width: 0;
+	color: var(--black);
+}
+#coordinates-desktop:hover span {
+	opacity: 0;
+	width: 0;
+}
+#coordinates-desktop:hover .cta {
+	opacity: 1;
+	width: auto;
+}
+#zoom {
+	position: fixed;
+	top: calc(var(--gutter)*1.4);
+	right: var(--gutter);
+	display: flex;
+	justify-content: flex-end;
+	gap: .3rem;
+	z-index: 1;
+	transition: var(--transition);
 	transition-delay: 500ms;
+}
+#zoom.extra {
+	right: calc(4vw + var(--gutter));
+}
+#zoom svg {
+	stroke: var(--darkGray);
+}
+#zoom button:hover svg {
+	stroke: var(--black);
+}
+#zoom button.off {
+	cursor: default;
+}
+#zoom button.off svg {
+	stroke: var(--lightGray);
+}
+/* UI mobile */
+nav[aria-label="ui-mobile"] {
+	display: none;
+}
+@media screen and (max-width: 700px) {
+	nav[aria-label="ui-desktop"] {
+		display: none;
+	}
+	nav[aria-label="ui-mobile"] {
+		display: flex;
+		position: fixed;
+		padding: 0 var(--gutter) calc(var(--gutter)*1.4);
+		bottom: 0;
+		left: 0;
+		width: 100%;
+		z-index: 10;
+		gap: .2rem;
+	}
+	nav[aria-label="ui-mobile"] .btn {
+		justify-content: center;
+	}
+	#search-bar-desktop {
+		display: none;
+	}
+	#search-btn-mobile {
+		width: 20%;
+	}
+	#search-mobile {
+		width: 80%;
+	}
+	#more-tags-desktop {
+		display: none;
+	}
+	#more-tags-mobile {
+		display: flex;
+	}
+	.tags {
+		top: unset;
+		padding-bottom: calc(var(--gutter)*2.8 + 2rem);
+		right: 0;
+		bottom: 0;
+		flex-direction: column-reverse;
+		align-items: flex-end;
+	}
+	#coordinates-mobile {
+		width: 60%;
+	}
+	#menuSwitch {
+		width: 20%;
+	}
 }
 
 /* Main */
@@ -515,9 +630,5 @@ footer div {
 		display: flex;
 		flex-direction: column;
 	}
-	footer div>*:nth-child(even) {
-		margin-bottom: 1.5em;
-	}
 }
-
 </style>

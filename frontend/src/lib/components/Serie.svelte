@@ -2,6 +2,7 @@
 import Module from "$lib/components/Module.svelte";
 import { register } from 'swiper/element/bundle';register();
 import { blur } from "svelte/transition";
+import sliderInjectedStyle from "$lib/utils/sliderInjectedStyle";
 
 let {
 	slides,
@@ -11,25 +12,37 @@ let {
 	link = true,
 	delayed = true,
 	homepage = false,
- } = $props()
+	position = undefined,
+} = $props()
+
+
+let swiperEl = $state()
+const swiperParams = {
+	autoHeight: true,
+	navigation: true,
+	injectStyles: [sliderInjectedStyle],
+};
+
+$effect(() => {
+	Object.assign(swiperEl, swiperParams);
+	swiperEl.initialize();
+})
 </script>
 
-<div>
+<div style="position: relative;" class="{size ? size : module.size} {position ? position : 'left'}">
 	<swiper-container
-	class="{size ? size : module.size}"
-	navigation={{
-		clickable: true
-	}}
-	autoHeight={true}
+	init="false"
+	bind:this={swiperEl}
 	in:blur|global={{ duration: 200, delay: delayed ? 500 : 500 }}
 	out:blur|global={{ duration: 200 }}
 	>
-	{#each slides as module, i}
-		<swiper-slide class="slide">
-				<Module module={module} i={i} size={size ? size : module.size} hiddenProject={hiddenProject ? true : false} delayed={delayed}/>
-		</swiper-slide>
-	{/each}
+		{#each slides as module, i}
+			<swiper-slide class="slide">
+					<Module module={module} i={i} size={size ? size : module.size} hiddenProject={hiddenProject} link={link} delayed={delayed}/>
+			</swiper-slide>
+		{/each}
 	</swiper-container>
+	
 	{#if project && !hiddenProject}
 		<p
 		in:blur|global={{ duration: 200, delay: delayed ? 500 : 500 }}

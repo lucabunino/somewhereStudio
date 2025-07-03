@@ -23,7 +23,7 @@ let captionHeight = $state(0)
 $effect(() => {
 	setTimeout(() => {
 		minimumDomLoaded = true
-	}, 1000);
+	}, 200);
 	if (imgEl && fullresUrl) {
 		const fullres = new Image();
 		fullres.src = fullresUrl;
@@ -37,7 +37,7 @@ $effect(() => {
 	if (thumbnail) {
 		setTimeout(() => {
 			domLoaded = true;
-		}, 500);
+		}, 200);
 	}
 });
 </script>

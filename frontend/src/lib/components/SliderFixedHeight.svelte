@@ -1,19 +1,30 @@
 <script>
 import { register } from 'swiper/element/bundle';register();
 import Media from '$lib/components/Media.svelte';register();
-let { 
+import sliderInjectedStyle from '$lib/utils/sliderInjectedStyle';
+
+let {
+	key,
 	slides,
 	autoWidth = false,
 	linkHeight = 0,
 } = $props()
 
-// const sizeMap = { xs: 5.5, s: 4.5, m: 3.5, l: 2.5, xl: 1.5 };
+let swiperEl = $state()
+const swiperParams = {
+	navigation: true,
+	injectStyles: [sliderInjectedStyle],
+};
+
+$effect(() => {
+	Object.assign(swiperEl, swiperParams);
+	swiperEl.initialize();
+})
 </script>
 
 <swiper-container
-navigation={{
-	clickable: true
-}}
+init={false}
+bind:this={swiperEl}
 loop={false}
 slides-per-view={'auto'}
 space-between={1}

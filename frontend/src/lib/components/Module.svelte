@@ -21,6 +21,11 @@ let {
 } = $props()
 
 let linkHeight = $state(0)
+let domLoaded = $state(false)
+
+$effect(() => {
+	domLoaded = true
+})
 </script>
 
 {#snippet moduleContent(module)}
@@ -37,14 +42,14 @@ let linkHeight = $state(0)
 			</div>
 		{:else}
 			<div class="media-container fixedHeight" style="height: calc(100% - {linkHeight}px);">
-				<SliderFixedHeight slides={module.media} autoWidth={true} linkHeight={linkHeight}/>
+				<SliderFixedHeight slides={module.media} autoWidth={true} linkHeight={linkHeight} key={module._id}/>
 				<!-- {#each module.media as media, i}
 					<Media media={media} linkHeight={linkHeight}/>
 				{/each} -->
 			</div>
 		{/if}
 	{:else if ['slider'].includes(module.kind)}
-		<Slider slides={module.media} size={module.size}/>
+		<Slider slides={module.media} size={module.size} key={module._id}/>
 	{:else if ['vimeo'].includes(module.kind)}
 		<div class="media-container">
 			<Vimeo id={module.id} hash={module.hash} cover={module.cover} title={module.textTitle}  text1={module.text1}/>
@@ -145,24 +150,25 @@ let linkHeight = $state(0)
 {/snippet}
 
 
-
-{#if link}
-	<a class="module {size ? size : module.size} {module.fixedHeight ? 'fixedHeight' : ''} {module.position ? module.position : 'left'}" data-kind={module.kind}
-	href={module.project?.slug ? `/index/${module.project.slug.current}` : ``}
-	style="background-color: {color ? 'var(--white)' : module.color?.hex}; color: {isDark(module.color?.hex) && !color ? "var(--white)" : "var(--black)"}"
-	in:blur|global={{ duration: 200, delay: delayed ? 500 + i*50 : 500 }}
-	out:blur|global={{ duration: 200 }}
-	>
-		{@render moduleContent(module)}
-	</a>
-{:else}
-	<div class="module {size ? size : module.size} {module.fixedHeight ? 'fixedHeight' : ''} {module.position ? module.position : 'left'}" data-kind={module.kind}
-	style="background-color: {color ? 'var(--white)' : module.color?.hex}; color: {isDark(module.color?.hex) && !color ? "var(--white)" : "var(--black)"}"
-	in:blur|global={{ duration: 200, delay: delayed ? 500 + i*50 : 500 }}
-	out:blur|global={{ duration: 200 }}
-	>
-		{@render moduleContent(module)}
-	</div>
+{#if domLoaded}
+	{#if link}
+		<a class="module {size ? size : module.size} {module.fixedHeight ? 'fixedHeight' : ''} {module.position ? module.position : 'left'}" data-kind={module.kind}
+		href={module.project?.slug ? `/index/${module.project.slug.current}` : ``}
+		style="background-color: {color ? 'var(--white)' : module.color?.hex}; color: {isDark(module.color?.hex) && !color ? "var(--white)" : "var(--black)"}"
+		in:blur|global={{ duration: 200, amount: 100, delay: delayed ? 500 + i*50 : 500 }}
+		out:blur|global={{ duration: 200, amount: 100 }}
+		>
+			{@render moduleContent(module)}
+		</a>
+	{:else}
+		<div class="module {size ? size : module.size} {module.fixedHeight ? 'fixedHeight' : ''} {module.position ? module.position : 'left'}" data-kind={module.kind}
+		style="background-color: {color ? 'var(--white)' : module.color?.hex}; color: {isDark(module.color?.hex) && !color ? "var(--white)" : "var(--black)"}"
+		in:blur|global={{ duration: 200, amount: 100, delay: delayed ? 500 + i*50 : 500 }}
+		out:blur|global={{ duration: 200, amount: 100 }}
+		>
+			{@render moduleContent(module)}
+		</div>
+	{/if}
 {/if}
 
 

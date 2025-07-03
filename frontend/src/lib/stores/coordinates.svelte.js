@@ -1,7 +1,7 @@
 import { tick } from 'svelte';
 
-let coordinates = $state({ latitude: '10', longitude: '10' });
-let animatedCoordinates = $state({ latitude: '10.00000', longitude: '10.00000' });
+let coordinates = $state({ latitude: '', longitude: '' });
+let animatedCoordinates = $state({ latitude: '', longitude: '' });
 
 export function getCoordinates() {
 	function formatNumber(num) {

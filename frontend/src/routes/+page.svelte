@@ -238,7 +238,7 @@ function handleMouseEnter(latitude, longitude) {
 				</div>
 				{#each data.modules as module, i}
 					<div class="module-container">
-						<div onmouseenter={() => {handleMouseEnter(module.latitude || module.reference.latitude || null, module.longitude || module.reference.longitude || null)}}>
+						<div onmouseenter={() => {handleMouseEnter(module.latitude || module.reference?.latitude || null, module.longitude || module.reference?.longitude || null)}}>
 							{#if module.modules}
 									<Serie slides={module.modules} project={module.project} size={module.size} hiddenProject={true} link={false}/>
 							{:else}

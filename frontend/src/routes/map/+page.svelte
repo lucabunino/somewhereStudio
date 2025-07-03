@@ -153,7 +153,22 @@ function modulesToGeoJSON(modules) {
 	};
 }
 
-// Clear all old markers and add fresh custom HTML markers for clusters and singles
+$effect(() => {
+	console.log("Ready");
+	tick().then(() => {
+		console.log("Map loading");		
+	});
+	if (map) {
+		console.log("map update");
+		map.flyTo({
+			center: [coordinater.coordinates.longitude, coordinater.coordinates.latitude],
+			zoom: zoomer.mapZoom,
+			essential: true,
+			duration: 500,
+		});		
+	}
+});
+
 function updateMarkers() {
 	if (!map) return;
 
@@ -216,23 +231,6 @@ function updateMarkers() {
 	});
 }
 
-$effect(() => {
-	console.log("Ready");
-	tick().then(() => {
-		console.log("Map loading");		
-	});
-	if (map) {
-		console.log("map update");
-		map.flyTo({
-			center: [coordinater.coordinates.longitude, coordinater.coordinates.latitude],
-			zoom: zoomer.mapZoom,
-			essential: true,
-			duration: 500,
-		});		
-	}
-});
-
-// Your spiderfy function remains unchanged
 function applyInitialSpiderfy(modules) {
 	const map = new Map();
 	modules.forEach((m, i) => {

@@ -1,20 +1,31 @@
 <script>
 import { register } from 'swiper/element/bundle';register();
 import Media from '$lib/components/Media.svelte';register();
-let { 
+import sliderInjectedStyle from '$lib/utils/sliderInjectedStyle';
+
+let {
 	slides,
 	size = "s",
 } = $props()
 
+let swiperEl = $state()
 const sizeMap = { xs: 5.5, s: 4.5, m: 3.5, l: 2.5, xl: 1.5 };
+const swiperParams = {
+	navigation: true,
+	injectStyles: [sliderInjectedStyle],
+};
+
+$effect(() => {
+	Object.assign(swiperEl, swiperParams);
+	swiperEl.initialize();
+})
 </script>
 
 <swiper-container
-navigation={{
-	clickable: true
-}}
+init={false}
+bind:this={swiperEl}
 slides-per-view={sizeMap[size]}
-centered-slides={false}
+centered-slides={true}
 space-between={1}
 >
 {#each slides as image, i}
@@ -24,8 +35,22 @@ space-between={1}
 {/each}
 </swiper-container>
 
+<!-- <div class="key-{key}-prev swiper-button-prev">
+	<svg width="20" height="34" xmlns="http://www.w3.org/2000/svg">
+		<path d="M20 16.977 5.993 34H0l14.045-16.977L0 0h5.993L20 16.977Z" fill="#fff"/>
+	</svg>
+</div>
+<div class="key-{key}-next swiper-button-next">
+	<svg width="20" height="34" xmlns="http://www.w3.org/2000/svg">
+		<path d="M20 16.977 5.993 34H0l14.045-16.977L0 0h5.993L20 16.977Z" fill="#fff"/>
+	</svg>
+</div> -->
+
 <style>
 /* Slider */
+swiper-container {
+	position: relative;
+}
 swiper-container::part(container) {
 	overflow-x: clip;
 	overflow-y: visible;
