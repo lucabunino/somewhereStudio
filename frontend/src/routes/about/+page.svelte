@@ -20,7 +20,7 @@ $effect(() => {
 
 <svelte:window bind:innerWidth bind:innerHeight></svelte:window>
 
-<section id="about" class="gaisyr-34">
+<section id="about" class="gaisyr-34 mobile-gaisyr-16">
 	{#if data.about.about}
 		<p class="about">{data.about.about}</p>
 	{/if}
@@ -48,7 +48,7 @@ $effect(() => {
 			<div class="person">
 				<h3>{person.name} {person.surname}</h3>
 				{#if person.bio}
-					<p class="gaisyr-19">{person.bio}</p>
+					<p class="gaisyr-19 mobile-gaisyr-11">{person.bio}</p>
 				{/if}
 			</div>
 			{/each}
@@ -88,9 +88,39 @@ $effect(() => {
 	display: grid;
 	grid-template-columns: repeat(2, 1fr);
 	gap: var(--gutter);
-	padding: calc(var(--gutter)*12) 0;
+	padding: 6rem 0;
+	width: 100%;
+}
+.person {
+	max-width: 800px;
 }
 .person h3 {
 	margin-bottom: .3em;
+}
+@media screen and (max-width: 700px) {
+	#about {
+		display: flex;
+		flex-direction: column;
+		align-items: flex-start;
+		width: 100vw;
+		padding: calc(var(--gutter) + .2rem) var(--gutter) 0;
+	}
+	.about, .clients {
+		margin-left: 0;
+		text-indent: 0;
+	}
+	.about {
+		margin-top: 6rem;
+	}
+	.contacts {
+		margin-left: 0;
+	}
+	.people {
+		grid-template-columns: repeat(1, 1fr);
+		gap: 6rem;
+	}
+	.person h3 {
+		margin-bottom: .3em;
+	}
 }
 </style>

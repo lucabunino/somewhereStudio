@@ -51,7 +51,7 @@ onMount(async () => {
 			></iframe>
 		{:else}
 			<button id="player-icon" onclick={(e) => {e.preventDefault(); isPlaying = true; header.setBlurred(true)}}>
-				<svg width="45" height="47" xmlns="http://www.w3.org/2000/svg">
+				<svg class="shadow" width="45" height="47" xmlns="http://www.w3.org/2000/svg">
 					<g filter="url(#a)">
 						<path d="M41 19.501 4.25 38.986V.016L41 19.5Z"/>
 					</g>
@@ -96,9 +96,6 @@ iframe {
 	z-index: 4;
 	padding: 1rem;
 	pointer-events: auto;
-}
-#player-icon svg {
-	filter: drop-shadow(0 0 5px rgba(0, 0, 0, 0.3));
 }
 #player-icon:hover svg {
 	fill: var(--lightGray);

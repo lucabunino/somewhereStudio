@@ -52,7 +52,7 @@ let checkCellTimer = $state();
 let preloadFactor = 4
 let bufferX = $derived(innerWidth / zoomer.zoom * preloadFactor * sizer)
 let bufferY = $derived(innerHeight / zoomer.zoom * preloadFactor * sizer)
-const sizer = 1
+const sizer = 1.1
 
 // Lifecycle
 onMount(() => {

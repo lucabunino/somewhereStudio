@@ -7,7 +7,7 @@ let scale = $derived(zoom*step)
 
 const mapInitialZoom = 6
 const mapMaxZoom = 20
-const mapMinZoom = 5
+const mapMinZoom = 2
 let mapZoom = $state(mapInitialZoom)
 
 export function getZoom() {

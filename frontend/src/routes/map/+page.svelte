@@ -20,6 +20,7 @@ let initialModules = $derived(applyInitialSpiderfy(data.modules))
 $inspect(initialModules)
 
 let modules = $state([data.modules])
+let oldSearchParams;
 let map;
 let mapContainer;
 let activeModule = $state(undefined);
@@ -34,7 +35,37 @@ onMount(() => {
 	if (data.searchParams.length > tagger.firstMaxTags) {
 		tagger.setMaxTags(data.searchParams.length)
 	};
+	createMap()
+});
 
+$effect(() => {
+	console.log("Ready");
+	// tick().then(() => {
+	// 	console.log("Map loading");		
+	// });
+	if (data.searchParams !== oldSearchParams) {
+		if (map) {
+			map.remove();	
+		}
+		createMap(map);
+		updateMarkers();
+	}
+	if (map) {
+		console.log("map update");
+		map.flyTo({
+			center: [coordinater.coordinates.longitude, coordinater.coordinates.latitude],
+			zoom: zoomer.mapZoom,
+			essential: true,
+			duration: 500,
+		});		
+	}
+});
+
+onDestroy(() => {
+	map.remove();
+});
+
+function createMap() {	
 	map = new mapboxgl.Map({
 		container: mapContainer,
 		style: 'mapbox://styles/lucabunino-com/cm6qt0ddx00rj01sd8lek6ucf',
@@ -43,7 +74,8 @@ onMount(() => {
 		zoom: zoomer.mapZoom,
 		minZoom: zoomer.mapMinZoom,
 		maxZoom: zoomer.mapMaxZoom,
-		localFontFamily: 'Ronzino, Arial, Helvetica, sans-serif',
+		projection: 'mercator',
+		// localFontFamily: 'Ronzino, Arial, Helvetica, sans-serif',
 	});
 
 	initialModules.forEach((module, i) => {
@@ -128,11 +160,11 @@ onMount(() => {
 
 		updateMarkers();
 	});
-});
+	oldSearchParams = data.searchParams;
+	console.log("map loaded");
+	
+}
 
-onDestroy(() => {
-	map.remove();
-});
 
 // Converts your modules array to GeoJSON FeatureCollection with properties for clustering
 function modulesToGeoJSON(modules) {
@@ -152,22 +184,6 @@ function modulesToGeoJSON(modules) {
 			}))
 	};
 }
-
-$effect(() => {
-	console.log("Ready");
-	tick().then(() => {
-		console.log("Map loading");		
-	});
-	if (map) {
-		console.log("map update");
-		map.flyTo({
-			center: [coordinater.coordinates.longitude, coordinater.coordinates.latitude],
-			zoom: zoomer.mapZoom,
-			essential: true,
-			duration: 500,
-		});		
-	}
-});
 
 function updateMarkers() {
 	if (!map) return;
@@ -233,6 +249,9 @@ function updateMarkers() {
 
 function applyInitialSpiderfy(modules) {
 	const map = new Map();
+	if (!modules) {
+		return
+	}
 	modules.forEach((m, i) => {
 		if (m.latitude == null || m.longitude == null) return;
 		const key = `${m.latitude.toFixed(6)},${m.longitude.toFixed(6)}`;
@@ -293,7 +312,9 @@ function updateData() {
 }
 </script>
 
-<div id="map" bind:this={mapContainer} onwheel={(e) => {panHandler(e)}} />
+<!-- {#key data.searchParams} -->
+	<div id="map" bind:this={mapContainer} onwheel={(e) => panHandler(e)}></div>
+<!-- {/key} -->
 
 <!-- {#if activeModule !== undefined}
 	<div class="module-container active" style="pointer-events: all;" use:clickOutside onclick_outside={() => handleClickOutside()}>
@@ -325,6 +346,7 @@ function updateData() {
 	position: absolute;
 	width: 100%;
 	height: 100%;
+	background-color: "#1A1A1A";
 }
 .module-container {
 	position: absolute;
@@ -332,20 +354,20 @@ function updateData() {
 	bottom: 0;
 	width: fit-content;
 	height: fit-content;
-	pointer-events: none;
+	pointer-events: none !important;
 	z-index: 3;
 }
 .module-container.active {
 	pointer-events: all;
 }
-:global(.mapboxgl-map) {
+/* :global(.mapboxgl-map) {
 	font: unset;
 }
 :global(.mapboxgl-ctrl) {
 	font-family: Ronzino, Arial, Helvetica, sans-serif;
     font-size: .7rem;
     letter-spacing: .01em;
-}
+} */
 :global(.custom-cluster-marker) {
 	background-color: var(--white);
 	color: var(--black);
@@ -357,7 +379,6 @@ function updateData() {
 	justify-content: center;
 	cursor: pointer;
 	user-select: none;
-	font-weight: 500;
 }
 :global(.custom-cluster-marker:hover, .custom-single-marker:hover) {
 	background-color: var(--darkGray);

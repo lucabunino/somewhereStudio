@@ -31,7 +31,7 @@ $effect(() => {
 {#snippet moduleContent(module)}
 	{#if ['image', 'shortVideo'].includes(module.kind)}
 		<div class="media-container">
-			<Media media={module.media[0]} linkHeight={linkHeight}/>
+			<Media media={module.media[0]} linkHeight={linkHeight} width={ module.size === 'xl' ? 2560 : module.size === 'l'  ? 1920 : 1080 }/>
 		</div>
 	{:else if ['composition'].includes(module.kind)}
 		{#if !module.fixedHeight}
@@ -127,6 +127,7 @@ $effect(() => {
                     components={{
                     block: {
                         normal: LongTextStyle,
+                        normalReading: LongTextStyle,
                         h3: LongTextStyle,
                     },
                     listItem: LongTextStyle,

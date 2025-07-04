@@ -172,6 +172,7 @@ export default {
 					type: 'block',
 					styles: [
 						{ value: 'normal', title: 'Normal' },
+						{ value: 'normal-reading', title: 'Normal (reading)' },
 						{ value: 'h3', title: 'H3' },
 					],
 					lists: [
@@ -216,6 +217,7 @@ export default {
 					type: 'block',
 					styles: [
 						{ value: 'normal', title: 'Normal' },
+						{ value: 'normalReading', title: 'Normal (reading)' },
 						{ value: 'h3', title: 'H3' },
 					],
 					lists: [

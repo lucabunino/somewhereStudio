@@ -8,7 +8,7 @@ export default `
 	border-radius: 100%;
 	width: 40px;
 	height: 40px;
-	filter: drop-shadow(0 0 5px rgba(0, 0, 0, 0.3));
+	filter: drop-shadow(1px 1px 1px rgba(0, 0, 0, 0.2));
 	z-index: 9999;
 	cursor: pointer;
 }

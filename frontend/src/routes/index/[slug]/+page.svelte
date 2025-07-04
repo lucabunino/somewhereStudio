@@ -13,7 +13,9 @@ let innerWidth = $state()
 let innerHeight = $state()
 let singleProjectHeight = $state()
 
-$inspect(data)
+// Bg
+import { getBg } from '$lib/stores/bg.svelte.js';
+let bger = getBg()
 
 // Tags
 import { getTags } from '$lib/stores/tag.svelte.js';
@@ -31,6 +33,7 @@ if (data.project[0].extra) {
 }
 
 onMount(() => {
+	bger.setBg(data.project[0].color ? data.project[0].color.hex : null)
 	zoomer.setZoom(zoomer.initialZoom)
 	tagger.setMaxTags(0)
 	setTimeout(() => {
@@ -44,6 +47,7 @@ $effect(() => {
 	domLoaded = true;
 	return () => {
 		extraer.setExtra(false)
+		bger.setBg(null)
 	};
 })
 </script>
@@ -57,7 +61,7 @@ $effect(() => {
 	> -->
 	<section id="singleProject" class:extra={data.project[0].extra}
 	bind:clientHeight={singleProjectHeight}
-	style={data.project[0].color ? `background-color: ${data.project[0].color.hex}; margin-bottom: ${(singleProjectHeight - singleProjectHeight*zoomer.scale)*-1}px; transform: scale(${zoomer.scale}); transform-origin: center top;` : `margin-bottom: ${(singleProjectHeight - singleProjectHeight*zoomer.scale)*-1}px; transform: scale(${zoomer.scale}); transform-origin: center top;`}
+	style={`margin-bottom: ${(singleProjectHeight - singleProjectHeight*zoomer.scale)*-1}px; transform: scale(${zoomer.scale}); transform-origin: center top;`}
 	>
 		<div class="module intro ronzino-12 medium uppercase"
 		in:blur|global={{ duration: 200, delay: 500 }}
@@ -81,7 +85,9 @@ $effect(() => {
 		{#each data.project[0].modules as module, i (module._id)}
 			<div class="module-container"
 			in:blur|global={{ duration: 200, delay: 500 + 100*i }}
-			out:blur|global={{ duration: 200}}>
+			out:blur|global={{ duration: 200}}
+			data-kind={module.kind}
+			>
 				{#if module.modules}
 					<Serie slides={module.modules} position={module.position} project={module.project} size={module.size} showProject={false} hiddenProject={true} link={false} color={data.project[0].color ? data.project[0].color : null} key={i}/>
 				{:else}
@@ -195,5 +201,11 @@ $effect(() => {
 	display: flex;
 	flex-direction: column;
 	gap: 3rem;
+}
+[data-kind="composition"] + [data-kind="composition"],
+[data-kind="composition"] + [data-kind="image"],
+[data-kind="image"] + [data-kind="image"],
+[data-kind="image"] + [data-kind="composition"] {
+	border-top: solid 1px var(--white);
 }
 </style>

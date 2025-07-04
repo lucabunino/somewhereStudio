@@ -43,7 +43,7 @@ html {
 	font-style: normal;
 	-webkit-font-smoothing: antialiased;
 	font-size: clamp(11px, 14px, 18px);
-	letter-spacing: -0.02em;
+	letter-spacing: -0.01em;
 	line-height: 1.143;
 	color: var(--black);
 	background-color: var(--lightGray);
@@ -185,7 +185,7 @@ a:any-link.underline,
 	color: var(--darkGray);
 }
 .tag.active {
-	z-index: 999;
+	z-index: 10;
 	padding-left: 1em;
 	transition-delay: 500ms;
 }
@@ -210,6 +210,9 @@ a:any-link.underline,
 	padding-left: 1em;
 	color: var(--black);
 }
+.shadow {
+	filter: drop-shadow(1px 1px 1px rgba(0, 0, 0, 0.1));
+}
 .todo {
 	border: solid red;
 	padding: 2em;
@@ -233,7 +236,13 @@ a:any-link.underline,
 	width: 60vw;
 }
 .xl {
-	width: 100%;
+	width: 100vw;
+}
+.scattered .xl {
+	width: 90vw;
+}
+.extra .xl {
+	width: 96vw;
 }
 .fixedHeight.xs {
 	width: unset;
@@ -281,25 +290,32 @@ a:any-link.underline,
 	html {
 		font-size: 11px;
 	}
-	.ronzino-12 {
-		font-size: .857rem;
-		letter-spacing: 0.01em;
-		line-height: 1.166;
+	.ronzino-12,
+	.mobile-ronzino-10 {
+		font-size: .909rem;
 	}
-	.ronzino-18 {
-		font-size: .857rem;
-		letter-spacing: 0;
-		line-height: 1.1;
+	.ronzino-18,
+	.mobile-ronzino-14 {
+		font-size: 1.272rem;
 	}
-	.gaisyr-14 {
+	.gaisyr-14,
+	.mobile-gaisyr-11 {
 		font-size: 1rem;
-		letter-spacing: -0.02em;
-		line-height: 1.143;
+		letter-spacing: -0.01em;
 	}
-	.gaisyr-34 {
-		font-size: 2.428rem;
+	.gaisyr-19,
+	.mobile-gaisyr-16 {
+		font-size: 1.454rem;
+		letter-spacing: -0.01em;
+	}
+	.gaisyr-34,
+	.mobile-gaisyr-22 {
+		font-size: 2rem;
+		letter-spacing: -0.02em;
+	}
+	.mobile-gaisyr-30 {
+		font-size: 2.727rem;
 		letter-spacing: -0.03em;
-		line-height: 0.970;
 	}
 	.tag button {
 		flex-direction: row-reverse;
