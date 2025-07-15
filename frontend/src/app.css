@@ -353,13 +353,13 @@ a:any-link.underline,
 }
 @media screen and (max-width: 700px) {
 	.xs {
-		width: 100vw;
+		width: 55vw;
 	}
 	.s {
-		width: 100vw;
+		width: 70vw;
 	}
 	.m {
-		width: 100vw;
+		width: 85vw;
 	}
 	.l {
 		width: 100vw;

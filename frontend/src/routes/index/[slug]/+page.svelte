@@ -77,7 +77,7 @@ function handleMouseEnter(latitude, longitude) {
 		in:blur|global={{ duration: 200, delay: 500 }}
 		out:blur|global={{ duration: 200}}
 		>
-			<h1 class="project-title gaisyr-34 normalcase">{data.project[0].title}</h1>
+			<h1 class="project-title gaisyr-34 mobile-gaisyr-30 normalcase">{data.project[0].title}</h1>
 			{#if data.project[0].collaborations}
 				<p class="collaborations">In collaborazione con {#each data.project[0].collaborations as collaboration, j}{collaboration.title}{#if data.project[0].collaborations?.length - 1 > j}{@html ', '}{/if}{/each}</p>
 			{/if}
@@ -210,5 +210,14 @@ function handleMouseEnter(latitude, longitude) {
 	display: flex;
 	flex-direction: column;
 	gap: 3rem;
+}
+
+@media screen and (max-width: 700px) {
+	.intro {
+		text-align: left;
+		width: 100%;
+		max-width: unset;
+		padding: calc(var(--gutter)*2.4) var(--gutter) 5rem;
+	}
 }
 </style>

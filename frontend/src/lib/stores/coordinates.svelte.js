@@ -31,7 +31,6 @@ export function getCoordinates() {
 			visible = true
 		} else {
 			coordinates = initialCoordinates;
-			animatedCoordinates = initialCoordinates;
 			visible = false
 		}
 	}

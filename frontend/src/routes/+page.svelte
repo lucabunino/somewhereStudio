@@ -355,4 +355,12 @@ function handleMouseEnter(latitude, longitude) {
 	padding: .5em;
 	text-align: right;
 }
+
+@media screen and (max-width: 700px) {
+	.intro {
+		width: 100%;
+		max-width: unset;
+		padding-top: 18rem;
+	}
+}
 </style>

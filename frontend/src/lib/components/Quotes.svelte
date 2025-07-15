@@ -17,7 +17,9 @@ autoHeight={false}
 {#each slides as quote, i}
 	<swiper-slide class="text">
 		<h4 class="gaisyr-34">{quote.quotation}</h4>
-		<h5 class="ronzino-18">{quote.author.title}</h5>
+		{#if quote.author}
+			<h5 class="ronzino-18">{quote.author.title}</h5>
+		{/if}
 	</swiper-slide>
 {/each}
 </swiper-container>

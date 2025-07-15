@@ -314,10 +314,12 @@ function handleKey({key}) {if (key === 'G' && dev) {viewGrid = !viewGrid}}
 				{#if !menuActive}Menu{:else}Chiudi{/if}
 			</button>
 		{:else}
-			<input id="search-mobile" type="text" class="btn search shadow gaisyr-14"
+			<input id="search-mobile" name="search" type="text" class="btn search shadow gaisyr-14"
 			placeholder="Cerca nel sito"
 			bind:value={search}
 			bind:this={searchMobile}
+			onkeyup={() => {handleKeyup()}}
+			onkeydown={(e) => {handleKeydown(e)}}
 			>
 		{/if}
 		<button id="search-btn-mobile" class="btn shadow" onclick={() => {handleSearchBtnMobile()}}
@@ -433,7 +435,7 @@ function handleKey({key}) {if (key === 'G' && dev) {viewGrid = !viewGrid}}
 				{@render children()}
 			</main>
 		{/key}
-		{#if ($page.url.pathname === '/' && data.searchTags.length > 0) || ($page.url.pathname !== '/' && $page.url.pathname !== '/map')}
+		{#if ($page.url.pathname === '/' && data.searchTags.length > 0) || ($page.url.pathname === '/' && data.searchString) || ($page.url.pathname !== '/' && $page.url.pathname !== '/map')}
 			<footer class="ronzino-12 uppercase medium">
 				<div>
 					{#if data.info.email}<a href="mailto:{data.info.email}">{data.info.email}</a>{/if}
@@ -524,6 +526,9 @@ function handleKey({key}) {if (key === 'G' && dev) {viewGrid = !viewGrid}}
 		flex-direction: column;
 		gap: 2rem;
 	}
+	.somewhere {
+		position: relative;
+	}
 	.menu.blurred .menu-item a {
 		color: unset;
 		filter: unset;
@@ -536,6 +541,9 @@ function handleKey({key}) {if (key === 'G' && dev) {viewGrid = !viewGrid}}
 		position: fixed;
 		top: 0;
 		z-index: 8;
+	}
+	.menu-item:nth-child(1) a {
+		display: inline-grid;
 	}
 	.menu-item {
 		display: none;
@@ -689,7 +697,6 @@ nav[aria-label="ui-mobile"] {
 /* Main */
 main {
 	min-height: calc(100vh - .857rem*1.166*3 - var(--gutter)*12.8);
-	min-height: 100vh;
 	overflow: hidden;
 }
 

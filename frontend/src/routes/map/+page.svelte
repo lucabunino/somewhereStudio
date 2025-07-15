@@ -8,6 +8,7 @@ import { clickOutside } from '$lib/utils/clickOutside.js';
 
 import { getCoordinates } from '$lib/stores/coordinates.svelte.js';
 let coordinater = getCoordinates()
+$inspect(coordinater.coordinates)
 
 import { getZoom } from '$lib/stores/zoom.svelte.js';
 let zoomer = getZoom()
@@ -50,11 +51,10 @@ $effect(() => {
 	}
 	if (map) {
 		map.flyTo({
-			center: [coordinater.coordinates.longitude, coordinater.coordinates.latitude],
 			zoom: zoomer.mapZoom,
 			essential: true,
 			duration: 500,
-		});		
+		});	
 	}
 });
 
@@ -152,7 +152,18 @@ function createMap() {
 		if (clickedFeature.properties && clickedFeature.properties.moduleIndex !== undefined) {
 			activeModule = clickedFeature.properties.moduleIndex;
 			const coords = clickedFeature.geometry.coordinates;
-			coordinater.setCoordinates(coords[1], coords[0]);
+			if (
+				coordinater.coordinates.latitude !== coords[1] ||
+				coordinater.coordinates.longitude !== coords[0]
+			) {
+				coordinater.setCoordinates(coords[1], coords[0]);
+				map.flyTo({
+					center: [coordinater.coordinates.longitude, coordinater.coordinates.latitude],
+					zoom: zoomer.mapZoom,
+					essential: true,
+					duration: 500,
+				});
+			}
 		}
 
 		updateMarkers();
@@ -236,6 +247,12 @@ function updateMarkers() {
 				coordinater.coordinates.longitude !== coords[0]
 			) {
 				coordinater.setCoordinates(coords[1], coords[0]);
+				map.flyTo({
+					center: [coordinater.coordinates.longitude, coordinater.coordinates.latitude],
+					zoom: zoomer.mapZoom,
+					essential: true,
+					duration: 500,
+				});
 			}
 		});
 
@@ -339,7 +356,7 @@ function updateData() {
 	></div> -->
 	<div class="module-container" bind:this={modules[i]} class:active={activeModule === i}>
 		{#if activeModule == i}
-			<div style="transform: scale({.5}); transform-origin: center; pointer-events: all;"
+			<div style="transform: scale({innerWidth < 700 ? .9 : .5}); transform-origin: center; pointer-events: all;"
 			use:clickOutside onclick_outside={() => handleClickOutside()}>
 				<Module module={module} i={i} delayed={false}/>
 			</div>
@@ -404,7 +421,6 @@ function updateData() {
 #cross .line:nth-child(2) {
 	transform: rotate(90deg);
 }
-
 .module-container {
 	position: absolute;
 	left: 0;
