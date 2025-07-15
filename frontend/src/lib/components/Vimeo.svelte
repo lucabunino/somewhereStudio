@@ -19,6 +19,7 @@ let {
 	text1 =  null,
 } = $props()
 
+let container = $state(undefined);
 let domLoaded = $state(false);
 let isPlaying = $state(false);
 let aspectRatio = $state(undefined);
@@ -26,18 +27,42 @@ let thumbnail = $state(undefined);
 let embed = $state(undefined);
 let iframe = $state(undefined);
 
-onMount(async () => {
+
+$effect(() => {
+	domLoaded = true;
+})
+
+async function loadVimeo() {
 	const response = await fetch(`/api/vimeo/${id}`);
 	const data = await response.json();
 	aspectRatio = data.width / data.height;
-	thumbnail = data.thumbnail
-	embed = data.embed	
-	domLoaded = true
-});
+	thumbnail = data.thumbnail;
+	embed = data.embed;
+}
+
+function inView(callback, options = {}) {
+	let observer;
+	return (node) => {
+		observer = new IntersectionObserver(([entry]) => {
+			if (entry.isIntersecting) {
+				callback();
+				observer.unobserve(node); // Only trigger once
+			}
+		}, options);
+		observer.observe(node);
+		return {
+			destroy() {
+				observer.disconnect();
+			}
+		};
+	};
+}
 </script>
 
 {#if domLoaded}
-	<div class="vimeo-container" class:homepage={$page.url.pathname === "/"} style="aspect-ratio: {aspectRatio};">
+	<div bind:this={container} use:inView={loadVimeo()}
+	class="vimeo-container" class:homepage={$page.url.pathname === "/"}
+	style="aspect-ratio: {aspectRatio};">
 		<div class="media-container">
 			<Media thumbnail={thumbnail} cover={true}/>
 		</div>

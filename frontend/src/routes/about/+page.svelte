@@ -120,7 +120,7 @@ $effect(() => {
 		gap: 6rem;
 	}
 	.person h3 {
-		margin-bottom: .3em;
+		margin-bottom: 1.7rem;
 	}
 }
 </style>

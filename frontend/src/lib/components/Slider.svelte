@@ -27,6 +27,7 @@ bind:this={swiperEl}
 slides-per-view={sizeMap[size]}
 centered-slides={true}
 space-between={1}
+grabCursor={true}
 >
 {#each slides as image, i}
 	<swiper-slide>

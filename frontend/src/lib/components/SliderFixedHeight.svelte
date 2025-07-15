@@ -29,6 +29,7 @@ loop={false}
 slides-per-view={'auto'}
 space-between={1}
 free-mode={true}
+grabCursor={true}
 >
 {#each slides as image, i}
 	<swiper-slide>

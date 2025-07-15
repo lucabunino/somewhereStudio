@@ -28,6 +28,7 @@ let tagger = getTags()
 
 // Variables
 let { data } = $props()
+$inspect(data.searchString)
 let domLoaded = $state(false)
 let innerWidth = $state(0)
 let innerHeight = $state(0)
@@ -50,25 +51,26 @@ let dragStart = { x: 0, y: 0 };
 let positionStart = { x: 0, y: 0 };
 let checkCellTimer = $state();
 let preloadFactor = 4
-let bufferX = $derived(innerWidth / zoomer.zoom * preloadFactor * sizer)
-let bufferY = $derived(innerHeight / zoomer.zoom * preloadFactor * sizer)
-const sizer = 1.1
+const sizerX = 1
+const sizerY = 1.2
+let bufferX = $derived(innerWidth / zoomer.zoom * preloadFactor * sizerX)
+let bufferY = $derived(innerHeight / zoomer.zoom * preloadFactor * sizerY)
 
 // Lifecycle
 onMount(() => {
 	zoomer.setZoom(zoomer.initialZoom)
 	tagger.setTags(data.tags, { keepHierarchy: false })
 	tagger.setMaxTags(tagger.firstMaxTags)
-	if (data.searchParams.length > tagger.firstMaxTags) {
-		tagger.setMaxTags(data.searchParams.length)
+	if (data.searchTags.length > tagger.firstMaxTags) {
+		tagger.setMaxTags(data.searchTags.length)
 	}
 })
 $effect(() => {
 	domLoaded = true;
-	if (data.searchParams.length !== lastLength) {
-		lastLength = data.searchParams.length;
+	if (data.searchTags.length !== lastLength) {
+		lastLength = data.searchTags.length;
 	}
-	if (data.searchParams.length == 0) {
+	if (data.searchTags.length == 0) {
 		if (checkCellTimer) return;
 		checkCellTimer = requestAnimationFrame(() => {
 			checkCellTimer = null;
@@ -112,15 +114,16 @@ function removeModule(gridX, gridY) {
 	}
 }
 function updatePosition(deltaX, deltaY, baseSpeed = 1) {
-	const scale = zoomer.scale * sizer;
-	positionX += deltaX * baseSpeed / scale;
-	positionY += deltaY * baseSpeed / scale;
+	const scaleX = zoomer.scale * sizerX;
+	const scaleY = zoomer.scale * sizerY;
+	positionX += deltaX * baseSpeed / scaleX;
+	positionY += deltaY * baseSpeed / scaleY;
 }
 
-function handleScroll(e) {
-	if (data.searchParams.length === 0) {
+function handleScroll(e) {	
+	if (data.searchTags.length === 0) {
 		updatePosition(-e.deltaX, -e.deltaY, 1);
-		header.setBlurred(false)
+		header.setBlurred(true)
 	}
 	enableAnimation = false
 }
@@ -144,14 +147,14 @@ function handleMouseUp() {
 	isDragging = false;
 }
 function calculateStartingPositionX(gridX) {
-	return gridX * innerWidth * sizer + innerWidth / 2;
+	return gridX * innerWidth * sizerX + innerWidth / 2;
 }
 function calculateStartingPositionY(gridY) {
-	return gridY * innerHeight * sizer + innerHeight / 2;
+	return gridY * innerHeight * sizerY + innerHeight / 2;
 }
 function isInView(gridX, gridY) {
-	const x = (gridX * innerWidth * sizer + innerWidth / 2 + positionX);
-	const y = (gridY * innerHeight * sizer + innerHeight / 2 + positionY);
+	const x = (gridX * innerWidth * sizerX + innerWidth / 2 + positionX);
+	const y = (gridY * innerHeight * sizerY + innerHeight / 2 + positionY);
 	return (
 		x + bufferX > 0 &&
 		x - bufferX < innerWidth &&
@@ -161,8 +164,8 @@ function isInView(gridX, gridY) {
 }
 function getTransformFn(module, index = 0) {
 	return () => {
-		const x = (calculateStartingPositionX(module.gridX) + positionX) * zoomer.scale;
-		const y = (calculateStartingPositionY(module.gridY) + positionY) * zoomer.scale;
+		const x = (calculateStartingPositionX(module.gridX) + positionX - innerWidth) * zoomer.scale;
+		const y = (calculateStartingPositionY(module.gridY) + positionY - innerHeight) * zoomer.scale;
 		return { x, y, scale: zoomer.scale };
 	};
 }
@@ -198,6 +201,8 @@ function getSpiralCoords(range) {
 function handleMouseEnter(latitude, longitude) {
 	if (latitude && longitude) {
 		coordinater.setCoordinates(latitude, longitude)
+	} else {
+		coordinater.setCoordinates(null, null)
 	}
 }
 
@@ -207,15 +212,15 @@ function handleMouseEnter(latitude, longitude) {
 
 <!-- svelte-ignore a11y_no_static_element_interactions -->
 <!-- <p style="position: fixed; top:50%; left:50%; background-color:white; z-index:999;">{positionX} / {modules.length}</p> -->
-{#key data.searchParams}
+<!-- {#key data.searchTags} -->
 	<section id="modules"
 	bind:clientHeight={modulesHeight}
 	onmousewheel={(e) => {handleScroll(e)}}
 	onmousedown={(e) => {handleMouseDown(e)}}
 	onmousemove={(e) => {handleMouseMove(e)}}
 	onmouseup={(e) => {handleMouseUp(e)}}
-	style={data.searchParams.length === 0 ? `height: 100vh; position:fixed;` : `height: auto; margin-bottom: ${(modulesHeight - modulesHeight*zoomer.scale)*-1}px; transform: scale(${zoomer.scale}); transform-origin: top;`}
-	class:scattered={data.searchParams.length === 0}
+	style={(data.searchTags.length === 0 && !data.searchString) ? `height: 100vh; position:fixed;` : `height: auto; margin-bottom: ${(modulesHeight - modulesHeight*zoomer.scale)*-1}px; transform: scale(${zoomer.scale}); transform-origin: top;`}
+	class:scattered={data.searchTags.length === 0 && !data.searchString}
 	>
 	<!-- <section id="modules"
 	bind:clientHeight={modulesHeight}
@@ -223,17 +228,20 @@ function handleMouseEnter(latitude, longitude) {
 	onmousedown={(e) => {handleMouseDown(e)}}
 	onmousemove={(e) => {handleMouseMove(e)}}
 	onmouseup={(e) => {handleMouseUp(e)}}
-	style={data.searchParams.length === 0 ? `height: 100vh; position:fixed;` : `height: auto; margin-bottom: -${modulesHeight - modulesHeight*zoomer.scale}px;`}
-	class:scattered={data.searchParams.length === 0}
-	use:gsapScale={data.searchParams.length > 0 ? zoomer.scale : 1}
+	style={data.searchTags.length === 0 ? `height: 100vh; position:fixed;` : `height: auto; margin-bottom: -${modulesHeight - modulesHeight*zoomer.scale}px;`}
+	class:scattered={data.searchTags.length === 0}
+	use:gsapScale={data.searchTags.length > 0 ? zoomer.scale : 1}
 	> -->
-			{#if data.searchParams.length > 0}
+			{#if data.searchTags.length > 0 || data.searchString}
 				<div class="module intro gaisyr-34"
 				in:blur|global={{ duration: 200, delay: 500 }}
 				out:blur|global={{ duration: 200}}
 				>{data.modules.length} Risultati per:
-					{#each data.searchParams as searchParam, i}
-						{#each data.tags.filter(tag => tag.slug.current === searchParam) as tag, j}{tag.title}{/each}{#if data.searchParams.length - 1 > i}{@html ', '}{/if}
+					{#if data.searchString != undefined}
+						'{data.searchString}'{#if data.searchTags.length > 0}{@html ' in '}{/if}
+					{/if}
+					{#each data.searchTags as searchParam, i}
+						{#each data.tags.filter(tag => tag.slug.current === searchParam) as tag, j}{tag.title}{/each}{#if data.searchTags.length - 1 > i}{@html ', '}{/if}
 					{/each}
 				</div>
 				{#each data.modules as module, i}
@@ -253,7 +261,7 @@ function handleMouseEnter(latitude, longitude) {
 					{@const startingPositionY = calculateStartingPositionY(module.gridY)}
 					<div class="module-container"
 					onmouseenter={() => {handleMouseEnter(module.latitude, module.longitude)}}
-					class:scattered={data.searchParams.length === 0}
+					class:scattered={data.searchTags.length === 0 || !data.searchString}
 					use:gsapTransform={getTransformFn(module)}
 					>
 						<!-- <div onmouseenter={() => {handleMouseEnter(module.latitude, module.longitude)}}> -->
@@ -267,7 +275,7 @@ function handleMouseEnter(latitude, longitude) {
 				{/each}
 			{/if}
 	</section>
-{/key}
+<!-- {/key} -->
 
 <style>
 #modules {
@@ -294,9 +302,10 @@ function handleMouseEnter(latitude, longitude) {
 	background-color: var(--white);
 }
 .intro {
-	padding: 3em;
+	padding: 6rem 3rem 5rem;
 	text-align: center;
 	max-width: 80vw;
+	height: auto;
 }
 .module-container {
 	position: relative;
@@ -305,13 +314,11 @@ function handleMouseEnter(latitude, longitude) {
 }
 .scattered .module-container {
 	position: absolute;
-	width: 100vw;
-	/* height: 90vh; */
-	height: 100vh;
+	width: 80vw;
+	height: 80vh;
 	display: flex;
 	align-items: center;
 	justify-content: center;
-	overflow: scroll;
 }
 .scattered .module-container div {
 	/* max-height: 90vh; */

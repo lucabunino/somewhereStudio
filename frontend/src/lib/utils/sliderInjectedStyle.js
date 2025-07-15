@@ -34,7 +34,8 @@ export default `
 }
 
 .swiper-button-disabled {
-	pointer-events: default;
-	opacity: .2;
+	cursor: default;
+	pointer-events: none;
+	display: none;
 }
 `;

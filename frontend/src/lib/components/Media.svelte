@@ -119,8 +119,8 @@ img, video {
 .autoWidth img, .autoWidth .video {
 	width: auto;
 }
-.homepage img, .homepage .video {
-	max-height: 90vh;
+:global(.homepage img, .homepage video) {
+	/* max-height: 145vh; */
 }
 .media.cover img {
 	height: 100%;

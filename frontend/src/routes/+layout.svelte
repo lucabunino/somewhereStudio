@@ -7,7 +7,7 @@ import { urlFor } from '$lib/utils/image';
 import { cubicOut } from 'svelte/easing';
 import { goto } from '$app/navigation';
 import { writable, derived } from 'svelte/store';
-import { slide, blur } from "svelte/transition";
+import { slide, blur, fly } from "svelte/transition";
 import { onMount } from "svelte";
 import { clickOutside } from '$lib/utils/clickOutside.js';
 
@@ -25,11 +25,12 @@ let searchActive = $state(false)
 let searchActiveMobile = $state(false)
 let menuActive = $state(false)
 let searchMobile = $state(null)
+let timeout;
+let blurredTimeout;
 
 // Tags
 import { getTags } from '$lib/stores/tag.svelte.js';
 let tagger = getTags()
-let timeout;
 let tags = $derived(data.tags.filter(tag => tagger.tags.some(t => t.slug.current === tag.slug.current)))
 
 // Bg
@@ -55,6 +56,11 @@ let extraer = getExtra()
 // Lifecycle
 onMount(() => {
 	coordinater.setCoordinates(data.info.adressLatitude, data.info.adressLongitude)
+	coordinater.setInitialCoordinates(data.info.adressLatitude, data.info.adressLongitude)
+	if (data.searchString) {
+		search = data.searchString
+		searchActive = true
+	}
 })
 $effect(() => {
 	setTimeout(() => {
@@ -81,14 +87,14 @@ function toggleTag(tagSlug) {
 		const newTags = tags.filter(t => t !== tagSlug);
 		url.searchParams.delete('tag'); // clear all first
 		newTags.forEach(t => url.searchParams.append('tag', t));
-		if (data.searchParams.length > tagger.firstMaxTags) {
+		if (data.searchTags.length > tagger.firstMaxTags) {
 			tagger.setMaxTags(tagger.maxTags - 1)
 		}
 	} else {
 		// Add the tag
 		url.searchParams.append('tag', tagSlug);
-		if (data.searchParams.length > tagger.firstMaxTags) {
-			tagger.setMaxTags(data.searchParams.length + 1)
+		if (data.searchTags.length > tagger.firstMaxTags) {
+			tagger.setMaxTags(data.searchTags.length + 1)
 		}
 	}
 	goto($page.url.pathname === "/" || $page.url.pathname === "/map" ? `?${url.searchParams.toString()}` : `/?${url.searchParams.toString()}`, { preload: true, replaceState: false });
@@ -117,7 +123,7 @@ function handleMouseEnter() {
 function handleScroll() {
 	const delta = 50;
 	const diff = scrollY - oldScroll;
-	if (scrollY < delta) {
+	if (scrollY < delta && diff < 0) {
 		header.setBlurred(false);
 		oldScroll = scrollY;
 	}
@@ -163,6 +169,27 @@ function handleSearchBtnMobile() {
 	
 }
 
+function handleKeydown(event) {	
+	if (event.key === 'Enter' && search) {
+		const params = new URLSearchParams(window.location.search);
+		params.set('search', search)
+		goto(`/?${params.toString()}`, { keepFocus: true });
+	}
+}
+
+function handleKeyup(event) {
+	if ($page.url.pathname === '/') {
+		const params = new URLSearchParams(window.location.search);
+		if (search) {
+			params.set('search', search)
+			goto(`?${params.toString()}`, { keepFocus: true });
+		} else {
+			params.delete('search')
+			goto(`?${params.toString()}`, { keepFocus: true });
+		}
+	}
+}
+
 // Dev
 let viewGrid = $state(false)
 const gridColumnsDesktop = 16
@@ -205,16 +232,26 @@ function handleKey({key}) {if (key === 'G' && dev) {viewGrid = !viewGrid}}
 			<div class="menu-bg"></div>
 		{/if}
 		<ul class="menu gaisyr-34 mobile-gaisyr-30"
-		class:blurred={header.blurred && $page.url.pathname !== '/index'}
+		class:blurred={header.blurred}
+		onclick={() => {menuActive = false; setTimeout(() => {header.setBlurred(true)}, 700);}}
+		onmouseenter={() => {header.setBlurred(false); clearTimeout(blurredTimeout);}}
+		onmouseleave={() => {clearTimeout(blurredTimeout); blurredTimeout = setTimeout(() => {header.setBlurred(true)}, 2000);}}
 		>
-			<li class="menu-item" class:visible={menuActive || $page.url.pathname === "/"} class:active={$page.url.pathname === "/"} onclick={() => {menuActive = false}}>
-				<a href="/{$page.url.search}">Som<span class="ls-7">e</span><span class="ls-15">w</span><span class="ls-30">h</span><span class="ls-70">e</span><span class="ls-120">r</span>e<br>Studio</a>
+			<li class="menu-item" class:visible={menuActive || $page.url.pathname === "/"} class:active={$page.url.pathname === "/"}>
+				<a href="/{$page.url.search}"><span class="somewhere">Som<span class="ls-7">e</span><span class="ls-15">w</span><span class="ls-30">h</span><span class="ls-70">e</span><span class="ls-120">r</span>e</span>Studio</a>
 			</li>
-			<li class="menu-item" class:visible={menuActive || $page.url.pathname === "/index"} class:active={$page.url.pathname === "/index" || $page.url.pathname.includes("/index/")} onclick={() => {menuActive = false}}>
+			<li class="menu-item" class:visible={menuActive || $page.url.pathname === "/index"} class:active={$page.url.pathname === "/index" || $page.url.pathname.includes("/index/")}>
 				<a href="/index">In<span class="ls-7">d</span><span class="ls-30">e</span>x</a>
 			</li>
-			<li class="menu-item" class:visible={menuActive || $page.url.pathname === "/about"} class:active={$page.url.pathname === "/about"} onclick={() => {menuActive = false}}>
+			<li class="menu-item" class:visible={menuActive || $page.url.pathname === "/about"} class:active={$page.url.pathname === "/about"}
+
+			>
 				<a href="/about"><span class="ls-30">A</span><span class="ls-70">b</span><span class="ls-30">o</span><span class="ls-7">u</span>t</a>
+			</li>
+			<li class="menu-item" class:visible={menuActive || $page.url.pathname === "/map"} class:active={$page.url.pathname === "/map"}
+
+			>
+				<a href="/map"><span class="ls-70">M</span><span class="ls-7">a</span>p</a>
 			</li>
 		</ul>
 	</nav>
@@ -222,7 +259,7 @@ function handleKey({key}) {if (key === 'G' && dev) {viewGrid = !viewGrid}}
 	<!-- UI desktop -->
 	<nav aria-label="ui-desktop">
 		{#if domLoaded}
-			{#if $page.url.pathname === "/" || $page.url.pathname === "/map"}
+			{#if (["/", "/map", "/index"].includes($page.url.pathname) || $page.url.pathname.includes('/index/')) && (coordinater.visible)}
 				<a href="/map{$page.url.search}" id="coordinates-desktop" class="btn tag ronzino-12"
 				in:slide|global={{ axis: "x", duration: 200 }}
 				out:slide|global={{ axis: "x", duration: 200, delay: 500 }}
@@ -236,30 +273,32 @@ function handleKey({key}) {if (key === 'G' && dev) {viewGrid = !viewGrid}}
 					{/if}
 				</a>
 			{/if}
-			<div id="zoom" class:extra={extraer.extra} class="shadow">
-				<button id="zoom-out" class="btn" class:off={($page.url.pathname === '/' && zoomer.zoom == zoomer.minZoom) || ($page.url.pathname === '/map' && zoomer.mapZoom <= zoomer.mapMinZoom + .1)}
-				onclick={() => {$page.url.pathname === "/map" ? zoomer.decreaseMapZoom() : zoomer.decreaseZoom()}}
-				in:slide|global={{ axis: "-x", duration: 200, delay: 50 }}
-				out:slide|global={{ axis: "-x", duration: 200, delay: 500 }}
-				>
-					<svg width="18" height="18" fill="none" xmlns="http://www.w3.org/2000/svg">
-						<path d="M7.5 14a6.5 6.5 0 1 0 0-13 6.5 6.5 0 0 0 0 13Z"/>
-						<path d="M10 7.5H5" stroke-miterlimit="10"/>
-						<path d="M16.9 17 12 12.2"/>
-					</svg>
-				</button>
-				<button id="zoom-in" class="btn" class:off={($page.url.pathname === '/' && zoomer.zoom == zoomer.maxZoom) || ($page.url.pathname === '/map' && zoomer.mapZoom >= zoomer.mapMaxZoom - .1)}
-				onclick={() => {$page.url.pathname === "/map" ? zoomer.increaseMapZoom() : zoomer.increaseZoom()}}
-				in:slide|global={{ axis: "-x", duration: 200 }}
-				out:slide|global={{ axis: "-x", duration: 200, delay: 500 }}
-				>
-					<svg width="18" height="18" fill="none" xmlns="http://www.w3.org/2000/svg">
-						<path d="M7.5 14a6.5 6.5 0 1 0 0-13 6.5 6.5 0 0 0 0 13Z"/>
-						<path d="M10 7.5H5M7.5 10V5" stroke-miterlimit="10"/>
-						<path d="M16.9 17 12 12.2"/>
-					</svg>
-				</button>
-			</div>
+			{#if !($page.url.pathname === "/index" || $page.url.pathname === "/about")}
+				<div id="zoom" class:extra={extraer.extra} class="shadow">
+					<button id="zoom-out" class="btn" class:off={($page.url.pathname === '/' && zoomer.zoom == zoomer.minZoom) || ($page.url.pathname.includes('/index/') && zoomer.zoom == zoomer.minZoom) || ($page.url.pathname === '/map' && zoomer.mapZoom <= zoomer.mapMinZoom + .1)}
+					onclick={() => {$page.url.pathname === "/map" ? zoomer.decreaseMapZoom() : zoomer.decreaseZoom()}}
+					in:slide|global={{ axis: "x", duration: 200, delay: 50 }}
+					out:slide|global={{ axis: "x", duration: 200, delay: 500 }}
+					>
+						<svg width="18" height="18" fill="none" xmlns="http://www.w3.org/2000/svg">
+							<path d="M7.5 14a6.5 6.5 0 1 0 0-13 6.5 6.5 0 0 0 0 13Z"/>
+							<path d="M10 7.5H5" stroke-miterlimit="10"/>
+							<path d="M16.9 17 12 12.2"/>
+						</svg>
+					</button>
+					<button id="zoom-in" class="btn" class:off={($page.url.pathname === '/' && zoomer.zoom == zoomer.maxZoom) || ($page.url.pathname.includes('/index/') && zoomer.zoom == zoomer.maxZoom) || ($page.url.pathname === '/map' && zoomer.mapZoom >= zoomer.mapMaxZoom - .1)}
+					onclick={() => {$page.url.pathname === "/map" ? zoomer.increaseMapZoom() : zoomer.increaseZoom()}}
+					in:slide|global={{ axis: "x", duration: 200 }}
+					out:slide|global={{ axis: "x", duration: 200, delay: 500 }}
+					>
+						<svg width="18" height="18" fill="none" xmlns="http://www.w3.org/2000/svg">
+							<path d="M7.5 14a6.5 6.5 0 1 0 0-13 6.5 6.5 0 0 0 0 13Z"/>
+							<path d="M10 7.5H5M7.5 10V5" stroke-miterlimit="10"/>
+							<path d="M16.9 17 12 12.2"/>
+						</svg>
+					</button>
+				</div>
+			{/if}
 		{/if}
 	</nav>
 
@@ -295,16 +334,25 @@ function handleKey({key}) {if (key === 'G' && dev) {viewGrid = !viewGrid}}
 	onmouseenter={() => handleMouseEnter()}
 	>
 	<div id="search-bar-desktop" class="shadow">
-		<input id="search-desktop" type="text" class="btn search"
+		<input id="search-desktop" name="search" type="text" class="btn search"
 		placeholder="Cerca nel sito"
 		use:clickOutside onclick_outside={() => handleClickOutside()}
 		bind:value={search}
 		onclick={() => {searchActive = true}}
 		in:slide|global={{ axis: "x", duration: 200 }}
 		out:slide|global={{ axis: "x", duration: 200 }}
+    	onkeyup={() => {handleKeyup()}}
+		onkeydown={(e) => {handleKeydown(e)}}
 		>
 		{#if searchActive}
-			<button id="search-btn-desktop" class="btn ronzino-12 uppercase" onclick={() => {searchActive = false; search = ""}}
+			<button id="search-btn-desktop" class="btn ronzino-12 uppercase"
+			onclick={() => {
+				searchActive = false;
+				search = "";
+				const params = new URLSearchParams(window.location.search);
+				params.delete("search");
+				goto(`?${params.toString()}`, { keepFocus: true });
+				}}
 			in:slide|global={{ axis: "x", duration: 200 }}
 			out:slide|global={{ axis: "x", duration: 200 }}
 			>× Chiudi</button>
@@ -328,7 +376,7 @@ function handleKey({key}) {if (key === 'G' && dev) {viewGrid = !viewGrid}}
 				.slice()
 				.filter(tag => !tag.hidden)
 				.sort((a, b) => {
-					const activeTags = data.searchParams;
+					const activeTags = data.searchTags;
 					const aActive = activeTags.includes(a.slug.current);
 					const bActive = activeTags.includes(b.slug.current);
 
@@ -344,16 +392,16 @@ function handleKey({key}) {if (key === 'G' && dev) {viewGrid = !viewGrid}}
 				}) as tag, i (tag.slug.current)}
 				<div class="tag shadow"
 				animate:flipVertical
-				class:active={data.searchParams.includes(tag.slug.current)}
-				style="--delay: {i*50}ms"
+				class:active={data.searchTags.includes(tag.slug.current)}
 				>
 					{#if tagger.open || i<tagger.maxTags}
 						<button onclick={() => toggleTag(tag.slug.current)}
-						in:slide|global={{ axis: "x", duration: 200, delay: 30 + i*30 }}
-						out:slide|global={{ axis: "x", duration: 200, delay: 500 + (tagger.tags.length)*30 - i*30 }}
+						in:slide|global={{ axis: "x", duration: 500, delay: 30 + i*30 }}
+						out:slide|global={{ axis: "x", duration: 500, delay: 0 }}
 						>
 							<span class="prefix">×</span>{tag.title}
 						</button>
+						<!-- out:slide|global={{ axis: "x", duration: 200, delay: 500 + (tagger.tags.length)*30 - i*30 }} -->
 					{/if}
 				</div>
 			{/each}
@@ -385,7 +433,7 @@ function handleKey({key}) {if (key === 'G' && dev) {viewGrid = !viewGrid}}
 				{@render children()}
 			</main>
 		{/key}
-		{#if ($page.url.pathname === '/' && data.searchParams.length > 0) || ($page.url.pathname !== '/' && $page.url.pathname !== '/map')}
+		{#if ($page.url.pathname === '/' && data.searchTags.length > 0) || ($page.url.pathname !== '/' && $page.url.pathname !== '/map')}
 			<footer class="ronzino-12 uppercase medium">
 				<div>
 					{#if data.info.email}<a href="mailto:{data.info.email}">{data.info.email}</a>{/if}
@@ -436,7 +484,7 @@ function handleKey({key}) {if (key === 'G' && dev) {viewGrid = !viewGrid}}
 	align-items: flex-end;
 	list-style: none;
 	position: fixed;
-	top: calc(50vh - 2rem);
+	top: calc(50vh - 1rem);
 	left: 0;
 	transform: translateY(-50%);
 	width: -webkit-fill-available;
@@ -447,7 +495,11 @@ function handleKey({key}) {if (key === 'G' && dev) {viewGrid = !viewGrid}}
 }
 .menu-item {
 	width: 100%;
-	padding: 0 var(--gutter);
+	padding: var(--gutter);
+}
+.somewhere {
+	position: absolute;
+	margin-top: -1.1em;
 }
 .menu-item a, .menu-item button {
 	pointer-events: all;
@@ -461,7 +513,7 @@ function handleKey({key}) {if (key === 'G' && dev) {viewGrid = !viewGrid}}
 .menu-item:hover .ls-30, .menu-item.active .ls-30 {letter-spacing: .30em;}
 .menu-item:hover .ls-70, .menu-item.active .ls-70 {letter-spacing: .70em;}
 .menu-item:hover .ls-120, .menu-item.active .ls-120 {letter-spacing: 1.20em;}
-.menu.blurred:not(:hover) .menu-item a {
+.menu.blurred .menu-item a {
 	color: var(--darkGray);
 	filter: blur(10px);
 }
@@ -472,7 +524,7 @@ function handleKey({key}) {if (key === 'G' && dev) {viewGrid = !viewGrid}}
 		flex-direction: column;
 		gap: 2rem;
 	}
-	.menu.blurred:not(:hover) .menu-item a {
+	.menu.blurred .menu-item a {
 		color: unset;
 		filter: unset;
 	}

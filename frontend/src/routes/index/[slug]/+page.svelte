@@ -21,6 +21,10 @@ let bger = getBg()
 import { getTags } from '$lib/stores/tag.svelte.js';
 let tagger = getTags()
 
+// Coordinates
+import { getCoordinates } from '$lib/stores/coordinates.svelte.js';
+let coordinater = getCoordinates()
+
 // Zoom
 import { getZoom } from '$lib/stores/zoom.svelte.js';
 let zoomer = getZoom()
@@ -38,10 +42,8 @@ onMount(() => {
 	tagger.setMaxTags(0)
 	setTimeout(() => {
 		tagger.setTags(data.project[0].tags, { keepHierarchy: false, hierarchy: 99 });
-	}, 500);
-	setTimeout(() => {
 		tagger.setMaxTags(data.project[0].tags.length)
-	}, 500);
+	}, 1000);
 })
 $effect(() => {
 	domLoaded = true;
@@ -50,6 +52,14 @@ $effect(() => {
 		bger.setBg(null)
 	};
 })
+
+function handleMouseEnter(latitude, longitude) {
+	if (latitude && longitude) {
+		coordinater.setCoordinates(latitude, longitude)
+	} else {
+		coordinater.setCoordinates(null, null)
+	}
+}
 </script>
 
 <svelte:window bind:innerWidth bind:innerHeight></svelte:window>
@@ -87,6 +97,7 @@ $effect(() => {
 			in:blur|global={{ duration: 200, delay: 500 + 100*i }}
 			out:blur|global={{ duration: 200}}
 			data-kind={module.kind}
+			onmouseenter={() => {handleMouseEnter(module.latitude, module.longitude)}}
 			>
 				{#if module.modules}
 					<Serie slides={module.modules} position={module.position} project={module.project} size={module.size} showProject={false} hiddenProject={true} link={false} color={data.project[0].color ? data.project[0].color : null} key={i}/>
@@ -144,13 +155,11 @@ $effect(() => {
 	background-color: var(--white);
 }
 .intro {
-	padding: 3em;
+	padding: 6rem 3rem 5rem;
 	text-align: center;
 	max-width: 80vw;
 	min-width: 40vw;
 	align-self: center;
-	/* height: calc(50vh + 1rem); */
-	/* padding: calc(var(--gutter)*1.4) var(--gutter); */
 }
 .tags {
 	margin-top: var(--gutter);
@@ -201,11 +210,5 @@ $effect(() => {
 	display: flex;
 	flex-direction: column;
 	gap: 3rem;
-}
-[data-kind="composition"] + [data-kind="composition"],
-[data-kind="composition"] + [data-kind="image"],
-[data-kind="image"] + [data-kind="image"],
-[data-kind="image"] + [data-kind="composition"] {
-	border-top: solid 1px var(--white);
 }
 </style>

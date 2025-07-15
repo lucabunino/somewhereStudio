@@ -101,22 +101,92 @@ export async function getInfo() {
 		}`
 	);
 }
-export async function getModules(tags) {
-	if (tags.length > 0) {
-		return await client.fetch(`
-			*[_type in ["module", "serie"]
-			&& search == true
-			${tags?.length ? `&& count(tags[@->slug.current in $tags]) > 0` : ''}
-			&& !(_id in path('drafts.**'))] {
+// export async function getModules(tags, search) {
+// 	if (tags.length > 0) {
+// 		return await client.fetch(`
+// 			*[_type in ["module", "serie"]
+// 			&& search == true
+// 			${tags?.length ? `&& count(tags[@->slug.current in $tags]) > 0` : ''}
+// 			&& !(_id in path('drafts.**'))] {
+// 				${module}
+// 			}|order(hierarchy desc)`, { tags });
+// 	} else if (search) {
+// 		return await client.fetch(`
+// 			*[_type == "module"
+// 			&& search == true
+// 			&& (
+// 				title match $search ||
+// 				project->title match $search ||
+// 				tags[]->title match $search ||
+// 				text1[].children[].text match $search ||
+// 				text2[].children[].text match $search ||
+// 				quotes[].quotation match $search
+// 			)
+// 			&& !(_id in path('drafts.**'))
+// 			] | score(
+// 			boost(title match $search, 4)
+// 			) | order(_score desc) {
+// 			${module},
+// 			_score
+// 			}
+// 			`, { search: `${search}*` });
+// 	} else {
+// 		return await client.fetch(`
+// 			*[_type == "homepage" && !(_id in path('drafts.**'))][0].modules[]->{
+// 				${module}
+// 			}`
+// 		);
+// 	}
+// }
+export async function getModules(tags, search) {
+	const hasTags = tags?.length > 0;
+	const hasSearch = !!search;
+
+	if (hasTags || hasSearch) {
+		// Build query parts
+		let filters = [
+			'_type in ["module", "serie"]',
+			'search == true',
+			'!(_id in path("drafts.**"))'
+		];
+
+		if (hasTags) {
+			filters.push('count(tags[@->slug.current in $tags]) > 0');
+		}
+
+		if (hasSearch) {
+			filters.push(`(
+				title match $search ||
+				project->title match $search ||
+				tags[]->title match $search ||
+				text1[].children[].text match $search ||
+				text2[].children[].text match $search ||
+				quotes[].quotation match $search
+			)`);
+		}
+
+		const query = `
+			*[${filters.join(' && ')}]
+			${hasSearch ? `| score(boost(title match $search, 4)) | order(_score desc)` : `| order(hierarchy desc)`} {
 				${module}
-			}|order(hierarchy desc)`, { tags });
-	} else {
-		return await client.fetch(`
-			*[_type == "homepage" && !(_id in path('drafts.**'))][0].modules[]->{
-				${module}
-			}`
-		);
+				${hasSearch ? `, _score` : ''}
+			}
+		`;
+
+		// Prepare params object safely
+		const params = {};
+		if (hasTags) params.tags = tags;
+		if (hasSearch) params.search = `${search}*`;
+
+		return await client.fetch(query, params);
 	}
+
+	// Default: homepage modules
+	return await client.fetch(`
+		*[_type == "homepage" && !(_id in path('drafts.**'))][0].modules[]->{
+			${module}
+		}
+	`);
 }
 export async function getMapModules(tags) {
 	return await client.fetch(`
@@ -182,6 +252,8 @@ export async function getIndex() {
 			},
 			locations[]->{
 				title,
+				latitude,
+				longitude,
 			}
 		}`
 	);

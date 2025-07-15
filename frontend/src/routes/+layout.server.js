@@ -6,14 +6,16 @@ export async function load({ url }) {
 	const info = await getInfo();
 	const seo = await getSeo();
 	const { pathname } = url
-	const searchParams = url.searchParams.getAll('tag');
-	if (tags, info, seo, pathname, searchParams) {
+	const searchTags = url.searchParams.getAll('tag');
+	const searchString = url.searchParams.get('search');
+	if (tags, info, seo, pathname) {
 		return {
 			tags,
 			info,
 			seo,
 			pathname,
-			searchParams
+			searchTags,
+			searchString
 		};
 	}
 	throw error(404, 'Not found');

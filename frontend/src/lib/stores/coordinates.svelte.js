@@ -1,16 +1,18 @@
 import { tick } from 'svelte';
 
-let coordinates = $state({ latitude: '', longitude: '' });
-let animatedCoordinates = $state({ latitude: '', longitude: '' });
+let initialCoordinates = $state({ latitude: null, longitude: null });
+let coordinates = $state({ latitude: null, longitude: null });
+let animatedCoordinates = $state({ latitude: null, longitude: null });
+let visible = $state(true)
+
+function formatNumber(num) {
+	let [intPart, decPart = ''] = (Math.round(num * 1e5) / 1e5).toFixed(5).split('.');
+	intPart = intPart.padStart(2, '0');
+	decPart = decPart.padEnd(5, '0');
+	return `${intPart}.${decPart}`;
+}
 
 export function getCoordinates() {
-	function formatNumber(num) {
-		let [intPart, decPart = ''] = (Math.round(num * 1e5) / 1e5).toFixed(5).split('.');
-		intPart = intPart.padStart(2, '0');
-		decPart = decPart.padEnd(5, '0');
-		return `${intPart}.${decPart}`;
-	}
-
 	async function animateCoordinate(key, value) {
 		const formatted = formatNumber(value);
 		coordinates[key] = value;
@@ -23,16 +25,25 @@ export function getCoordinates() {
 	}
 
 	function setCoordinates(newLat, newLng) {
-		animateCoordinate('latitude', newLat);
-		animateCoordinate('longitude', newLng);
+		if (newLat !== null && newLng !== null) {
+			animateCoordinate('latitude', newLat);
+			animateCoordinate('longitude', newLng);
+			visible = true
+		} else {
+			coordinates = initialCoordinates;
+			animatedCoordinates = initialCoordinates;
+			visible = false
+		}
 	}
 
-	function resetCoordinates(newLat, newLng) {
-		animateCoordinate('latitude', newLat);
-		animateCoordinate('longitude', newLng);
+	function setInitialCoordinates(newLat, newLng) {
+		initialCoordinates = { latitude: newLat, longitude: newLng };
 	}
 
 	return {
+		get visible() {
+			return visible;
+		},
 		get coordinates() {
 			return coordinates;
 		},
@@ -43,5 +54,6 @@ export function getCoordinates() {
 			return { latitude: formatNumber(coordinates.latitude), longitude: formatNumber(coordinates.longitude) };
 		},
 		setCoordinates,
+		setInitialCoordinates,
 	};
 }

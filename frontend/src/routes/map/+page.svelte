@@ -17,10 +17,9 @@ let tagger = getTags()
 
 let { data } = $props()
 let initialModules = $derived(applyInitialSpiderfy(data.modules))
-$inspect(initialModules)
 
 let modules = $state([data.modules])
-let oldSearchParams;
+let oldsearchTags;
 let map;
 let mapContainer;
 let activeModule = $state(undefined);
@@ -32,18 +31,17 @@ const moveEndDelay = 200;
 onMount(() => {
 	tagger.setTags(data.tags, { keepHierarchy: false })
 	tagger.setMaxTags(tagger.firstMaxTags)
-	if (data.searchParams.length > tagger.firstMaxTags) {
-		tagger.setMaxTags(data.searchParams.length)
+	if (data.searchTags.length > tagger.firstMaxTags) {
+		tagger.setMaxTags(data.searchTags.length)
 	};
 	createMap()
 });
 
 $effect(() => {
-	console.log("Ready");
 	// tick().then(() => {
 	// 	console.log("Map loading");		
 	// });
-	if (data.searchParams !== oldSearchParams) {
+	if (data.searchTags !== oldsearchTags) {
 		if (map) {
 			map.remove();	
 		}
@@ -51,7 +49,6 @@ $effect(() => {
 		updateMarkers();
 	}
 	if (map) {
-		console.log("map update");
 		map.flyTo({
 			center: [coordinater.coordinates.longitude, coordinater.coordinates.latitude],
 			zoom: zoomer.mapZoom,
@@ -160,7 +157,7 @@ function createMap() {
 
 		updateMarkers();
 	});
-	oldSearchParams = data.searchParams;
+	oldsearchTags = data.searchTags;
 	console.log("map loaded");
 	
 }
@@ -233,10 +230,13 @@ function updateMarkers() {
 
 		el.addEventListener('click', (e) => {
 			e.stopPropagation();
-			activeModule = i;
-			console.log(activeModule);
-			
-			coordinater.setCoordinates(coords[1], coords[0]);
+			activeModule = i;			
+			if (
+				coordinater.coordinates.latitude !== coords[1] ||
+				coordinater.coordinates.longitude !== coords[0]
+			) {
+				coordinater.setCoordinates(coords[1], coords[0]);
+			}
 		});
 
 		const marker = new mapboxgl.Marker(el)
@@ -312,8 +312,18 @@ function updateData() {
 }
 </script>
 
-<!-- {#key data.searchParams} -->
-	<div id="map" bind:this={mapContainer} onwheel={(e) => panHandler(e)}></div>
+<!-- {#key data.searchTags} -->
+<div id="map" bind:this={mapContainer} onwheel={(e) => panHandler(e)}></div>
+<div id="map-ui">
+	<div id="cross">
+		<div class="line"></div>
+		<div class="line"></div>
+	</div>
+	<div class="line top"></div>
+	<div class="line right"></div>
+	<div class="line bottom"></div>
+	<div class="line left"></div>
+</div>
 <!-- {/key} -->
 
 <!-- {#if activeModule !== undefined}
@@ -348,6 +358,53 @@ function updateData() {
 	height: 100%;
 	background-color: "#1A1A1A";
 }
+.line {
+	position: fixed;
+	width: 1.5rem;
+	height: 1px;
+	background-color: var(--white);
+	mix-blend-mode: difference;
+}
+.line.top {
+	top: 0;
+	left: 50%;
+	transform: rotate(90deg);
+}
+.line.bottom {
+	bottom: 0;
+	left: 50%;
+	transform: rotate(90deg);
+}
+.line.left {
+	top: 50%;
+	left: 0;
+	transform: translateX(-50%);
+}
+.line.right {
+	top: 50%;
+	right: 0;
+	transform: translateX(50%);
+}
+#cross {
+	position: fixed;
+	top: 50%;
+	left: 50%;
+	transform: translateX(-50%) translateY(-50%);
+	width: auto;
+	height: auto;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	z-index: 2;
+	mix-blend-mode: difference;
+}
+#cross .line {
+	position: absolute;
+}
+#cross .line:nth-child(2) {
+	transform: rotate(90deg);
+}
+
 .module-container {
 	position: absolute;
 	left: 0;
@@ -359,6 +416,7 @@ function updateData() {
 }
 .module-container.active {
 	pointer-events: all;
+	z-index: 3;
 }
 /* :global(.mapboxgl-map) {
 	font: unset;
@@ -379,6 +437,7 @@ function updateData() {
 	justify-content: center;
 	cursor: pointer;
 	user-select: none;
+	z-index: 1;
 }
 :global(.custom-cluster-marker:hover, .custom-single-marker:hover) {
 	background-color: var(--darkGray);
@@ -388,5 +447,6 @@ function updateData() {
 	width: 1.5rem;
 	height: 1.5rem;
 	cursor: pointer;
+	z-index: 1;
 }
 </style>

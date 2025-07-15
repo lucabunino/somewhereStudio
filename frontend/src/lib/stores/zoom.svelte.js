@@ -1,4 +1,4 @@
-const initialZoom = 5
+const initialZoom = 1
 const maxZoom = 9
 const minZoom = 2
 const step = 0.2

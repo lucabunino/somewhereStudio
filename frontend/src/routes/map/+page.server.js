@@ -3,6 +3,7 @@ import { error } from '@sveltejs/kit';
 
 export async function load({ url }) {
 	const tags = url.searchParams.getAll('tag');
+	// const search = url.searchParams.get('search');
 	const modules = await getMapModules(tags);
 	if (modules) {
 		return {

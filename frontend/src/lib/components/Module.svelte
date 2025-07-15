@@ -10,6 +10,7 @@ import ShortTextStyle from "$lib/components/portableTextStyles/ShortTextStyle.sv
 import LongTextStyle from "$lib/components/portableTextStyles/LongTextStyle.svelte";
 import BoxStyle from "$lib/components/portableTextStyles/BoxStyle.svelte";
 import { PortableText } from '@portabletext/svelte'
+import { page } from '$app/stores';
 let {
 	module,
 	i,
@@ -17,7 +18,7 @@ let {
 	hiddenProject = false,
 	link = true,
 	delayed = true,
-	color = null
+	color = null,
 } = $props()
 
 let linkHeight = $state(0)
@@ -153,7 +154,7 @@ $effect(() => {
 
 {#if domLoaded}
 	{#if link}
-		<a class="module {size ? size : module.size} {module.fixedHeight ? 'fixedHeight' : ''} {module.position ? module.position : 'left'}" data-kind={module.kind}
+		<a class:homepage={$page.url.pathname === "/"} class="module {size ? size : module.size} {(module.kind === "composition" && module.fixedHeight) ? 'fixedHeight' : 'autoHeight'} {module.position ? module.position : 'left'}" data-kind={module.kind}
 		href={module.project?.slug ? `/index/${module.project.slug.current}` : ``}
 		style="background-color: {color ? 'var(--white)' : module.color?.hex}; color: {isDark(module.color?.hex) && !color ? "var(--white)" : "var(--black)"}"
 		in:blur|global={{ duration: 200, amount: 100, delay: delayed ? 500 + i*50 : 500 }}
@@ -162,7 +163,7 @@ $effect(() => {
 			{@render moduleContent(module)}
 		</a>
 	{:else}
-		<div class="module {size ? size : module.size} {module.fixedHeight ? 'fixedHeight' : ''} {module.position ? module.position : 'left'}" data-kind={module.kind}
+		<div class:homepage={$page.url.pathname === "/"} class="module {size ? size : module.size} {(module.kind === "composition" && module.fixedHeight) ? 'fixedHeight' : ''} {module.position ? module.position : 'left'}" data-kind={module.kind}
 		style="background-color: {color ? 'var(--white)' : module.color?.hex}; color: {isDark(module.color?.hex) && !color ? "var(--white)" : "var(--black)"}"
 		in:blur|global={{ duration: 200, amount: 100, delay: delayed ? 500 + i*50 : 500 }}
 		out:blur|global={{ duration: 200, amount: 100 }}
@@ -194,9 +195,6 @@ $effect(() => {
 	gap: 1px;
 }
 [data-kind="composition"] .media-container.fixedHeight {
-	/* display: flex;
-	overflow: scroll;
-	gap: 1px; */
 	display: block;
 	width: auto;
 	max-width: 100vw;
@@ -267,5 +265,17 @@ $effect(() => {
 }
 [data-kind="box"] .project {
     width: 100%;
+}
+
+/* General */
+:global(.scattered .text-container) {
+	max-height: 100vh;
+    overflow: scroll;
+}
+.homepage[data-kind="slider"] {
+	width: 80vw;
+}
+.homepage[data-kind="composition"] .media-container.fixedHeight {
+	max-width: 80vw;
 }
 </style>

@@ -20,6 +20,10 @@ onMount(() => {
 	tagger.setMaxTags(0)
 })
 
+// Coordinates
+import { getCoordinates } from '$lib/stores/coordinates.svelte.js';
+let coordinater = getCoordinates()
+
 $effect(() => {
 	domLoaded = true
 })
@@ -48,7 +52,7 @@ $effect(() => {
 		</div>
 		{#each data.index as project, i}
 			<li class="project" class:singlePage={project.singlePage} class:active={indexHover === i}
-			onmouseenter={() => {indexHover = i; console.log(projectHover)}}
+			onmouseenter={() => {indexHover = i; console.log(projectHover); (project.locations?.[0]?.latitude && project.locations?.[0]?.longitude) ? coordinater.setCoordinates(project.locations[0].latitude, project.locations[0].longitude) : coordinater.setCoordinates(null, null)}}
 			>
 				<a class="project-link" href={project.singlePage ? `/index/${project.slug.current}` : ``}>
 					<p class="year">{new Date(project.date).getFullYear()}</p>
