@@ -77,7 +77,8 @@ $effect(() => {
 			const gridX = Math.floor(-positionX / innerWidth);
 			const gridY = Math.floor(-positionY / innerHeight);
 			const key = `${gridX},${gridY}`;
-			const spiralCoords = getSpiralCoords(10);
+			// const spiralCoords = getSpiralCoords(data.modules.length);
+			const spiralCoords = getSpiralCoords(2);
 			for (const [dx, dy] of spiralCoords) {
 				const x = gridX + dx;
 				const y = gridY + dy;
@@ -164,8 +165,8 @@ function isInView(gridX, gridY) {
 }
 function getTransformFn(module, index = 0) {
 	return () => {
-		const x = (calculateStartingPositionX(module.gridX) + positionX - innerWidth) * zoomer.scale;
-		const y = (calculateStartingPositionY(module.gridY) + positionY - innerHeight) * zoomer.scale;
+		const x = (calculateStartingPositionX(module.gridX) + positionX) * zoomer.scale;
+		const y = (calculateStartingPositionY(module.gridY) + positionY) * zoomer.scale;
 		return { x, y, scale: zoomer.scale };
 	};
 }
@@ -198,6 +199,29 @@ function getSpiralCoords(range) {
 	coords.unshift([0, 0]);
 	return coords;
 }
+// function getSpiralCoords(count) {
+// 	const coords = [];
+// 	let x = 0, y = 0;
+// 	let dx = 0, dy = -1;
+// 	let step = 0;
+
+// 	while (coords.length < count) {
+// 		if (-count < x && x < count && -count < y && y < count) {
+// 			coords.push([x, y]);
+// 		}
+
+// 		if (x === y || (x < 0 && x === -y) || (x > 0 && x === 1 - y)) {
+// 			// Change direction: right → down → left → up
+// 			[dx, dy] = [-dy, dx];
+// 		}
+
+// 		x += dx;
+// 		y += dy;
+// 	}
+
+// 	return coords;
+// }
+
 function handleMouseEnter(latitude, longitude) {
 	if (latitude && longitude) {
 		coordinater.setCoordinates(latitude, longitude)
@@ -264,6 +288,7 @@ function handleMouseEnter(latitude, longitude) {
 					class:scattered={data.searchTags.length === 0 || !data.searchString}
 					use:gsapTransform={getTransformFn(module)}
 					>
+					<p class="gaisyr-34">{i}</p>
 						<!-- <div onmouseenter={() => {handleMouseEnter(module.latitude, module.longitude)}}> -->
 							{#if module.modules}
 									<Serie slides={module.modules} project={module.project} size={module.size} hiddenProject={true} link={false} delayed={false}/>
