@@ -61,14 +61,15 @@ onMount(() => {
 		search = data.searchString
 		searchActive = true
 	}
-})
-$effect(() => {
 	setTimeout(() => {
 		domLoaded = true
 	}, 1500);
 	setTimeout(() => {
 		mainLoaded = true
 	}, 3000);
+})
+$effect(() => {
+
 })
 
 // Functions
@@ -81,7 +82,7 @@ function toggleTag(tagSlug) {
 	const tags = url.searchParams.getAll('tag');
 
 	const tagIndex = tags.indexOf(tagSlug);
-
+	menuActive = false;
 	if (tagIndex > -1) {
 		// Remove the tag
 		const newTags = tags.filter(t => t !== tagSlug);
@@ -89,11 +90,17 @@ function toggleTag(tagSlug) {
 		newTags.forEach(t => url.searchParams.append('tag', t));
 		if (data.searchTags.length > tagger.firstMaxTags) {
 			tagger.setMaxTags(tagger.maxTags - 1)
+		} else {
+			if (data.searchTags.length === 1) {
+				tagger.setMaxTags(tagger.firstMaxTags)
+			} else {
+				tagger.setMaxTags(tagger.maxTags - 1)
+			}
 		}
 	} else {
 		// Add the tag
 		url.searchParams.append('tag', tagSlug);
-		if (data.searchTags.length > tagger.firstMaxTags) {
+		if (data.searchTags.length > tagger.firstMaxTags || innerWidth < 700) {
 			tagger.setMaxTags(data.searchTags.length + 1)
 		}
 	}
@@ -233,7 +240,7 @@ function handleKey({key}) {if (key === 'G' && dev) {viewGrid = !viewGrid}}
 		{/if}
 		<ul class="menu gaisyr-34 mobile-gaisyr-30"
 		class:blurred={header.blurred}
-		onclick={() => {menuActive = false; setTimeout(() => {header.setBlurred(true)}, 700);}}
+		onclick={() => {menuActive = false}}
 		onmouseenter={() => {header.setBlurred(false); clearTimeout(blurredTimeout);}}
 		onmouseleave={() => {clearTimeout(blurredTimeout); blurredTimeout = setTimeout(() => {header.setBlurred(true)}, 2000);}}
 		>
@@ -248,9 +255,7 @@ function handleKey({key}) {if (key === 'G' && dev) {viewGrid = !viewGrid}}
 			>
 				<a href="/about"><span class="ls-30">A</span><span class="ls-70">b</span><span class="ls-30">o</span><span class="ls-7">u</span>t</a>
 			</li>
-			<li class="menu-item" class:visible={menuActive || $page.url.pathname === "/map"} class:active={$page.url.pathname === "/map"}
-
-			>
+			<li class="menu-item" class:visible={menuActive || $page.url.pathname === "/map"} class:active={$page.url.pathname === "/map"}>
 				<a href="/map"><span class="ls-70">M</span><span class="ls-7">a</span>p</a>
 			</li>
 		</ul>
@@ -322,10 +327,17 @@ function handleKey({key}) {if (key === 'G' && dev) {viewGrid = !viewGrid}}
 			onkeydown={(e) => {handleKeydown(e)}}
 			>
 		{/if}
-		<button id="search-btn-mobile" class="btn shadow" onclick={() => {handleSearchBtnMobile()}}
-		in:slide|global={{ axis: "x", duration: 200 }}
-		out:slide|global={{ axis: "x", duration: 200 }}
-		>Cerca</button>
+		{#if extraer.extra}
+			<button id="search-btn-mobile" class="btn shadow" onclick={() => {extraer.setExtraOpen(!extraer.extraOpen)}}
+			in:slide|global={{ axis: "x", duration: 200 }}
+			out:slide|global={{ axis: "x", duration: 200 }}
+			>{extraer.extraOpen ? 'Chiudi' : 'Extra'}</button>
+		{:else}
+			<button id="search-btn-mobile" class="btn shadow" onclick={() => {handleSearchBtnMobile()}}
+			in:slide|global={{ axis: "x", duration: 200 }}
+			out:slide|global={{ axis: "x", duration: 200 }}
+			>Cerca</button>
+		{/if}
 	</nav>
 </header>
 

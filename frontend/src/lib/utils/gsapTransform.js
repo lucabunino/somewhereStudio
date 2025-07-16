@@ -7,7 +7,6 @@ export function gsapTransform(node, getTransform) {
 
 	function loop() {
 		const { x, y, scale } = getTransform();
-
 		// Only animate if something changed
 		const hasChanged = (
 			x !== prev.x || y !== prev.y || scale !== prev.scale
@@ -23,8 +22,8 @@ export function gsapTransform(node, getTransform) {
 			} else {
 				gsap.to(node, {
 					x, y, scale,
-					duration: .5,
-					ease: "power3.out",
+					duration: .4,
+					ease: "power5.out",
 					transformOrigin: "center center"
 				});
 			}

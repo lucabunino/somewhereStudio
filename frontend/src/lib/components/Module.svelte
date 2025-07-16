@@ -144,9 +144,9 @@ $effect(() => {
 	{:else}
 	    <p class="gaisyr-34 todo">No style for {module.kind}</p>
 	{/if}
-	{#if !hiddenProject}
+	{#if !hiddenProject && module.project?.slug}
         {#if !['box'].includes(module.kind)}
-            <div class="project ronzino-12 medium uppercase" bind:clientHeight={linkHeight}>{#if module.project?.slug}{module.project.title}{:else}<span style="color: red;">No linked project</span>{/if}</div>
+            <div class="project ronzino-12 medium uppercase" bind:clientHeight={linkHeight}>{module.project.title}</div>
         {/if}
 	{/if}
 {/snippet}

@@ -3,15 +3,16 @@ import Serie from "$lib/components/Serie.svelte";
 import Module from "$lib/components/Module.svelte";
 import Media from "$lib/components/Media.svelte";
 import { blur, slide } from "svelte/transition";
-import { onMount } from "svelte";
+import { onDestroy, onMount } from "svelte";
 import { isDark } from "$lib/utils/color";
 
 let { data } = $props();
-let extraOpen = $state(false)
 let domLoaded = $state(false)
 let innerWidth = $state()
 let innerHeight = $state()
 let singleProjectHeight = $state()
+let introHeight = $state()
+let body = $state()
 
 // Bg
 import { getBg } from '$lib/stores/bg.svelte.js';
@@ -32,6 +33,7 @@ let zoomer = getZoom()
 // Extra
 import { getExtra } from '$lib/stores/extra.svelte.js';
 let extraer = getExtra()
+
 if (data.project[0].extra) {
 	extraer.setExtra(true)
 }
@@ -47,10 +49,20 @@ onMount(() => {
 })
 $effect(() => {
 	domLoaded = true;
-	return () => {
-		extraer.setExtra(false)
-		bger.setBg(null)
-	};
+	if (extraer.extraOpen == true) {
+		console.log("open");
+		body.style.overflow = 'hidden';
+	} else {
+		console.log("close");
+		body.style.overflow = '';
+	}
+})
+
+onDestroy(() => {
+	extraer.setExtra(false)
+	extraer.setExtraOpen(false)
+	body.style.overflow = '';
+	bger.setBg(null)
 })
 
 function handleMouseEnter(latitude, longitude) {
@@ -62,6 +74,7 @@ function handleMouseEnter(latitude, longitude) {
 }
 </script>
 
+<svelte:body bind:this={body}/>
 <svelte:window bind:innerWidth bind:innerHeight></svelte:window>
 
 {#if domLoaded}
@@ -76,6 +89,7 @@ function handleMouseEnter(latitude, longitude) {
 		<div class="module intro ronzino-12 medium uppercase"
 		in:blur|global={{ duration: 200, delay: 500 }}
 		out:blur|global={{ duration: 200}}
+		bind:clientHeight={introHeight}
 		>
 			<h1 class="project-title gaisyr-34 mobile-gaisyr-30 normalcase">{data.project[0].title}</h1>
 			{#if data.project[0].collaborations}
@@ -109,11 +123,34 @@ function handleMouseEnter(latitude, longitude) {
 	</section>
 	{#if data.project[0].extra}
 		<section id="extra"
-		class:open={extraOpen}
-		onclick={() => {extraOpen ? '' : extraOpen = true}}
+		class:open={extraer.extraOpen}
+		onclick={() => {!extraer.extraOpen && extraer.setExtraOpen(true)}}
 		in:slide|global={{ axis: 'x', duration: 200, delay: 500 }}
 		out:slide|global={{ axis: 'x', duration: 200}}
+		style={`--introHeight: ${0}px`}
 		>
+		
+		<div class="module intro ronzino-12 medium uppercase mobile-only"
+		in:blur|global={{ duration: 200, delay: 500 }}
+		out:blur|global={{ duration: 200}}
+		bind:clientHeight={introHeight}
+		>
+			<h1 class="project-title gaisyr-34 mobile-gaisyr-30 normalcase">{data.project[0].title}</h1>
+			{#if data.project[0].collaborations}
+				<p class="collaborations">In collaborazione con {#each data.project[0].collaborations as collaboration, j}{collaboration.title}{#if data.project[0].collaborations?.length - 1 > j}{@html ', '}{/if}{/each}</p>
+			{/if}
+			{#if data.project[0].date || data.project[0].locations}
+				<p class="date-and-location">
+					{#if data.project[0].date}
+						<span class="date">{new Date(data.project[0].date).getFullYear()}{#if data.project[0].locations}{@html ', '}{/if}</span>
+					{/if}
+					{#if data.project[0].locations}
+						<span class="locations">{#each data.project[0].locations as location, j}{location.title}{#if data.project[0].locations?.length - 1 > j}{@html ', '}{/if}{/each}</span>
+					{/if}
+				</p>
+			{/if}
+		</div>
+
 			<h4 class="ronzino-12 medium uppercase">Extra</h4>
 				<div class="extra-container">
 					{#each data.project[0].extra as extra, i}
@@ -125,8 +162,9 @@ function handleMouseEnter(latitude, longitude) {
 					{/each}
 				</div>
 		</section>
-		<div id="extraSwitch" class:open={extraOpen}
-		onclick={() => {extraOpen ? extraOpen = false : ''}}
+		<div id="extraSwitch" class:open={extraer.extraOpen}
+		onclick={() => {extraer.extraOpen && extraer.setExtraOpen(false)}}
+		style={`--introHeight: ${introHeight}px`}
 		></div>
 	{/if}
 {/if}
@@ -218,6 +256,42 @@ function handleMouseEnter(latitude, longitude) {
 		width: 100%;
 		max-width: unset;
 		padding: calc(var(--gutter)*2.4) var(--gutter) 5rem;
+	}
+	#singleProject.extra {
+		width: 100%;
+	}
+	#extra {
+		width: 100vw;
+		transform: translateY(100vh);
+		padding-top: 0;
+		margin-top: var(--introHeight);
+		height: calc(100vh - var(--introHeight));
+		z-index: 6;
+		transition: none;
+	}
+	#extra:not(.open):hover {
+		transform: unset;
+	}
+	#extra.open {
+		transform: translateY(0);
+	}
+	#extraSwitch {
+		position: fixed;
+		top: 0;
+		left: 0;
+		height: var(--introHeight);
+		transform: translateY(100vh);
+		width: 100%;
+	}
+	#extraSwitch.open {
+		z-index: 7;
+		transform: translateY(0);
+	}
+	.extra-container {
+		margin-bottom: 6rem;
+	}
+	#extra .intro {
+		padding: calc(var(--gutter)*2.4) 0 5rem;
 	}
 }
 </style>

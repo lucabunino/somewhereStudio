@@ -16,6 +16,9 @@ let zoomer = getZoom()
 import { getTags } from '$lib/stores/tag.svelte.js';
 let tagger = getTags()
 
+import { getHeader } from '$lib/stores/header.svelte.js';
+let header = getHeader()
+
 let { data } = $props()
 let initialModules = $derived(applyInitialSpiderfy(data.modules))
 
@@ -36,12 +39,10 @@ onMount(() => {
 		tagger.setMaxTags(data.searchTags.length)
 	};
 	createMap()
+	header.setBlurred(true);
 });
 
 $effect(() => {
-	// tick().then(() => {
-	// 	console.log("Map loading");		
-	// });
 	if (data.searchTags !== oldsearchTags) {
 		if (map) {
 			map.remove();	
@@ -72,7 +73,6 @@ function createMap() {
 		minZoom: zoomer.mapMinZoom,
 		maxZoom: zoomer.mapMaxZoom,
 		projection: 'mercator',
-		// localFontFamily: 'Ronzino, Arial, Helvetica, sans-serif',
 	});
 
 	initialModules.forEach((module, i) => {
@@ -135,6 +135,7 @@ function createMap() {
 				if (dist < 30) { // 30 px radius
 					const clusterId = f.properties.cluster_id;
 					map.getSource('modules').getClusterExpansionZoom(clusterId, (err, zoom) => {
+						zoom += 3;
 						if (err) return;
 						map.easeTo({
 							center: f.geometry.coordinates,
@@ -332,28 +333,18 @@ function updateData() {
 <!-- {#key data.searchTags} -->
 <div id="map" bind:this={mapContainer} onwheel={(e) => panHandler(e)}></div>
 <div id="map-ui">
-	<div id="cross">
+	<!-- <div id="cross">
 		<div class="line"></div>
 		<div class="line"></div>
-	</div>
+	</div> -->
 	<div class="line top"></div>
 	<div class="line right"></div>
 	<div class="line bottom"></div>
 	<div class="line left"></div>
 </div>
-<!-- {/key} -->
-
-<!-- {#if activeModule !== undefined}
-	<div class="module-container active" style="pointer-events: all;" use:clickOutside onclick_outside={() => handleClickOutside()}>
-		<Module module={data.modules[activeModule]} i={activeModule} delayed={false} />
-	</div>
-{/if} -->
 
 
 {#each initialModules as module, i}
-	<!-- <div class="marker" bind:this={els[i]}
-	onclick={() => {handleClick(i, module.latitude, module.longitude)}}
-	></div> -->
 	<div class="module-container" bind:this={modules[i]} class:active={activeModule === i}>
 		{#if activeModule == i}
 			<div style="transform: scale({innerWidth < 700 ? .9 : .5}); transform-origin: center; pointer-events: all;"
@@ -363,10 +354,6 @@ function updateData() {
 		{/if}
 	</div>
 {/each}
-
-<div class="sidebar">
-	Longitude: {coordinater.coordinates.longitude} | Latitude: {coordinater.coordinates.latitude} | Zoom: {zoomer.mapZoom}
-</div>
 
 <style>
 #map {

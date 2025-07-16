@@ -1,6 +1,6 @@
 <script>
 import { slide } from 'svelte/transition';
-
+import { onMount } from "svelte";
 
 // Variables
 let { data } = $props()
@@ -8,9 +8,15 @@ let domLoaded = $state(false)
 let innerWidth = $state(0)
 let innerHeight = $state(0)
 
-// Tags
 import { getTags } from '$lib/stores/tag.svelte.js';
 let tagger = getTags()
+
+import { getHeader } from '$lib/stores/header.svelte.js';
+let header = getHeader()
+
+onMount(() => {
+	header.setBlurred(true)
+})
 
 $effect(() => {
 	domLoaded = true
@@ -67,9 +73,13 @@ $effect(() => {
 	width: 100vw;
 	padding: calc(var(--gutter) + .2rem) var(--gutter) 0;
 }
-.about, .clients {
+.about {
 	margin-left: 30vw;
 	text-indent: calc(-30vw + 14.2rem + var(--gutter));
+}
+.clients {
+	text-indent: 0;
+	margin-left: 0;
 }
 .contacts {
 	margin-top: .5em;
@@ -97,6 +107,25 @@ $effect(() => {
 .person h3 {
 	margin-bottom: .3em;
 }
+@media screen and (max-width: 1100px) {
+	.about {
+		margin-top: 6rem;
+		margin-left: 0;
+		text-indent: 0;
+	}
+	.contacts {
+		margin-left: 0;
+	}
+}
+@media screen and (max-width: 900px) {
+	.people {
+		grid-template-columns: repeat(1, 1fr);
+		gap: 6rem;
+	}
+	.person h3 {
+		margin-bottom: 1.7rem;
+	}
+}
 @media screen and (max-width: 700px) {
 	#about {
 		display: flex;
@@ -104,23 +133,6 @@ $effect(() => {
 		align-items: flex-start;
 		width: 100vw;
 		padding: calc(var(--gutter) + .2rem) var(--gutter) 0;
-	}
-	.about, .clients {
-		margin-left: 0;
-		text-indent: 0;
-	}
-	.about {
-		margin-top: 6rem;
-	}
-	.contacts {
-		margin-left: 0;
-	}
-	.people {
-		grid-template-columns: repeat(1, 1fr);
-		gap: 6rem;
-	}
-	.person h3 {
-		margin-bottom: 1.7rem;
 	}
 }
 </style>

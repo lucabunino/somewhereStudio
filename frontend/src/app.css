@@ -224,10 +224,28 @@ a:any-link.underline,
 	opacity: 0;
 	pointer-events: none;
 }
-.mobile-only {
+.mobile-only, .mobile-inline {
 	display: none;
 }
+
+@media screen and (max-width: 1200px) {
+	.gaisyr-34 {
+		font-family: Gaisyr, 'Times New Roman', Times, serif;
+		font-size: 2rem;
+		letter-spacing: -0.03em;
+		line-height: 0.970;
+	}
+}
 @media screen and (max-width: 700px) {
+	.desktop-only {
+		display: none;
+	}
+	.mobile-only {
+		display: inherit;
+	}
+	.mobile-inline {
+		display: inline;
+	}
 	:root {
 		--gutter: 0.636rem;
 	}
@@ -367,7 +385,19 @@ a:any-link.underline,
 	.xl {
 		width: 100vw;
 	}
+	.scattered .xs {
+		width: 50vw;
+	}
+	.scattered .s {
+		width: 60vw;
+	}
+	.scattered .m {
+		width: 70vw;
+	}
+	.scattered .l {
+		width: 80vw;
+	}
 	.scattered .xl {
-		width: 100vw;
+		width: 90vw;
 	}
 }

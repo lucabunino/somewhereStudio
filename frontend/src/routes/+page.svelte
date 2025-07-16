@@ -50,15 +50,16 @@ let isDragging = false;
 let dragStart = { x: 0, y: 0 };
 let positionStart = { x: 0, y: 0 };
 let checkCellTimer = $state();
-let preloadFactor = 4
-const sizerX = 1
-const sizerY = 1.2
+let preloadFactor = $derived(innerWidth > 700 ? 4 : 8)
+const sizerX = $derived(innerWidth > 700 ? 1 : 1.2)
+const sizerY = $derived(innerWidth > 700 ? 1.1 : .6)
+const randomFactor = $derived(innerWidth > 700 ? .2 : .1)
 let bufferX = $derived(innerWidth / zoomer.zoom * preloadFactor * sizerX)
 let bufferY = $derived(innerHeight / zoomer.zoom * preloadFactor * sizerY)
 
 // Lifecycle
 onMount(() => {
-	zoomer.setZoom(zoomer.initialZoom)
+	zoomer.setZoom(3)
 	tagger.setTags(data.tags, { keepHierarchy: false })
 	tagger.setMaxTags(tagger.firstMaxTags)
 	if (data.searchTags.length > tagger.firstMaxTags) {
@@ -67,6 +68,9 @@ onMount(() => {
 })
 $effect(() => {
 	domLoaded = true;
+	if (innerWidth < 700) {
+		zoomer.setZoom(5)
+	}
 	if (data.searchTags.length !== lastLength) {
 		lastLength = data.searchTags.length;
 	}
@@ -74,11 +78,11 @@ $effect(() => {
 		if (checkCellTimer) return;
 		checkCellTimer = requestAnimationFrame(() => {
 			checkCellTimer = null;
-			const gridX = Math.floor(-positionX / innerWidth);
-			const gridY = Math.floor(-positionY / innerHeight);
+			const gridX = Math.floor(-positionX / (innerWidth * sizerX));
+			const gridY = Math.floor(-positionY / (innerHeight * sizerY));
 			const key = `${gridX},${gridY}`;
 			// const spiralCoords = getSpiralCoords(data.modules.length);
-			const spiralCoords = getSpiralCoords(2);
+			const spiralCoords = getSpiralCoords(3);
 			for (const [dx, dy] of spiralCoords) {
 				const x = gridX + dx;
 				const y = gridY + dy;
@@ -91,6 +95,8 @@ $effect(() => {
 				}
 			}
 		});
+	} else {
+		zoomer.setZoom(zoomer.initialZoom)
 	}
 })
 function addModule(gridX, gridY) {
@@ -100,6 +106,8 @@ function addModule(gridX, gridY) {
 		gridX,
 		gridY,
 		index,
+		offsetX: (Math.random() - 0.5) * innerWidth * randomFactor,
+		offsetY: (Math.random() - 0.5) * innerHeight * randomFactor,
 	});
 	visitedCells.push(`${gridX},${gridY}`);
 }
@@ -115,10 +123,8 @@ function removeModule(gridX, gridY) {
 	}
 }
 function updatePosition(deltaX, deltaY, baseSpeed = 1) {
-	const scaleX = zoomer.scale * sizerX;
-	const scaleY = zoomer.scale * sizerY;
-	positionX += deltaX * baseSpeed / scaleX;
-	positionY += deltaY * baseSpeed / scaleY;
+	positionX += deltaX * baseSpeed / (zoomer.scale * sizerX);
+	positionY += deltaY * baseSpeed / (zoomer.scale * sizerY);
 }
 
 function handleScroll(e) {	
@@ -147,26 +153,27 @@ function handleMouseMove(e) {
 function handleMouseUp() {
 	isDragging = false;
 }
-function calculateStartingPositionX(gridX) {
-	return gridX * innerWidth * sizerX + innerWidth / 2;
-}
-function calculateStartingPositionY(gridY) {
-	return gridY * innerHeight * sizerY + innerHeight / 2;
-}
 function isInView(gridX, gridY) {
-	const x = (gridX * innerWidth * sizerX + innerWidth / 2 + positionX);
-	const y = (gridY * innerHeight * sizerY + innerHeight / 2 + positionY);
+	const scaledInnerWidth = innerWidth / zoomer.zoom;
+	const scaledInnerHeight = innerHeight / zoomer.zoom;
+
+	const x = gridX * innerWidth * sizerX + positionX;
+	const y = gridY * innerHeight * sizerY + positionY;
+
 	return (
-		x + bufferX > 0 &&
-		x - bufferX < innerWidth &&
-		y + bufferY > 0 &&
-		y - bufferY < innerHeight
+		x + scaledInnerWidth * preloadFactor > 0 &&
+		x - scaledInnerWidth * preloadFactor < innerWidth &&
+		y + scaledInnerHeight * preloadFactor > 0 &&
+		y - scaledInnerHeight * preloadFactor < innerHeight
 	);
 }
+
 function getTransformFn(module, index = 0) {
 	return () => {
-		const x = (calculateStartingPositionX(module.gridX) + positionX) * zoomer.scale;
-		const y = (calculateStartingPositionY(module.gridY) + positionY) * zoomer.scale;
+		const baseX = module.gridX * innerWidth * sizerX + innerWidth/2;
+		const baseY = module.gridY * innerHeight * sizerY + innerHeight/2;
+		const x = (baseX + positionX + module.offsetX) * zoomer.scale;
+		const y = (baseY + positionY + module.offsetY) * zoomer.scale;
 		return { x, y, scale: zoomer.scale };
 	};
 }
@@ -180,7 +187,7 @@ function applyZoom() {
 	positionX = -(worldCenterX - screenCenterX / zoomer.scale);
 	positionY = -(worldCenterY - screenCenterY / zoomer.scale);
 
-	oldScale = zoomer.step * zoomer.zoom;
+	oldScale = zoomer.scale;
 }
 function getSpiralCoords(range) {
 	const coords = [];
@@ -199,28 +206,6 @@ function getSpiralCoords(range) {
 	coords.unshift([0, 0]);
 	return coords;
 }
-// function getSpiralCoords(count) {
-// 	const coords = [];
-// 	let x = 0, y = 0;
-// 	let dx = 0, dy = -1;
-// 	let step = 0;
-
-// 	while (coords.length < count) {
-// 		if (-count < x && x < count && -count < y && y < count) {
-// 			coords.push([x, y]);
-// 		}
-
-// 		if (x === y || (x < 0 && x === -y) || (x > 0 && x === 1 - y)) {
-// 			// Change direction: right → down → left → up
-// 			[dx, dy] = [-dy, dx];
-// 		}
-
-// 		x += dx;
-// 		y += dy;
-// 	}
-
-// 	return coords;
-// }
 
 function handleMouseEnter(latitude, longitude) {
 	if (latitude && longitude) {
@@ -230,77 +215,131 @@ function handleMouseEnter(latitude, longitude) {
 	}
 }
 
+let velocityX = 0;
+let velocityY = 0;
+let momentumFrame;
+
+function handleTouchStart(e) {
+  isDragging = true;
+  cancelMomentum();
+  enableAnimation = false;
+
+  const touch = e.touches[0];
+  lastX = touch.clientX;
+  lastY = touch.clientY;
+  velocityX = 0;
+  velocityY = 0;
+}
+
+function handleTouchMove(e) {
+  if (!isDragging || e.touches.length !== 1) return;
+
+  const touch = e.touches[0];
+  const deltaX = touch.clientX - lastX;
+  const deltaY = touch.clientY - lastY;
+
+  velocityX = deltaX;
+  velocityY = deltaY;
+
+  lastX = touch.clientX;
+  lastY = touch.clientY;
+
+  updatePosition(deltaX, deltaY, 2);
+}
+
+function handleTouchEnd(e) {
+  isDragging = false;
+  enableAnimation = true;
+  startMomentum(velocityX, velocityY);
+}
+
+function startMomentum(vx, vy) {
+  const friction = 0.95;
+  const threshold = 0.5;
+
+  function step() {
+    vx *= friction;
+    vy *= friction;
+
+    if (Math.abs(vx) > threshold || Math.abs(vy) > threshold) {
+      updatePosition(vx, vy, 2);
+      momentumFrame = requestAnimationFrame(step);
+    } else {
+      cancelMomentum();
+    }
+  }
+
+  momentumFrame = requestAnimationFrame(step);
+}
+
+function cancelMomentum() {
+  if (momentumFrame) {
+    cancelAnimationFrame(momentumFrame);
+    momentumFrame = null;
+  }
+}
+
+
 </script>
 
 <svelte:window bind:innerWidth bind:innerHeight></svelte:window>
 
 <!-- svelte-ignore a11y_no_static_element_interactions -->
-<!-- <p style="position: fixed; top:50%; left:50%; background-color:white; z-index:999;">{positionX} / {modules.length}</p> -->
-<!-- {#key data.searchTags} -->
+{#key data.searchTags}
 	<section id="modules"
 	bind:clientHeight={modulesHeight}
 	onmousewheel={(e) => {handleScroll(e)}}
 	onmousedown={(e) => {handleMouseDown(e)}}
 	onmousemove={(e) => {handleMouseMove(e)}}
 	onmouseup={(e) => {handleMouseUp(e)}}
-	style={(data.searchTags.length === 0 && !data.searchString) ? `height: 100vh; position:fixed;` : `height: auto; margin-bottom: ${(modulesHeight - modulesHeight*zoomer.scale)*-1}px; transform: scale(${zoomer.scale}); transform-origin: top;`}
+	ontouchstart={handleTouchStart}
+  	ontouchmove={handleTouchMove}
+  	ontouchend={handleTouchEnd}
+	style={(data.searchTags.length === 0 && !data.searchString)
+		? `height: 100vh; position:fixed;`
+		: `height: auto; margin-bottom: ${(modulesHeight - modulesHeight*zoomer.scale)*-1}px; transform: scale(${zoomer.scale}); transform-origin: top;`}
 	class:scattered={data.searchTags.length === 0 && !data.searchString}
 	>
-	<!-- <section id="modules"
-	bind:clientHeight={modulesHeight}
-	onmousewheel={(e) => {handleScroll(e)}}
-	onmousedown={(e) => {handleMouseDown(e)}}
-	onmousemove={(e) => {handleMouseMove(e)}}
-	onmouseup={(e) => {handleMouseUp(e)}}
-	style={data.searchTags.length === 0 ? `height: 100vh; position:fixed;` : `height: auto; margin-bottom: -${modulesHeight - modulesHeight*zoomer.scale}px;`}
-	class:scattered={data.searchTags.length === 0}
-	use:gsapScale={data.searchTags.length > 0 ? zoomer.scale : 1}
-	> -->
-			{#if data.searchTags.length > 0 || data.searchString}
-				<div class="module intro gaisyr-34"
-				in:blur|global={{ duration: 200, delay: 500 }}
-				out:blur|global={{ duration: 200}}
-				>{data.modules.length} Risultati per:
-					{#if data.searchString != undefined}
-						'{data.searchString}'{#if data.searchTags.length > 0}{@html ' in '}{/if}
-					{/if}
-					{#each data.searchTags as searchParam, i}
-						{#each data.tags.filter(tag => tag.slug.current === searchParam) as tag, j}{tag.title}{/each}{#if data.searchTags.length - 1 > i}{@html ', '}{/if}
-					{/each}
+		{#if data.searchTags.length > 0 || data.searchString}
+			<div class="module intro gaisyr-34"
+			in:blur|global={{ duration: 200, delay: 500 }}
+			out:blur|global={{ duration: 200}}
+			>{data.modules.length} Risultati per:
+				{#if data.searchString != undefined}
+					'{data.searchString}'{#if data.searchTags.length > 0}{@html ' in '}{/if}
+				{/if}
+				{#each data.searchTags as searchParam, i}
+					{#each data.tags.filter(tag => tag.slug.current === searchParam) as tag, j}{tag.title}{/each}{#if data.searchTags.length - 1 > i}{@html ', '}{/if}
+				{/each}
+			</div>
+			{#each data.modules as module, i}
+				<div class="module-container">
+					<div onmouseenter={() => {handleMouseEnter(module.latitude || module.reference?.latitude || null, module.longitude || module.reference?.longitude || null)}}>
+						{#if module.modules}
+								<Serie slides={module.modules} project={module.project} size={module.size} hiddenProject={true} link={false}/>
+						{:else}
+								<Module module={module} i={i} delayed={false}/>
+						{/if}
+					</div>
 				</div>
-				{#each data.modules as module, i}
-					<div class="module-container">
-						<div onmouseenter={() => {handleMouseEnter(module.latitude || module.reference?.latitude || null, module.longitude || module.reference?.longitude || null)}}>
-							{#if module.modules}
-									<Serie slides={module.modules} project={module.project} size={module.size} hiddenProject={true} link={false}/>
-							{:else}
-									<Module module={module} i={i} delayed={false}/>
-							{/if}
-						</div>
-					</div>
-				{/each}
-			{:else}
-				{#each activeModules as module, i (module.gridX + '-' + module.gridY)}
-					{@const startingPositionX = calculateStartingPositionX(module.gridX)}
-					{@const startingPositionY = calculateStartingPositionY(module.gridY)}
-					<div class="module-container"
-					onmouseenter={() => {handleMouseEnter(module.latitude, module.longitude)}}
-					class:scattered={data.searchTags.length === 0 || !data.searchString}
-					use:gsapTransform={getTransformFn(module)}
-					>
-					<p class="gaisyr-34">{i}</p>
-						<!-- <div onmouseenter={() => {handleMouseEnter(module.latitude, module.longitude)}}> -->
-							{#if module.modules}
-									<Serie slides={module.modules} project={module.project} size={module.size} hiddenProject={true} link={false} delayed={false}/>
-							{:else}
-									<Module module={module} i={i} delayed={false}/>
-							{/if}
-						<!-- </div> -->
-					</div>
-				{/each}
-			{/if}
+			{/each}
+		{:else}
+			{#each activeModules as module, i (module.gridX + '-' + module.gridY)}
+				<div class="module-container"
+				onmouseenter={() => {handleMouseEnter(module.latitude, module.longitude)}}
+				class:scattered={data.searchTags.length === 0 || !data.searchString}
+				use:gsapTransform={getTransformFn(module)}
+				>
+					{#if module.modules}
+							<Serie slides={module.modules} project={module.project} size={module.size} hiddenProject={true} link={false} delayed={false}/>
+					{:else}
+							<Module module={module} i={i} delayed={false}/>
+					{/if}
+				</div>
+			{/each}
+		{/if}
 	</section>
-<!-- {/key} -->
+{/key}
 
 <style>
 #modules {
@@ -361,6 +400,10 @@ function handleMouseEnter(latitude, longitude) {
 		width: 100%;
 		max-width: unset;
 		padding-top: 18rem;
+	}
+	.scattered .module-container {
+		width: 100vw;
+		height: 70vh;
 	}
 }
 </style>
