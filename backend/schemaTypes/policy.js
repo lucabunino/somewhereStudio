@@ -37,10 +37,6 @@ export default {
 						{title: 'Bullet', value: 'bullet'},
 					],
 					marks: {
-						decorators: [
-							{title: 'Strong', value: 'strong'},
-							{title: 'Emphasis', value: 'em'},
-						],
 						annotations: [
 							{
 								name: 'link',

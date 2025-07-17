@@ -101,6 +101,19 @@ export async function getInfo() {
 		}`
 	);
 }
+export async function getPolicies() {
+	return await client.fetch(`
+		*[_type == "policy" && !(_id in path('drafts.**'))] {
+			...,
+		}`
+	);
+}
+export async function getPolicy(slug) {
+	return await client.fetch(`
+		*[_type == "policy" && kind == $slug && !(_id in path('drafts.**'))][0] {
+			...,
+		}`, { slug });
+}
 // export async function getModules(tags, search) {
 // 	if (tags.length > 0) {
 // 		return await client.fetch(`

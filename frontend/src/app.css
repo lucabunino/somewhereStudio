@@ -227,7 +227,10 @@ a:any-link.underline,
 .mobile-only, .mobile-inline {
 	display: none;
 }
-
+.sup {
+	font-size: .5em;
+    font-weight: 600;
+}
 @media screen and (max-width: 1200px) {
 	.gaisyr-34 {
 		font-family: Gaisyr, 'Times New Roman', Times, serif;
@@ -311,8 +314,20 @@ a:any-link.underline,
 .xl {
 	width: 100vw;
 }
-.extra .xl {
-	width: 96vw;
+.scattered .xs {
+	width: 20vw;
+}
+.scattered .s {
+	width: 30vw;
+}
+.scattered .m {
+	width: 40vw;
+}
+.scattered .l {
+	width: 50vw;
+}
+.scattered .xl {
+	width: 60vw;
 }
 .fixedHeight.xs {
 	width: unset;
@@ -334,40 +349,40 @@ a:any-link.underline,
 	width: unset;
 	height: 90vh;
 }
-.scattered .xs {
-	width: 20vw;
+.extra .xl {
+	width: 96vw;
 }
-.scattered .s {
-	width: 30vw;
-}
-.scattered .m {
-	width: 40vw;
-}
-.scattered .l {
-	width: 50vw;
-}
-.scattered .xl {
-	width: 60vw;
-}
-#singleProject .left {
-	align-self: flex-start;
-}
-#singleProject .center {
-	align-self: center;
-}
-#singleProject .right {
-	align-self: flex-end;
-}
-[data-kind="composition"] + [data-kind="composition"] .module,
-[data-kind="image"] + [data-kind="image"] .module,
-[data-kind="shortVideo"] + [data-kind="shortVideo"] .module,
-[data-kind="composition"] + [data-kind="image"] .module,
-[data-kind="composition"] + [data-kind="shortVideo"] .module,
-[data-kind="image"] + [data-kind="composition"] .module,
-[data-kind="image"] + [data-kind="shortVideo"] .module,
-[data-kind="shortVideo"] + [data-kind="composition"] .module,
-[data-kind="shortVideo"] + [data-kind="image"] .module {
-	border-top: solid 1px var(--lightGray);
+@media screen and (max-width: 1200px) {
+	.xs {
+		width: 40vw;
+	}
+	.s {
+		width: 50vw;
+	}
+	.m {
+		width: 60vw;
+	}
+	.l {
+		width: 80vw;
+	}
+	.xl {
+		width: 100vw;
+	}
+	.scattered .xs {
+		width: 40vw;
+	}
+	.scattered .s {
+		width: 50vw;
+	}
+	.scattered .m {
+		width: 60vw;
+	}
+	.scattered .l {
+		width: 70vw;
+	}
+	.scattered .xl {
+		width: 80vw;
+	}
 }
 @media screen and (max-width: 700px) {
 	.xs {
@@ -400,4 +415,27 @@ a:any-link.underline,
 	.scattered .xl {
 		width: 90vw;
 	}
+	.extra .xl {
+		width: 100vw;
+	}
+}
+#singleProject .left {
+	align-self: flex-start;
+}
+#singleProject .center {
+	align-self: center;
+}
+#singleProject .right {
+	align-self: flex-end;
+}
+[data-kind="composition"] + [data-kind="composition"] .module,
+[data-kind="image"] + [data-kind="image"] .module,
+[data-kind="shortVideo"] + [data-kind="shortVideo"] .module,
+[data-kind="composition"] + [data-kind="image"] .module,
+[data-kind="composition"] + [data-kind="shortVideo"] .module,
+[data-kind="image"] + [data-kind="composition"] .module,
+[data-kind="image"] + [data-kind="shortVideo"] .module,
+[data-kind="shortVideo"] + [data-kind="composition"] .module,
+[data-kind="shortVideo"] + [data-kind="image"] .module {
+	border-top: solid 1px var(--lightGray);
 }

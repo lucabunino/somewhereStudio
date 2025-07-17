@@ -65,4 +65,10 @@ swiper-container::part(bullet), swiper-container::part(bullet-active) {
 	height: .8em;
 	background-color: var(--darkGray);
 }
+@media screen and (max-width: 700px) {
+	.text {
+		padding-left: var(--gutter);
+		padding-right: var(--gutter);
+	}
+}
 </style>

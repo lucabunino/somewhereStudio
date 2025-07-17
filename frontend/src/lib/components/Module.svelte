@@ -8,7 +8,7 @@ import Slider from "$lib/components/Slider.svelte";
 import SliderFixedHeight from "$lib/components/SliderFixedHeight.svelte";
 import ShortTextStyle from "$lib/components/portableTextStyles/ShortTextStyle.svelte";
 import LongTextStyle from "$lib/components/portableTextStyles/LongTextStyle.svelte";
-import BoxStyle from "$lib/components/portableTextStyles/BoxStyle.svelte";
+import BoxTextStyle from "$lib/components/portableTextStyles/BoxTextStyle.svelte";
 import { PortableText } from '@portabletext/svelte'
 import { page } from '$app/stores';
 let {
@@ -60,7 +60,7 @@ $effect(() => {
 		<div class="media-container {module.side ? `side-${module.side}` : ``}">
 			<div class="text">
                 {#if module.textTitle}
-					<h3 class="ronzino-24">{module.textTitle}</h3>
+					<h3 class="ronzino-18">{module.textTitle}</h3>
 				{/if}
                 {#if module.text1}
                     <div>
@@ -68,12 +68,12 @@ $effect(() => {
                         value={module.text1}
                         components={{
                         block: {
-                            normal: BoxStyle,
-                            h3: BoxStyle,
+                            normal: BoxTextStyle,
+                            h3: BoxTextStyle,
                         },
-                        listItem: BoxStyle,
+                        listItem: BoxTextStyle,
                         marks: {
-                            link: BoxStyle,
+                            link: BoxTextStyle,
                         },
                         }}/>
                     </div>
@@ -106,7 +106,7 @@ $effect(() => {
 	{:else if ['longText'].includes(module.kind)}
         <div class="text-container {module.side ? `side-${module.side}` : ``}">
             {#if module.text1}
-                <div class="text text-big gaisyr-34">
+                <div class="text text-big gaisyr-34" class:noFloat={!module.text2}>
                     <PortableText
                     value={module.text1}
                     components={{
@@ -142,7 +142,7 @@ $effect(() => {
 	{:else if ['quote'].includes(module.kind)}
 	    <Quotes slides={module.quotes} hiddenProject={hiddenProject ? true : false}/>
 	{:else}
-	    <p class="gaisyr-34 todo">No style for {module.kind}</p>
+	    <p class="gaisyr-34 todo">No style for {module.title} {module.kind}</p>
 	{/if}
 	{#if !hiddenProject && module.project?.slug}
         {#if !['box'].includes(module.kind)}
@@ -154,22 +154,39 @@ $effect(() => {
 
 {#if domLoaded}
 	{#if link}
-		<a class:homepage={$page.url.pathname === "/"} class="module {size ? size : module.size} {(module.kind === "composition" && module.fixedHeight) ? 'fixedHeight' : 'autoHeight'} {module.position ? module.position : 'left'}" data-kind={module.kind}
-		href={module.project?.slug ? `/index/${module.project.slug.current}` : ``}
-		style="background-color: {color ? 'var(--white)' : module.color?.hex}; color: {isDark(module.color?.hex) && !color ? "var(--white)" : "var(--black)"}"
-		in:blur|global={{ duration: 200, amount: 100, delay: delayed ? 500 + i*50 : 500 }}
-		out:blur|global={{ duration: 200, amount: 100 }}
-		>
-			{@render moduleContent(module)}
-		</a>
+		{#if innerWidth > 700}
+			<a class:homepage={$page.url.pathname === "/"} class="module {size ? size : module.size} {(module.kind === "composition" && module.fixedHeight) ? 'fixedHeight' : 'autoHeight'} {module.position ? module.position : 'left'}" data-kind={module.kind}
+			href={module.project?.slug ? `/index/${module.project.slug.current}` : ``}
+			style="background-color: {color ? 'var(--white)' : module.color?.hex}; color: {isDark(module.color?.hex) && !color ? "var(--white)" : "var(--black)"}"
+			in:blur|global={{ duration: 400, amount: 20, delay: delayed ? 400 + i*50 : 400 }}
+			out:blur|global={{ duration: 400, amount: 20 }}
+			>
+				{@render moduleContent(module)}
+			</a>
+		{:else}
+			<a class:homepage={$page.url.pathname === "/"} class="module {size ? size : module.size} {(module.kind === "composition" && module.fixedHeight) ? 'fixedHeight' : 'autoHeight'} {module.position ? module.position : 'left'}" data-kind={module.kind}
+			href={module.project?.slug ? `/index/${module.project.slug.current}` : ``}
+			style="background-color: {color ? 'var(--white)' : module.color?.hex}; color: {isDark(module.color?.hex) && !color ? "var(--white)" : "var(--black)"}"
+			>
+				{@render moduleContent(module)}
+			</a>
+		{/if}
 	{:else}
-		<div class:homepage={$page.url.pathname === "/"} class="module {size ? size : module.size} {(module.kind === "composition" && module.fixedHeight) ? 'fixedHeight' : ''} {module.position ? module.position : 'left'}" data-kind={module.kind}
-		style="background-color: {color ? 'var(--white)' : module.color?.hex}; color: {isDark(module.color?.hex) && !color ? "var(--white)" : "var(--black)"}"
-		in:blur|global={{ duration: 200, amount: 100, delay: delayed ? 500 + i*50 : 500 }}
-		out:blur|global={{ duration: 200, amount: 100 }}
-		>
-			{@render moduleContent(module)}
-		</div>
+		{#if innerWidth > 700}
+			<div class:homepage={$page.url.pathname === "/"} class="module {size ? size : module.size} {(module.kind === "composition" && module.fixedHeight) ? 'fixedHeight' : ''} {module.position ? module.position : 'left'}" data-kind={module.kind}
+			style="background-color: {color ? 'var(--white)' : module.color?.hex}; color: {isDark(module.color?.hex) && !color ? "var(--white)" : "var(--black)"}"
+			in:blur|global={{ duration: 200, amount: 100, delay: delayed ? 500 + i*50 : 500 }}
+			out:blur|global={{ duration: 200, amount: 100 }}
+			>
+				{@render moduleContent(module)}
+			</div>
+		{:else}
+			<div class:homepage={$page.url.pathname === "/"} class="module {size ? size : module.size} {(module.kind === "composition" && module.fixedHeight) ? 'fixedHeight' : ''} {module.position ? module.position : 'left'}" data-kind={module.kind}
+			style="background-color: {color ? 'var(--white)' : module.color?.hex}; color: {isDark(module.color?.hex) && !color ? "var(--white)" : "var(--black)"}"
+			>
+				{@render moduleContent(module)}
+			</div>
+		{/if}
 	{/if}
 {/if}
 
@@ -207,11 +224,34 @@ $effect(() => {
 [data-kind="vimeo"] .media-container {
 	display: flex;
 }
+@media screen and (max-width: 700px) {
+	[data-kind="vimeo"] {
+		width: 100vw;
+	}
+	:global(.scattered [data-kind="vimeo"]) {
+		width: 90vw;
+	}
+}
 /* ShortText */
 [data-kind="shortText"] .text {
 	padding: var(--gutter) calc(var(--gutter)/2) calc(var(--gutter)*2);
 	margin-left: 18rem;
 	text-indent: -18rem;
+}
+@media screen and (max-width: 1200px) {
+	[data-kind="shortText"] .text {
+		margin-left: 14rem;
+		text-indent: -14rem;
+	}
+}
+@media screen and (max-width: 700px) {
+	[data-kind="shortText"] .text {
+		padding-top: calc(var(--gutter)*1.4);
+		padding-left: var(--gutter);
+		padding-right: var(--gutter);
+		margin-left: 10rem;
+		text-indent: -10rem;
+	}
 }
 /* LongText */
 [data-kind="longText"] .text-container {
@@ -227,6 +267,12 @@ $effect(() => {
 	margin-left: var(--gutter);
     margin-top: calc((2.428rem*.970*3 - 1.3rem)*-1)
 }
+[data-kind="longText"] .text-big.noFloat {
+	float: unset;
+	width: auto;
+	margin-left: 0;
+	text-indent: 50%;
+}
 [data-kind="longText"] .side-left .text-big {
 	float: left;
 }
@@ -235,6 +281,21 @@ $effect(() => {
 }
 [data-kind="longText"] .side-left .text-small {
 	clear: right;
+}
+@media screen and (max-width: 1200px) {
+	[data-kind="longText"] .text-big {
+		width: calc(100% - 14rem);
+	}
+}
+@media screen and (max-width: 700px) {
+	[data-kind="longText"] .text {
+		padding-top: calc(2.428rem*.970*3 - 1.3rem + var(--gutter)*1.4);
+		padding-left: var(--gutter);
+		padding-right: var(--gutter);
+	}
+	[data-kind="longText"] .text-big {
+		width: calc(100% - 10rem);
+	}
 }
 /* Box */
 [data-kind="box"] .media-container {
@@ -266,6 +327,33 @@ $effect(() => {
 [data-kind="box"] .project {
     width: 100%;
 }
+@media screen and (max-width: 700px) {
+	[data-kind="box"] .media-container {
+		flex-direction: column-reverse;
+	}
+	[data-kind="box"] .text-container {
+		width: 100%;
+	}
+	[data-kind="box"] .text {
+		width: 100%;
+		padding-top: calc(var(--gutter)*1.4);
+		padding-left: var(--gutter);
+		padding-right: var(--gutter);
+	}
+	[data-kind="box"] .img {
+		width: auto;
+		margin-bottom:2rem;
+	}
+	[data-kind="box"] h3 {
+		margin-bottom: 1em;
+	}
+	[data-kind="box"] .text p:not(.project) {
+		margin-bottom: 1em;
+	}
+	[data-kind="box"] .project {
+		width: 100%;
+	}
+}
 
 /* General */
 :global(.scattered .text-container) {
@@ -277,5 +365,10 @@ $effect(() => {
 }
 .homepage[data-kind="composition"] .media-container.fixedHeight {
 	max-width: 80vw;
+}
+@media screen and (max-width: 700px) {
+	.module {
+		/* padding-top: var(--gutter); */
+	}
 }
 </style>

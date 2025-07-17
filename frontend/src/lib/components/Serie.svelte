@@ -43,7 +43,7 @@ $effect(() => {
 		{/each}
 	</swiper-container>
 	
-	{#if project && !hiddenProject}
+	{#if project && hiddenProject}
 		<p
 		in:blur|global={{ duration: 200, delay: delayed ? 500 : 500 }}
 		out:blur|global={{ duration: 200 }}
@@ -59,6 +59,11 @@ $effect(() => {
 
 
 <style>
+.project {
+	padding: .5em;
+	text-align: right;
+	background-color: var(--white);
+}
 /* Serie */
 swiper-container::part(container) {
 	overflow-x: clip;

@@ -14,7 +14,7 @@ let {style, listItem, markDefs} = $derived(value);
 
 {#if value._type === 'link'}
 	<span class="link"><a href={value?.url} target={value?.blank ? '_blank' : undefined}>
-	{@render children()}
+	{@render children()}{#if value?.blank}<sup>{@html ' ↗'}</sup>{/if}
 	</a></span>
 {:else if style === 'normal' && !listItem}
 	<p class="paragraph">{@render children()}</p>
@@ -28,6 +28,12 @@ let {style, listItem, markDefs} = $derived(value);
 .link {
 	text-decoration: underline;
 	cursor: pointer;
+}
+.link.blank::after {
+	content: 'AA';
+}
+.link:hover {
+	color: var(--darkGray);
 }
 .paragraph {
 	margin: 0;

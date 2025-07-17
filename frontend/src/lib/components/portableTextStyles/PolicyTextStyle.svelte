@@ -14,7 +14,7 @@ let {style, listItem, markDefs} = $derived(value);
 
 {#if value._type === 'link'}
 	<span class="link"><a href={value?.url} target={value?.blank ? '_blank' : undefined}>
-	{@render children()}
+	{@render children()}{#if value?.blank}<sup>{@html ' ↗'}</sup>{/if}
 	</a></span>
 {:else if style === 'normal' && !listItem}
 	<p class="paragraph">{@render children()}</p>
@@ -29,18 +29,28 @@ let {style, listItem, markDefs} = $derived(value);
 	text-decoration: underline;
 	cursor: pointer;
 }
-:global(.text-small .paragraph + .paragraph) {
+.link.blank::after {
+	content: 'AA';
+}
+.link:hover {
+	color: var(--darkGray);
+}
+.paragraph {
 	margin: 0;
-    text-indent: 6rem;
 }
 h3 {
 	margin-top: 2em;
 	margin-bottom: .2em;
+	margin-left: 18rem;
+	text-indent: -18rem;
+}
+:global(ul:not(.menu)) {
+	padding-inline-start: 5rem;
+	margin: .5em 0;
 }
 li {
 	padding: 0;
 	text-indent: 0;
 	list-style-type: "— ";
-    list-style-position: inside;
 }
 </style>

@@ -188,7 +188,7 @@ function handleScroll() {
 		border-bottom: solid 1px var(--darkGray);
 	}
 	.project-link {
-		grid-template-columns: 30px 1fr;
+		grid-template-columns: 40px 1fr;
 		gap: 0;
 	}
 	.project-link>* {

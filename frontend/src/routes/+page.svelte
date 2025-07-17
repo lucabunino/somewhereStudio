@@ -50,7 +50,7 @@ let isDragging = false;
 let dragStart = { x: 0, y: 0 };
 let positionStart = { x: 0, y: 0 };
 let checkCellTimer = $state();
-let preloadFactor = $derived(innerWidth > 700 ? 4 : 8)
+let preloadFactor = $derived(innerWidth > 700 ? 10 : 12)
 const sizerX = $derived(innerWidth > 700 ? 1 : 1.2)
 const sizerY = $derived(innerWidth > 700 ? 1.1 : .6)
 const randomFactor = $derived(innerWidth > 700 ? .2 : .1)
@@ -59,7 +59,7 @@ let bufferY = $derived(innerHeight / zoomer.zoom * preloadFactor * sizerY)
 
 // Lifecycle
 onMount(() => {
-	zoomer.setZoom(3)
+	zoomer.setZoom(zoomer.initialZoom - 2)
 	tagger.setTags(data.tags, { keepHierarchy: false })
 	tagger.setMaxTags(tagger.firstMaxTags)
 	if (data.searchTags.length > tagger.firstMaxTags) {
@@ -95,8 +95,6 @@ $effect(() => {
 				}
 			}
 		});
-	} else {
-		zoomer.setZoom(zoomer.initialZoom)
 	}
 })
 function addModule(gridX, gridY) {
@@ -301,22 +299,34 @@ function cancelMomentum() {
 	class:scattered={data.searchTags.length === 0 && !data.searchString}
 	>
 		{#if data.searchTags.length > 0 || data.searchString}
-			<div class="module intro gaisyr-34"
-			in:blur|global={{ duration: 200, delay: 500 }}
-			out:blur|global={{ duration: 200}}
-			>{data.modules.length} Risultati per:
-				{#if data.searchString != undefined}
-					'{data.searchString}'{#if data.searchTags.length > 0}{@html ' in '}{/if}
-				{/if}
-				{#each data.searchTags as searchParam, i}
-					{#each data.tags.filter(tag => tag.slug.current === searchParam) as tag, j}{tag.title}{/each}{#if data.searchTags.length - 1 > i}{@html ', '}{/if}
-				{/each}
-			</div>
+			{#if innerWidth > 700}
+				<div class="module intro gaisyr-34"
+				in:blur|global={{ duration: 200, delay: 500 }}
+				out:blur|global={{ duration: 200}}
+				>{data.modules.length} Risultati per:
+					{#if data.searchString != undefined}
+						'{data.searchString}'{#if data.searchTags.length > 0}{@html ' in '}{/if}
+					{/if}
+					{#each data.searchTags as searchParam, i}
+						{#each data.tags.filter(tag => tag.slug.current === searchParam) as tag, j}{tag.title}{/each}{#if data.searchTags.length - 1 > i}{@html ', '}{/if}
+					{/each}
+				</div>
+			{:else}
+				<div class="module intro gaisyr-34"
+				>{data.modules.length} Risultati per:
+					{#if data.searchString != undefined}
+						'{data.searchString}'{#if data.searchTags.length > 0}{@html ' in '}{/if}
+					{/if}
+					{#each data.searchTags as searchParam, i}
+						{#each data.tags.filter(tag => tag.slug.current === searchParam) as tag, j}{tag.title}{/each}{#if data.searchTags.length - 1 > i}{@html ', '}{/if}
+					{/each}
+				</div>
+			{/if}
 			{#each data.modules as module, i}
 				<div class="module-container">
 					<div onmouseenter={() => {handleMouseEnter(module.latitude || module.reference?.latitude || null, module.longitude || module.reference?.longitude || null)}}>
 						{#if module.modules}
-								<Serie slides={module.modules} project={module.project} size={module.size} hiddenProject={true} link={false}/>
+								<Serie slides={module.modules} project={module.project} size={module.size} hiddenProject={false} link={module.link} delayed={false}/>
 						{:else}
 								<Module module={module} i={i} delayed={false}/>
 						{/if}

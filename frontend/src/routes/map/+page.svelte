@@ -4,6 +4,7 @@ import 'mapbox-gl/dist/mapbox-gl.css';
 import { PUBLIC_MAPBOX_TOKEN } from '$env/static/public';
 import { onMount, onDestroy, tick } from "svelte";
 import Module from '$lib/components/Module.svelte';
+import Serie from '$lib/components/Serie.svelte';
 import { clickOutside } from '$lib/utils/clickOutside.js';
 
 import { getCoordinates } from '$lib/stores/coordinates.svelte.js';
@@ -19,6 +20,9 @@ let tagger = getTags()
 import { getHeader } from '$lib/stores/header.svelte.js';
 let header = getHeader()
 
+import { getBg } from '$lib/stores/bg.svelte.js';
+let bger = getBg()
+
 let { data } = $props()
 let initialModules = $derived(applyInitialSpiderfy(data.modules))
 
@@ -33,6 +37,7 @@ let moveEndTimeout;
 const moveEndDelay = 200;
 
 onMount(() => {
+	bger.setBg('#222')
 	tagger.setTags(data.tags, { keepHierarchy: false })
 	tagger.setMaxTags(tagger.firstMaxTags)
 	if (data.searchTags.length > tagger.firstMaxTags) {
@@ -61,6 +66,7 @@ $effect(() => {
 
 onDestroy(() => {
 	map.remove();
+	bger.setBg(null)
 });
 
 function createMap() {	
@@ -349,7 +355,11 @@ function updateData() {
 		{#if activeModule == i}
 			<div style="transform: scale({innerWidth < 700 ? .9 : .5}); transform-origin: center; pointer-events: all;"
 			use:clickOutside onclick_outside={() => handleClickOutside()}>
-				<Module module={module} i={i} delayed={false}/>
+				{#if module.modules}
+						<Serie slides={module.modules} project={module.project} size={module.size} link={module.link}/>
+				{:else}
+						<Module module={module} i={i} delayed={false}/>
+				{/if}
 			</div>
 		{/if}
 	</div>

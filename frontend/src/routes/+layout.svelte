@@ -13,6 +13,7 @@ import { clickOutside } from '$lib/utils/clickOutside.js';
 
 // Variables
 let { data, children } = $props();
+// $inspect(data)
 let mouse = $state([])
 let domLoaded = $state(false)
 let mainLoaded = $state(false)
@@ -25,6 +26,7 @@ let searchActive = $state(false)
 let searchActiveMobile = $state(false)
 let menuActive = $state(false)
 let searchMobile = $state(null)
+let showBanner = $state()
 let timeout;
 let blurredTimeout;
 
@@ -51,10 +53,16 @@ let coordinater = getCoordinates()
 
 // Extra
 import { getExtra } from '$lib/stores/extra.svelte.js';
+    import { isDark } from "$lib/utils/color";
 let extraer = getExtra()
 
 // Lifecycle
 onMount(() => {
+	if (localStorage.getItem('cookieConsent') === 'accepted') {
+		showBanner = false;
+	} else {
+		showBanner = true;
+	}
 	coordinater.setCoordinates(data.info.adressLatitude, data.info.adressLongitude)
 	coordinater.setInitialCoordinates(data.info.adressLatitude, data.info.adressLongitude)
 	if (data.searchString) {
@@ -104,6 +112,16 @@ function toggleTag(tagSlug) {
 			tagger.setMaxTags(data.searchTags.length + 1)
 		}
 	}
+	if (url.searchParams.size > 0) {
+		setTimeout(() => {
+			zoomer.setZoom(zoomer.initialZoom)
+		}, 500);
+	} else {
+		zoomer.setZoom(zoomer.initialZoom - 2)
+		setTimeout(() => {
+			zoomer.setZoom(zoomer.initialZoom - 2)
+		}, 500);
+	}
 	goto($page.url.pathname === "/" || $page.url.pathname === "/map" ? `?${url.searchParams.toString()}` : `/?${url.searchParams.toString()}`, { preload: true, replaceState: false });
 }
 export function flipVertical(node, { from, to }) {
@@ -113,7 +131,7 @@ export function flipVertical(node, { from, to }) {
 	const dy = fromTop - toTop;
 	return {
 		delay: 0,
-		duration: 200,
+		duration: 300,
 		easing: cubicOut,
 		css: t => `transform: translateY(${(1 - t) * dy}px);`
 	};
@@ -155,18 +173,22 @@ function handleClickOutside() {
 	searchActive = false
 }
 function handleClickOutsideMobile() {
-	searchActiveMobile = false
+	// searchActiveMobile = false
 }
-
+function acceptCookies() {
+  localStorage.setItem('cookieConsent', 'accepted');
+  showBanner = false;
+}
 function handleReset(e) {
 	e.preventDefault();
 	zoomer.resetMapZoom();
 	coordinater.setCoordinates(data.info.adressLatitude, data.info.adressLongitude);
 }
-
 function handleSearchBtnMobile() {
-	if (searchActive) {
-		console.log("search " + search);		
+	if (searchActiveMobile) {
+		console.log("close");
+		searchActiveMobile = false
+		search = undefined
 	} else {
 		searchActiveMobile = true
 		setTimeout(() => {
@@ -175,21 +197,27 @@ function handleSearchBtnMobile() {
 	}
 	
 }
-
 function handleKeydown(event) {	
 	if (event.key === 'Enter' && search) {
 		const params = new URLSearchParams(window.location.search);
 		params.set('search', search)
 		goto(`/?${params.toString()}`, { keepFocus: true });
+		scrollY = 0
+		searchActiveMobile = false
+		menuActive = false
+		search = undefined
 	}
 }
-
 function handleKeyup(event) {
 	if ($page.url.pathname === '/') {
 		const params = new URLSearchParams(window.location.search);
 		if (search) {
 			params.set('search', search)
 			goto(`?${params.toString()}`, { keepFocus: true });
+			scrollY = 0
+			setTimeout(() => {
+				zoomer.setZoom(zoomer.initialZoom)
+			}, 500);
 		} else {
 			params.delete('search')
 			goto(`?${params.toString()}`, { keepFocus: true });
@@ -245,7 +273,7 @@ function handleKey({key}) {if (key === 'G' && dev) {viewGrid = !viewGrid}}
 		onmouseleave={() => {clearTimeout(blurredTimeout); blurredTimeout = setTimeout(() => {header.setBlurred(true)}, 2000);}}
 		>
 			<li class="menu-item" class:visible={menuActive || $page.url.pathname === "/"} class:active={$page.url.pathname === "/"}>
-				<a href="/{$page.url.search}"><span class="somewhere">Som<span class="ls-7">e</span><span class="ls-15">w</span><span class="ls-30">h</span><span class="ls-70">e</span><span class="ls-120">r</span>e</span>Studio</a>
+				<a href="/"><span class="somewhere">Som<span class="ls-7">e</span><span class="ls-15">w</span><span class="ls-30">h</span><span class="ls-70">e</span><span class="ls-120">r</span>e</span>Studio</a>
 			</li>
 			<li class="menu-item" class:visible={menuActive || $page.url.pathname === "/index"} class:active={$page.url.pathname === "/index" || $page.url.pathname.includes("/index/")}>
 				<a href="/index">In<span class="ls-7">d</span><span class="ls-30">e</span>x</a>
@@ -266,8 +294,8 @@ function handleKey({key}) {if (key === 'G' && dev) {viewGrid = !viewGrid}}
 		{#if domLoaded}
 			{#if (["/", "/map", "/index"].includes($page.url.pathname) || $page.url.pathname.includes('/index/')) && (coordinater.visible)}
 				<a href="/map{$page.url.search}" id="coordinates-desktop" class="btn tag ronzino-12"
-				in:slide|global={{ axis: "x", duration: 200 }}
-				out:slide|global={{ axis: "x", duration: 200, delay: 500 }}
+				in:slide|global={{ axis: "x", duration: 300 }}
+				out:slide|global={{ axis: "x", duration: 300, delay: 500 }}
 				onclick={(e) => {$page.url.pathname === "/map" ? handleReset(e) : ''}}
 				>
 					<span>{$page.url.pathname === "/map" ? coordinater.formattedCoordinates.latitude : coordinater.animatedCoordinates.latitude}N, {$page.url.pathname === "/map" ? coordinater.formattedCoordinates.longitude : coordinater.animatedCoordinates.longitude}E</span>
@@ -282,8 +310,8 @@ function handleKey({key}) {if (key === 'G' && dev) {viewGrid = !viewGrid}}
 				<div id="zoom" class:extra={extraer.extra} class="shadow">
 					<button id="zoom-out" class="btn" class:off={($page.url.pathname === '/' && zoomer.zoom == zoomer.minZoom) || ($page.url.pathname.includes('/index/') && zoomer.zoom == zoomer.minZoom) || ($page.url.pathname === '/map' && zoomer.mapZoom <= zoomer.mapMinZoom + .1)}
 					onclick={() => {$page.url.pathname === "/map" ? zoomer.decreaseMapZoom() : zoomer.decreaseZoom()}}
-					in:slide|global={{ axis: "x", duration: 200, delay: 50 }}
-					out:slide|global={{ axis: "x", duration: 200, delay: 500 }}
+					in:slide|global={{ axis: "x", duration: 300, delay: 50 }}
+					out:slide|global={{ axis: "x", duration: 300, delay: 500 }}
 					>
 						<svg width="18" height="18" fill="none" xmlns="http://www.w3.org/2000/svg">
 							<path d="M7.5 14a6.5 6.5 0 1 0 0-13 6.5 6.5 0 0 0 0 13Z"/>
@@ -293,8 +321,8 @@ function handleKey({key}) {if (key === 'G' && dev) {viewGrid = !viewGrid}}
 					</button>
 					<button id="zoom-in" class="btn" class:off={($page.url.pathname === '/' && zoomer.zoom == zoomer.maxZoom) || ($page.url.pathname.includes('/index/') && zoomer.zoom == zoomer.maxZoom) || ($page.url.pathname === '/map' && zoomer.mapZoom >= zoomer.mapMaxZoom - .1)}
 					onclick={() => {$page.url.pathname === "/map" ? zoomer.increaseMapZoom() : zoomer.increaseZoom()}}
-					in:slide|global={{ axis: "x", duration: 200 }}
-					out:slide|global={{ axis: "x", duration: 200, delay: 500 }}
+					in:slide|global={{ axis: "x", duration: 300 }}
+					out:slide|global={{ axis: "x", duration: 300, delay: 500 }}
 					>
 						<svg width="18" height="18" fill="none" xmlns="http://www.w3.org/2000/svg">
 							<path d="M7.5 14a6.5 6.5 0 1 0 0-13 6.5 6.5 0 0 0 0 13Z"/>
@@ -323,20 +351,19 @@ function handleKey({key}) {if (key === 'G' && dev) {viewGrid = !viewGrid}}
 			placeholder="Cerca nel sito"
 			bind:value={search}
 			bind:this={searchMobile}
-			onkeyup={() => {handleKeyup()}}
 			onkeydown={(e) => {handleKeydown(e)}}
 			>
 		{/if}
 		{#if extraer.extra}
 			<button id="search-btn-mobile" class="btn shadow" onclick={() => {extraer.setExtraOpen(!extraer.extraOpen)}}
-			in:slide|global={{ axis: "x", duration: 200 }}
-			out:slide|global={{ axis: "x", duration: 200 }}
+			in:slide|global={{ axis: "x", duration: 300 }}
+			out:slide|global={{ axis: "x", duration: 300 }}
 			>{extraer.extraOpen ? 'Chiudi' : 'Extra'}</button>
 		{:else}
 			<button id="search-btn-mobile" class="btn shadow" onclick={() => {handleSearchBtnMobile()}}
-			in:slide|global={{ axis: "x", duration: 200 }}
-			out:slide|global={{ axis: "x", duration: 200 }}
-			>Cerca</button>
+			in:slide|global={{ axis: "x", duration: 300 }}
+			out:slide|global={{ axis: "x", duration: 300 }}
+			>{#if !searchActiveMobile}Cerca{:else}Chiudi{/if}</button>
 		{/if}
 	</nav>
 </header>
@@ -347,42 +374,44 @@ function handleKey({key}) {if (key === 'G' && dev) {viewGrid = !viewGrid}}
 	onmouseleave={() => handleMouseLeave()}
 	onmouseenter={() => handleMouseEnter()}
 	>
-	<div id="search-bar-desktop" class="shadow">
-		<input id="search-desktop" name="search" type="text" class="btn search"
-		placeholder="Cerca nel sito"
-		use:clickOutside onclick_outside={() => handleClickOutside()}
-		bind:value={search}
-		onclick={() => {searchActive = true}}
-		in:slide|global={{ axis: "x", duration: 200 }}
-		out:slide|global={{ axis: "x", duration: 200 }}
-    	onkeyup={() => {handleKeyup()}}
-		onkeydown={(e) => {handleKeydown(e)}}
-		>
-		{#if searchActive}
-			<button id="search-btn-desktop" class="btn ronzino-12 uppercase"
-			onclick={() => {
-				searchActive = false;
-				search = "";
-				const params = new URLSearchParams(window.location.search);
-				params.delete("search");
-				goto(`?${params.toString()}`, { keepFocus: true });
-				}}
-			in:slide|global={{ axis: "x", duration: 200 }}
-			out:slide|global={{ axis: "x", duration: 200 }}
-			>× Chiudi</button>
-		{/if}
-	</div>
+	{#if $page.url.pathname !== '/map'}
+		<div id="search-bar-desktop" class="shadow">
+			<input id="search-desktop" name="search" type="text" class="btn search"
+			placeholder="Cerca nel sito"
+			use:clickOutside onclick_outside={() => handleClickOutside()}
+			bind:value={search}
+			onclick={() => {searchActive = true}}
+			in:slide|global={{ axis: "x", duration: 300 }}
+			out:slide|global={{ axis: "x", duration: 300 }}
+			onkeyup={() => {handleKeyup()}}
+			onkeydown={(e) => {handleKeydown(e)}}
+			>
+			{#if searchActive}
+				<button id="search-btn-desktop" class="btn ronzino-12 uppercase"
+				onclick={() => {
+					searchActive = false;
+					search = "";
+					const params = new URLSearchParams(window.location.search);
+					params.delete("search");
+					goto(`?${params.toString()}`, { keepFocus: true });
+					}}
+				in:slide|global={{ axis: "x", duration: 300 }}
+				out:slide|global={{ axis: "x", duration: 300 }}
+				>× Chiudi</button>
+			{/if}
+		</div>
+	{/if}
 		<!-- {#if $page.url.pathname === "/" || $page.url.pathname !== "/" && tagger.open} -->
 		 	<div id="more-tags-mobile" class="tag ronzino-12 uppercase shadow">
 				{#if !tagger.open}
 					<button class="btn" onclick={() => {!tagger.open ? openTagger() : closeTagger()}}
-					in:slide|global={{ axis: "x", duration: 200, delay: 50 }}
-					out:slide|global={{ axis: "x", duration: 200, delay: 0 }}
+					in:slide|global={{ axis: "x", duration: 300, delay: 50 }}
+					out:slide|global={{ axis: "x", duration: 300, delay: 0 }}
 					>...</button>
 				{:else}
 					<button class="btn" onclick={() => {!tagger.open ? openTagger() : closeTagger()}}
-					in:slide|global={{ axis: "x", duration: 200, delay: 50 }}
-					out:slide|global={{ axis: "x", duration: 200, delay: 0 }}
+					in:slide|global={{ axis: "x", duration: 300, delay: 50 }}
+					out:slide|global={{ axis: "x", duration: 300, delay: 0 }}
 					>× Chiudi</button>
 				{/if}
 			</div>
@@ -415,7 +444,7 @@ function handleKey({key}) {if (key === 'G' && dev) {viewGrid = !viewGrid}}
 						>
 							<span class="prefix">×</span>{tag.title}
 						</button>
-						<!-- out:slide|global={{ axis: "x", duration: 200, delay: 500 + (tagger.tags.length)*30 - i*30 }} -->
+						<!-- out:slide|global={{ axis: "x", duration: 300, delay: 500 + (tagger.tags.length)*30 - i*30 }} -->
 					{/if}
 				</div>
 			{/each}
@@ -423,12 +452,12 @@ function handleKey({key}) {if (key === 'G' && dev) {viewGrid = !viewGrid}}
 			<div id="more-tags-desktop" class="tag ronzino-12 uppercase shadow">
 				{#if !tagger.open}
 					<button class="btn" onclick={() => {!tagger.open ? openTagger() : closeTagger()}}
-					in:slide|global={{ axis: "x", duration: 200, delay: 200 + (tagger.maxTags+1)*30 }}
+					in:slide|global={{ axis: "x", duration: 300, delay: 300 + (tagger.maxTags+1)*30 }}
 					out:slide|global={{ axis: "x", duration: 0, delay: 0 }}
 					>...</button>
 				{:else}
 					<button class="btn" onclick={() => {!tagger.open ? openTagger() : closeTagger()}}
-					in:slide|global={{ axis: "x", duration: 200, delay: 200 + (tagger.maxTags+1)*30 }}
+					in:slide|global={{ axis: "x", duration: 300, delay: 300 + (tagger.maxTags+1)*30 }}
 					out:slide|global={{ axis: "x", duration: 0, delay: 0 }}
 					>× Chiudi</button>
 				{/if}
@@ -441,14 +470,14 @@ function handleKey({key}) {if (key === 'G' && dev) {viewGrid = !viewGrid}}
 	<div class="site-wrapper" style="background-color: {bger.bg};">
 		{#key data.pathname}
 			<main
-			in:blur|global={{ duration: 200, delay: 500 }}
-			out:blur|global={{ duration: 200, delay: 0 }}
+			in:blur|global={{ duration: 300, delay: 0 }}
+			out:blur|global={{ duration: 300, delay: 0 }}
 			>
 				{@render children()}
 			</main>
 		{/key}
 		{#if ($page.url.pathname === '/' && data.searchTags.length > 0) || ($page.url.pathname === '/' && data.searchString) || ($page.url.pathname !== '/' && $page.url.pathname !== '/map')}
-			<footer class="ronzino-12 uppercase medium">
+			<footer class="ronzino-12 uppercase medium" class:white={isDark(bger.bg)}>
 				<div>
 					{#if data.info.email}<a href="mailto:{data.info.email}">{data.info.email}</a>{/if}
 					{#if data.info.adressLabel}
@@ -466,10 +495,10 @@ function handleKey({key}) {if (key === 'G' && dev) {viewGrid = !viewGrid}}
 						{/each}
 					</div>
 				{/if}
-				{#if data.info.policies}
+				{#if data.policies}
 					<div>
-						{#each data.info.policies as policy}
-							<a href={policy.slug.current}>{policy.title}</a>
+						{#each data.policies as policy}
+							<a href="/{policy.kind}">{policy.kind}</a>
 						{/each}
 					</div>
 				{/if}
@@ -485,11 +514,18 @@ function handleKey({key}) {if (key === 'G' && dev) {viewGrid = !viewGrid}}
 	</div>
 {/if}
 
+{#if showBanner}
+  <div class="gaisyr-14" id="cookie-banner">
+    <p>Utilizziamo solo cookie tecnici per garantirti la migliore esperienza di navigazione sul sito. Questi cookie sono necessari per il funzionamento del sito e non richiedono il tuo consenso. Per saperne di più, consulta la nostra <a href="cookies" class="white underline hover-green">Cookie Policy</a></p>
+    <button class="btn ronzino-12 uppercase" onclick={acceptCookies}>Ok, ho capito</button>
+  </div>
+{/if}
 
 
 <style>
 .site-wrapper {
 	transition: var(--transition);
+	min-height: 100vh;
 }
 /* Header */
 .menu {
@@ -723,6 +759,12 @@ footer div {
 	display: flex;
 	flex-direction: column;
 }
+footer.white {
+	color: var(--white);
+}
+footer a:hover {
+	color: var(--darkGray) !important;
+}
 @media screen and (max-width: 700px) {
 	footer {
 		flex-direction: column;
@@ -733,6 +775,32 @@ footer div {
 	footer div {
 		display: flex;
 		flex-direction: column;
+	}
+}
+
+/* Cookie banner */
+#cookie-banner {
+	position: fixed;
+	bottom: 0;
+	margin: var(--gutter);
+	padding: var(--gutter);
+	z-index: 9;
+	background-color: var(--white);
+	max-width: 700px;
+}
+#cookie-banner a:hover {
+	color: var(--darkGray);
+}
+#cookie-banner .btn {
+	padding: 0;
+	margin-top: 1rem;
+}
+@media screen and (max-width: 700px) {
+	#cookie-banner {
+		top: 50%;
+		bottom: unset;
+		transform: translateY(-50%);
+		background-color: var(--white);
 	}
 }
 </style>

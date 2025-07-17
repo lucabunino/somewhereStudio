@@ -14,7 +14,7 @@ let {
 } = $props();
 
 let domLoaded = $state(false);
-let minimumDomLoaded = $state(false);
+let minimumDomLoaded = $state(true);
 let imgEl;
 let videoEl;
 let fullresUrl = media?.asset ? urlFor(media.asset).width(width) : null;
@@ -37,7 +37,7 @@ $effect(() => {
 	if (thumbnail) {
 		setTimeout(() => {
 			domLoaded = true;
-		}, 200);
+		}, 0);
 	}
 });
 </script>
@@ -136,5 +136,11 @@ img, video {
 }
 .media.loaded .blur {
 	backdrop-filter: blur(0);
+}
+@media screen and (max-width: 700px) {
+	.caption {
+		text-indent: var(--gutter);
+		margin-top: .3rem;
+	}
 }
 </style>

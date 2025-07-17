@@ -76,10 +76,8 @@ function inView(callback, options = {}) {
 			></iframe>
 		{:else}
 			<button id="player-icon" onclick={(e) => {e.preventDefault(); isPlaying = true; header.setBlurred(true)}}>
-				<svg class="shadow" width="45" height="47" xmlns="http://www.w3.org/2000/svg">
-					<g filter="url(#a)">
-						<path d="M41 19.501 4.25 38.986V.016L41 19.5Z"/>
-					</g>
+				<svg class="shadow" width="45" height="47" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 45 47">
+					<path d="M41 19.501 4.25 38.986V.016L41 19.5Z"/>
 				</svg>
 			</button>
 			{#if title || text1}
@@ -117,10 +115,16 @@ iframe {
 	fill: var(--white);
 	top: 50%;
 	left: 50%;
-	transform: translateX(-50%) translateY(-50%);
+	-webkit-transform: translateX(-50%) translateY(-50%);
+	    -ms-transform: translateX(-50%) translateY(-50%);
+	        transform: translateX(-50%) translateY(-50%);
 	z-index: 4;
 	padding: 1rem;
 	pointer-events: auto;
+}
+#player-icon svg {
+	width: 4rem;
+	height: 4rem;
 }
 #player-icon:hover svg {
 	fill: var(--lightGray);
@@ -134,6 +138,8 @@ iframe {
 	height: 100%;
 	color: var(--white);
 	padding: var(--gutter);
+	background: -webkit-gradient(linear, left top, right top, from(rgba(0, 0, 0, 0.3)), to(rgba(0, 0, 0, 0)));
+	background: -o-linear-gradient(left, rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0));
 	background: linear-gradient(to right, rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0));
 }
 .vimeo-info h3 {
@@ -143,5 +149,22 @@ iframe {
 .vimeo-info p {
 	text-indent: 5rem;
 	max-width: 450px;
+}
+@media screen and (max-width: 700px) {
+	#player-icon {
+		position: absolute;
+		fill: var(--white);
+		top: unset;
+		left: 0;
+		bottom: var(--gutter);
+		-webkit-transform: none;
+		    -ms-transform: none;
+		        transform: none;
+		padding: var(--gutter);
+	}
+	#player-icon svg {
+		width: 2.5rem;
+		height: 2.5rem;
+	}
 }
 </style>

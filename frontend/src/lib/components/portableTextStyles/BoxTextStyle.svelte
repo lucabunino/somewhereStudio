@@ -18,8 +18,6 @@ let {style, listItem, markDefs} = $derived(value);
 	</a></span>
 {:else if style === 'normal' && !listItem}
 	<p class="paragraph">{@render children()}</p>
-{:else if style === 'normalReading' && !listItem}
-	<p class="paragraph gaisyr-19">{@render children()}</p>
 {:else if listItem == 'bullet'}
 	<li>{@render children()}</li>
 {:else if style=== 'h3'}

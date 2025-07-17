@@ -34,7 +34,7 @@ let zoomer = getZoom()
 import { getExtra } from '$lib/stores/extra.svelte.js';
 let extraer = getExtra()
 
-if (data.project[0].extra) {
+if (data.project[0]?.extra) {
 	extraer.setExtra(true)
 }
 
@@ -45,7 +45,7 @@ onMount(() => {
 	setTimeout(() => {
 		tagger.setTags(data.project[0].tags, { keepHierarchy: false, hierarchy: 99 });
 		tagger.setMaxTags(data.project[0].tags.length)
-	}, 1000);
+	}, 1500);
 })
 $effect(() => {
 	domLoaded = true;
