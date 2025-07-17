@@ -786,7 +786,7 @@ footer a:hover {
 	padding: var(--gutter);
 	z-index: 9;
 	background-color: var(--white);
-	max-width: 700px;
+	max-width: 500px;
 }
 #cookie-banner a:hover {
 	color: var(--darkGray);
@@ -794,6 +794,7 @@ footer a:hover {
 #cookie-banner .btn {
 	padding: 0;
 	margin-top: 1rem;
+	height: auto;
 }
 @media screen and (max-width: 700px) {
 	#cookie-banner {
@@ -801,6 +802,7 @@ footer a:hover {
 		bottom: unset;
 		transform: translateY(-50%);
 		background-color: var(--white);
+		max-width: 700px;
 	}
 }
 </style>
