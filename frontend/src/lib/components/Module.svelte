@@ -208,6 +208,7 @@ $effect(() => {
 }
 /* Composition */
 [data-kind="composition"] .media-container {
+	display: -ms-grid;
 	display: grid;
 	gap: 1px;
 }
@@ -222,6 +223,8 @@ $effect(() => {
 }
 /* Vimeo */
 [data-kind="vimeo"] .media-container {
+	display: -webkit-box;
+	display: -ms-flexbox;
 	display: flex;
 }
 @media screen and (max-width: 700px) {
@@ -299,20 +302,31 @@ $effect(() => {
 }
 /* Box */
 [data-kind="box"] .media-container {
+	display: -webkit-box;
+	display: -ms-flexbox;
 	display: flex;
-    flex-wrap: wrap;
+    -ms-flex-wrap: wrap;
+        flex-wrap: wrap;
     width: 100%;
 }
 [data-kind="box"] .side-left {
-	flex-direction: row-reverse;
+	-webkit-box-orient: horizontal;
+	-webkit-box-direction: reverse;
+	    -ms-flex-direction: row-reverse;
+	        flex-direction: row-reverse;
 }
 [data-kind="box"] .text-container {
 	width: 100%;
 }
 [data-kind="box"] .text {
 	padding: var(--gutter) calc(var(--gutter)/2);
+	display: -webkit-box;
+	display: -ms-flexbox;
 	display: flex;
-	flex-direction: column;
+	-webkit-box-orient: vertical;
+	-webkit-box-direction: normal;
+	    -ms-flex-direction: column;
+	        flex-direction: column;
 	width: 50%;
 }
 [data-kind="box"] .img {
@@ -329,7 +343,10 @@ $effect(() => {
 }
 @media screen and (max-width: 700px) {
 	[data-kind="box"] .media-container {
-		flex-direction: column-reverse;
+		-webkit-box-orient: vertical;
+		-webkit-box-direction: reverse;
+		    -ms-flex-direction: column-reverse;
+		        flex-direction: column-reverse;
 	}
 	[data-kind="box"] .text-container {
 		width: 100%;

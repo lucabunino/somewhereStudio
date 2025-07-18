@@ -138,8 +138,8 @@ iframe {
 	height: 100%;
 	color: var(--white);
 	padding: var(--gutter);
-	background: -webkit-gradient(linear, left top, right top, from(rgba(0, 0, 0, 0.3)), to(rgba(0, 0, 0, 0)));
 	background: -o-linear-gradient(left, rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0));
+	background: -webkit-gradient(linear, left top, right top, from(rgba(0, 0, 0, 0.3)), to(rgba(0, 0, 0, 0)));
 	background: linear-gradient(to right, rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0));
 }
 .vimeo-info h3 {

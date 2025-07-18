@@ -114,7 +114,8 @@ img, video {
 	display: block;
 	height: 100%;
     width: 100%;
-    object-fit: cover;
+    -o-object-fit: cover;
+       object-fit: cover;
 }
 .autoWidth img, .autoWidth .video {
 	width: auto;
@@ -124,18 +125,23 @@ img, video {
 }
 .media.cover img {
 	height: 100%;
-	object-fit: cover;
+	-o-object-fit: cover;
+	   object-fit: cover;
 }
 .blur {
 	position: absolute;
 	top: 0;
 	width: 100%;
 	height: 100%;
-	backdrop-filter: blur(30px);
+	-webkit-backdrop-filter: blur(30px);
+	        backdrop-filter: blur(30px);
+	-webkit-transition: var(--transition);
+	-o-transition: var(--transition);
 	transition: var(--transition);
 }
 .media.loaded .blur {
-	backdrop-filter: blur(0);
+	-webkit-backdrop-filter: blur(0);
+	        backdrop-filter: blur(0);
 }
 @media screen and (max-width: 700px) {
 	.caption {

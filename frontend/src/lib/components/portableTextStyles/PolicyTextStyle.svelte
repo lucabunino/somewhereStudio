@@ -45,7 +45,8 @@ h3 {
 	text-indent: -18rem;
 }
 :global(ul:not(.menu)) {
-	padding-inline-start: 5rem;
+	-webkit-padding-start: 5rem;
+	        padding-inline-start: 5rem;
 	margin: .5em 0;
 }
 li {

@@ -91,13 +91,9 @@ function handleMouseEnter(latitude, longitude) {
 <svelte:window bind:innerWidth bind:innerHeight></svelte:window>
 
 {#if domLoaded}
-	<!-- <section id="singleProject" class:extra={data.project[0].extra}
-	bind:clientHeight={singleProjectHeight}
-	style={data.project[0].color ? `background-color: ${data.project[0].color.hex}; margin-bottom: ${(singleProjectHeight - singleProjectHeight*zoomer.scale)*-1}px; transform: scale(${zoomer.scale}); transform-origin: left top; width: ${innerWidth*zoomer.scale}px` : `margin-bottom: ${(singleProjectHeight - singleProjectHeight*zoomer.scale)*-1}px; transform: scale(${zoomer.scale}); transform-origin: left top; width: ${innerWidth/zoomer.scale}px`}
-	> -->
 	<section id="singleProject" class:extra={data.project[0].extra}
 	bind:clientHeight={singleProjectHeight}
-	style={`margin-bottom: ${(singleProjectHeight - singleProjectHeight*zoomer.scale)*-1}px; transform: scale(${zoomer.scale}); transform-origin: center top;`}
+	style={`margin-bottom: ${(singleProjectHeight - singleProjectHeight*zoomer.scale)*-1}px; -webkit-transform: scale(${zoomer.scale}); -ms-transform: scale(${zoomer.scale}); transform: scale(${zoomer.scale}); -webkit-transform-origin: center top; -ms-transform-origin: center top; transform-origin: center top;`}
 	>
 		<div class="module intro ronzino-12 medium uppercase"
 		in:blur|global={{ duration: 200, delay: 500 }}
@@ -185,11 +181,23 @@ function handleMouseEnter(latitude, longitude) {
 <style>
 #singleProject {
 	width: 100%;
+	display: -webkit-box;
+	display: -ms-flexbox;
 	display: flex;
-	flex-direction: column;
-	flex-wrap: nowrap;
+	-webkit-box-orient: vertical;
+	-webkit-box-direction: normal;
+	    -ms-flex-direction: column;
+	        flex-direction: column;
+	-ms-flex-wrap: nowrap;
+	    flex-wrap: nowrap;
+	-webkit-transition: var(--transition);
+	-o-transition: var(--transition);
 	transition: var(--transition);
+	-webkit-transition-property: margin, -webkit-transform;
+	transition-property: margin, -webkit-transform;
+	-o-transition-property: margin, transform;
 	transition-property: margin, transform;
+	transition-property: margin, transform, -webkit-transform;
 }
 #singleProject.extra {
 	width: 96vw;
@@ -198,8 +206,13 @@ function handleMouseEnter(latitude, longitude) {
 	margin-bottom: var(--gutter);
 }
 .module-container {
+	display: -webkit-box;
+	display: -ms-flexbox;
 	display: flex;
-	flex-direction: column;
+	-webkit-box-orient: vertical;
+	-webkit-box-direction: normal;
+	    -ms-flex-direction: column;
+	        flex-direction: column;
 }
 .module {
 	display: block;
@@ -210,24 +223,35 @@ function handleMouseEnter(latitude, longitude) {
 	text-align: center;
 	max-width: 80vw;
 	min-width: 40vw;
-	align-self: center;
+	-ms-flex-item-align: center;
+	    -ms-grid-row-align: center;
+	    align-self: center;
 }
 .tags {
 	margin-top: var(--gutter);
 	list-style: none;
 	padding: 0;
+	display: -webkit-box;
+	display: -ms-flexbox;
 	display: flex;
-	flex-direction: column;
+	-webkit-box-orient: vertical;
+	-webkit-box-direction: normal;
+	    -ms-flex-direction: column;
+	        flex-direction: column;
 }
 #extra {
 	width: 20vw;
-	transform: translateX(16vw);
+	-webkit-transform: translateX(16vw);
+	    -ms-transform: translateX(16vw);
+	        transform: translateX(16vw);
 	position: fixed;
 	top: 0;
 	right: 0;
 	height: 100vh;
 	overflow-y: scroll;
 	background-color: var(--white);
+	-webkit-transition: var(--transition);
+	-o-transition: var(--transition);
 	transition: var(--transition);
 	z-index: 10;
 	padding: calc(var(--gutter)*1.4) var(--gutter);
@@ -236,10 +260,14 @@ function handleMouseEnter(latitude, longitude) {
 	cursor: pointer;
 }
 #extra:not(.open):hover {
-	transform: translateX(14vw);
+	-webkit-transform: translateX(14vw);
+	    -ms-transform: translateX(14vw);
+	        transform: translateX(14vw);
 }
 #extra.open {
-	transform: translateX(0);
+	-webkit-transform: translateX(0);
+	    -ms-transform: translateX(0);
+	        transform: translateX(0);
 }
 #extraSwitch {
 	position: fixed;
@@ -247,19 +275,28 @@ function handleMouseEnter(latitude, longitude) {
 	left: 0;
 	height: 100vh;
 	width: 80vw;
-	transform: translateX(-80vw);
+	-webkit-transform: translateX(-80vw);
+	    -ms-transform: translateX(-80vw);
+	        transform: translateX(-80vw);
 	cursor: pointer;
 }
 #extraSwitch.open {
 	z-index: 10;
-	transform: translateX(0);
+	-webkit-transform: translateX(0);
+	    -ms-transform: translateX(0);
+	        transform: translateX(0);
 }
 #extra h4 {
 	margin-bottom: 6rem;
 }
 .extra-container {
+	display: -webkit-box;
+	display: -ms-flexbox;
 	display: flex;
-	flex-direction: column;
+	-webkit-box-orient: vertical;
+	-webkit-box-direction: normal;
+	    -ms-flex-direction: column;
+	        flex-direction: column;
 	gap: 3rem;
 }
 
@@ -275,30 +312,42 @@ function handleMouseEnter(latitude, longitude) {
 	}
 	#extra {
 		width: 100vw;
-		transform: translateY(100vh);
+		-webkit-transform: translateY(100vh);
+		    -ms-transform: translateY(100vh);
+		        transform: translateY(100vh);
 		padding-top: 0;
 		margin-top: var(--introHeight);
 		height: calc(100vh - var(--introHeight));
 		z-index: 6;
+		-webkit-transition: none;
+		-o-transition: none;
 		transition: none;
 	}
 	#extra:not(.open):hover {
-		transform: unset;
+		-webkit-transform: unset;
+		    -ms-transform: unset;
+		        transform: unset;
 	}
 	#extra.open {
-		transform: translateY(0);
+		-webkit-transform: translateY(0);
+		    -ms-transform: translateY(0);
+		        transform: translateY(0);
 	}
 	#extraSwitch {
 		position: fixed;
 		top: 0;
 		left: 0;
 		height: var(--introHeight);
-		transform: translateY(100vh);
+		-webkit-transform: translateY(100vh);
+		    -ms-transform: translateY(100vh);
+		        transform: translateY(100vh);
 		width: 100%;
 	}
 	#extraSwitch.open {
 		z-index: 7;
-		transform: translateY(0);
+		-webkit-transform: translateY(0);
+		    -ms-transform: translateY(0);
+		        transform: translateY(0);
 	}
 	.extra-container {
 		margin-bottom: 6rem;

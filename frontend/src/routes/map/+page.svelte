@@ -343,7 +343,7 @@ function updateData() {
 	{#each initialModules as module, i}
 		<div class="module-container" bind:this={modules[i]} class:active={activeModule === i}>
 			{#if activeModule == i}
-				<div style="transform: scale({innerWidth < 700 ? .9 : .5}); transform-origin: center; pointer-events: all;"
+				<div style="-webkit-transform: scale({innerWidth < 700 ? .9 : .5}); -ms-transform: scale({innerWidth < 700 ? .9 : .5}); transform: scale({innerWidth < 700 ? .9 : .5}); -webkit-transform-origin: center; -ms-transform-origin: center; transform-origin: center; pointer-events: all;"
 				use:clickOutside onclick_outside={() => handleClickOutside()}>
 					{#if module.modules}
 							<Serie slides={module.modules} project={module.project} size={module.size} link={module.link}/>
@@ -355,7 +355,7 @@ function updateData() {
 		</div>
 	{/each}
 {:else}
-	<p id="cookieMessage" class="gaisyr-19">Per poter visualizzare la mappa devi acconsentire all'uso dei cookies di Mapbox, {innerWidth > 700 ? 'in basso a sinistra' : 'in alto a destra'}.</p>
+	<p id="cookie-message" class:blurred={!header.blurred} class="gaisyr-19">Per poter visualizzare la mappa è necessario acconsentire all'uso dei cookie, {innerWidth > 700 ? 'in basso a sinistra' : 'in alto a destra'}.</p>
 {/if}
 </div>
 
@@ -365,14 +365,25 @@ function updateData() {
 	height: 100dvh;
 	background-color: #222;
 }
-#cookieMessage {
+#cookie-message {
 	color: var(--white);
-	justify-self: center;
+	-ms-grid-column-align: center;
+	    justify-self: center;
 	position: relative;
-	top: 50%;
-	transform: translateY(-50%);
+	top: calc(50% - 1rem);
+	-webkit-transform: translateY(-50%);
+	    -ms-transform: translateY(-50%);
+	        transform: translateY(-50%);
 	padding: var(--gutter);
 	text-align: center;
+	-webkit-transition: var(--transition);
+	-o-transition: var(--transition);
+	transition: var(--transition);
+}
+#cookie-message.blurred {
+	color: var(--darkGray);
+	-webkit-filter: blur(10px);
+	        filter: blur(10px);
 }
 #map {
 	position: absolute;
@@ -390,33 +401,49 @@ function updateData() {
 .line.top {
 	top: 0;
 	left: 50%;
-	transform: rotate(90deg);
+	-webkit-transform: rotate(90deg);
+	    -ms-transform: rotate(90deg);
+	        transform: rotate(90deg);
 }
 .line.bottom {
 	bottom: 0;
 	left: 50%;
-	transform: rotate(90deg);
+	-webkit-transform: rotate(90deg);
+	    -ms-transform: rotate(90deg);
+	        transform: rotate(90deg);
 }
 .line.left {
 	top: 50%;
 	left: 0;
-	transform: translateX(-50%);
+	-webkit-transform: translateX(-50%);
+	    -ms-transform: translateX(-50%);
+	        transform: translateX(-50%);
 }
 .line.right {
 	top: 50%;
 	right: 0;
-	transform: translateX(50%);
+	-webkit-transform: translateX(50%);
+	    -ms-transform: translateX(50%);
+	        transform: translateX(50%);
 }
 #cross {
 	position: fixed;
 	top: 50%;
 	left: 50%;
-	transform: translateX(-50%) translateY(-50%);
+	-webkit-transform: translateX(-50%) translateY(-50%);
+	    -ms-transform: translateX(-50%) translateY(-50%);
+	        transform: translateX(-50%) translateY(-50%);
 	width: auto;
 	height: auto;
+	display: -webkit-box;
+	display: -ms-flexbox;
 	display: flex;
-	align-items: center;
-	justify-content: center;
+	-webkit-box-align: center;
+	    -ms-flex-align: center;
+	        align-items: center;
+	-webkit-box-pack: center;
+	    -ms-flex-pack: center;
+	        justify-content: center;
 	z-index: 2;
 	mix-blend-mode: difference;
 }
@@ -424,13 +451,19 @@ function updateData() {
 	position: absolute;
 }
 #cross .line:nth-child(2) {
-	transform: rotate(90deg);
+	-webkit-transform: rotate(90deg);
+	    -ms-transform: rotate(90deg);
+	        transform: rotate(90deg);
 }
 .module-container {
 	position: absolute;
 	left: 0;
 	bottom: 0;
+	width: -webkit-fit-content;
+	width: -moz-fit-content;
 	width: fit-content;
+	height: -webkit-fit-content;
+	height: -moz-fit-content;
 	height: fit-content;
 	pointer-events: none !important;
 	z-index: 3;
@@ -445,11 +478,20 @@ function updateData() {
 	border-radius: 50%;
 	width: 3rem;
 	height: 3rem;
+	display: -webkit-box;
+	display: -ms-flexbox;
 	display: flex;
-	align-items: center;
-	justify-content: center;
+	-webkit-box-align: center;
+	    -ms-flex-align: center;
+	        align-items: center;
+	-webkit-box-pack: center;
+	    -ms-flex-pack: center;
+	        justify-content: center;
 	cursor: pointer;
-	user-select: none;
+	-webkit-user-select: none;
+	   -moz-user-select: none;
+	    -ms-user-select: none;
+	        user-select: none;
 	z-index: 1;
 }
 :global(.custom-cluster-marker:hover, .custom-single-marker:hover) {

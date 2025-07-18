@@ -36,17 +36,6 @@ grabCursor={true}
 {/each}
 </swiper-container>
 
-<!-- <div class="key-{key}-prev swiper-button-prev">
-	<svg width="20" height="34" xmlns="http://www.w3.org/2000/svg">
-		<path d="M20 16.977 5.993 34H0l14.045-16.977L0 0h5.993L20 16.977Z" fill="#fff"/>
-	</svg>
-</div>
-<div class="key-{key}-next swiper-button-next">
-	<svg width="20" height="34" xmlns="http://www.w3.org/2000/svg">
-		<path d="M20 16.977 5.993 34H0l14.045-16.977L0 0h5.993L20 16.977Z" fill="#fff"/>
-	</svg>
-</div> -->
-
 <style>
 /* Slider */
 swiper-container {

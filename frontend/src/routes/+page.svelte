@@ -286,7 +286,7 @@ function cancelMomentum() {
 {#key data.searchTags}
 	<section id="modules"
 	bind:clientHeight={modulesHeight}
-	onmousewheel={(e) => {handleScroll(e)}}
+	onwheel={(e) => {handleScroll(e)}}
 	onmousedown={(e) => {handleMouseDown(e)}}
 	onmousemove={(e) => {handleMouseMove(e)}}
 	onmouseup={(e) => {handleMouseUp(e)}}
@@ -295,7 +295,7 @@ function cancelMomentum() {
   	ontouchend={handleTouchEnd}
 	style={(data.searchTags.length === 0 && !data.searchString)
 		? `height: 100vh; position:fixed;`
-		: `height: auto; margin-bottom: ${(modulesHeight - modulesHeight*zoomer.scale)*-1}px; transform: scale(${zoomer.scale}); transform-origin: top;`}
+		: `height: auto; margin-bottom:  ${(modulesHeight - modulesHeight*zoomer.scale)*-1}px; -webkit-transform: scale(${zoomer.scale}); -ms-transform: scale(${zoomer.scale}); transform: scale(${zoomer.scale}); -webkit-transform-origin: top; -ms-transform-origin: top; transform-origin: top;`}
 	class:scattered={data.searchTags.length === 0 && !data.searchString}
 	>
 		{#if data.searchTags.length > 0 || data.searchString}
@@ -353,21 +353,38 @@ function cancelMomentum() {
 
 <style>
 #modules {
+	display: -webkit-box;
+	display: -ms-flexbox;
 	display: flex;
-	flex-direction: column;
-	align-items: center;
+	-webkit-box-orient: vertical;
+	-webkit-box-direction: normal;
+	    -ms-flex-direction: column;
+	        flex-direction: column;
+	-webkit-box-align: center;
+	    -ms-flex-align: center;
+	        align-items: center;
 	width: 100vw;
-	justify-self: center;
+	-ms-grid-column-align: center;
+	    justify-self: center;
+	-webkit-transition: var(--transition);
+	-o-transition: var(--transition);
 	transition: var(--transition);
+	-webkit-transition-property: margin, -webkit-transform;
+	transition-property: margin, -webkit-transform;
+	-o-transition-property: margin, transform;
 	transition-property: margin, transform;
+	transition-property: margin, transform, -webkit-transform;
 }
 #modules.scattered {
 	overscroll-behavior-x: contain;
-  	touch-action: pan-y;
+  	-ms-touch-action: pan-y;
+  	    touch-action: pan-y;
+	cursor: -webkit-grab;
 	cursor: grab;
 	overflow: hidden;
 }
 #modules.scattered:active {
+	cursor: -webkit-grabbing;
 	cursor: grabbing;
 }
 .module {
@@ -383,16 +400,24 @@ function cancelMomentum() {
 }
 .module-container {
 	position: relative;
-	transform-origin: center;
+	-webkit-transform-origin: center;
+	    -ms-transform-origin: center;
+	        transform-origin: center;
 	will-change: transform;
 }
 .scattered .module-container {
 	position: absolute;
 	width: 80vw;
 	height: 80vh;
+	display: -webkit-box;
+	display: -ms-flexbox;
 	display: flex;
-	align-items: center;
-	justify-content: center;
+	-webkit-box-align: center;
+	    -ms-flex-align: center;
+	        align-items: center;
+	-webkit-box-pack: center;
+	    -ms-flex-pack: center;
+	        justify-content: center;
 }
 .scattered .module-container div {
 	/* max-height: 90vh; */

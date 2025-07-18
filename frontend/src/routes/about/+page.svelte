@@ -67,9 +67,16 @@ $effect(() => {
 
 <style>
 #about {
+	display: -webkit-box;
+	display: -ms-flexbox;
 	display: flex;
-	flex-direction: column;
-	align-items: flex-start;
+	-webkit-box-orient: vertical;
+	-webkit-box-direction: normal;
+	    -ms-flex-direction: column;
+	        flex-direction: column;
+	-webkit-box-align: start;
+	    -ms-flex-align: start;
+	        align-items: flex-start;
 	width: 100vw;
 	padding: calc(var(--gutter) + .2rem) var(--gutter) 0;
 }
@@ -95,7 +102,9 @@ $effect(() => {
 	color: var(--black);
 }
 .people {
+	display: -ms-grid;
 	display: grid;
+	-ms-grid-columns: 1fr var(--gutter) 1fr;
 	grid-template-columns: repeat(2, 1fr);
 	gap: var(--gutter);
 	padding: 6rem 0;
@@ -119,6 +128,7 @@ $effect(() => {
 }
 @media screen and (max-width: 900px) {
 	.people {
+		-ms-grid-columns: 1fr;
 		grid-template-columns: repeat(1, 1fr);
 		gap: 6rem;
 	}
@@ -128,9 +138,16 @@ $effect(() => {
 }
 @media screen and (max-width: 700px) {
 	#about {
+		display: -webkit-box;
+		display: -ms-flexbox;
 		display: flex;
-		flex-direction: column;
-		align-items: flex-start;
+		-webkit-box-orient: vertical;
+		-webkit-box-direction: normal;
+		    -ms-flex-direction: column;
+		        flex-direction: column;
+		-webkit-box-align: start;
+		    -ms-flex-align: start;
+		        align-items: flex-start;
 		width: 100vw;
 		padding: calc(var(--gutter) + .2rem) var(--gutter) 0;
 	}
