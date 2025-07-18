@@ -27,6 +27,7 @@ let searchActiveMobile = $state(false)
 let menuActive = $state(false)
 let searchMobile = $state(null)
 let showBanner = $state()
+let cookieBanner = $state()
 let timeout;
 let blurredTimeout;
 
@@ -60,8 +61,10 @@ let extraer = getExtra()
 onMount(() => {
 	if (localStorage.getItem('cookieConsent') === 'accepted') {
 		showBanner = false;
+		cookieBanner = true;
 	} else {
 		showBanner = true;
+		cookieBanner = false;
 	}
 	coordinater.setCoordinates(data.info.adressLatitude, data.info.adressLongitude)
 	coordinater.setInitialCoordinates(data.info.adressLatitude, data.info.adressLongitude)
@@ -178,6 +181,12 @@ function handleClickOutsideMobile() {
 function acceptCookies() {
   localStorage.setItem('cookieConsent', 'accepted');
   showBanner = false;
+  cookieBanner = true;
+}
+function rejectCookies() {
+  localStorage.setItem('cookieConsent', 'rejected');
+  showBanner = false;
+  cookieBanner = false;
 }
 function handleReset(e) {
 	e.preventDefault();
@@ -468,10 +477,10 @@ function handleKey({key}) {if (key === 'G' && dev) {viewGrid = !viewGrid}}
 <!-- Main -->
 {#if domLoaded}
 	<div class="site-wrapper" style="background-color: {bger.bg};">
-		{#key data.pathname}
+		{#key data.pathname && cookieBanner}
 			<main
-			in:blur|global={{ duration: 300, delay: 0 }}
-			out:blur|global={{ duration: 300, delay: 0 }}
+			in:blur|global={{ duration: 200, delay: 200 }}
+			out:blur|global={{ duration: 200, delay: 0 }}
 			>
 				{@render children()}
 			</main>
@@ -514,12 +523,17 @@ function handleKey({key}) {if (key === 'G' && dev) {viewGrid = !viewGrid}}
 	</div>
 {/if}
 
-{#if showBanner}
-  <div class="gaisyr-14" id="cookie-banner">
-    <p>Utilizziamo solo cookie tecnici per garantirti la migliore esperienza di navigazione sul sito. Questi cookie sono necessari per il funzionamento del sito e non richiedono il tuo consenso. Per saperne di più, consulta la nostra <a href="cookies" class="white underline hover-green">Cookie Policy</a></p>
-    <button class="btn ronzino-12 uppercase" onclick={acceptCookies}>Ok, ho capito</button>
-  </div>
-{/if}
+<div class="gaisyr-14 shadow" id="cookie-banner" class:centered={showBanner}>
+	{#if showBanner}
+			<p>Questo sito utilizza servizi di terze parti come Vimeo e Mapbox che possono impostare cookie. Avviando la riproduzione di un video o accettando questa policy, consenti l’uso dei relativi cookie.{#each data.policies as policy}{#if policy.kind == 'cookies'}{@html ' '}Per saperne di più, consulta la nostra <a href="/cookies" class="underline">cookie policy</a>{/if}{/each}
+			<div id="cookie-btns">
+				<button id="accept-cookies" onclick={acceptCookies} class="btn ronzino-12 uppercase">Accetta</button>
+				<button id="reject-cookies" onclick={rejectCookies} class="btn ronzino-12 uppercase">Rifiuta</button>
+			</div>
+	{:else if $page.url.pathname == '/map'}
+		<button id="cookieSwitch" onclick={() => {showBanner = true}} class="btn ronzino-12 uppercase">Cookies</button>
+	{/if}
+</div>
 
 
 <style>
@@ -783,26 +797,31 @@ footer a:hover {
 	position: fixed;
 	bottom: 0;
 	margin: var(--gutter);
-	padding: var(--gutter);
 	z-index: 9;
 	background-color: var(--white);
 	max-width: 500px;
 }
+#cookie-banner p {
+	margin: var(--gutter);
+}
 #cookie-banner a:hover {
 	color: var(--darkGray);
 }
-#cookie-banner .btn {
-	padding: 0;
-	margin-top: 1rem;
-	height: auto;
+#cookie-btns {
+	display: flex;
 }
 @media screen and (max-width: 700px) {
 	#cookie-banner {
-		top: 50%;
+		top: calc(var(--gutter)*1.4);
+		right: 0;
 		bottom: unset;
-		transform: translateY(-50%);
 		background-color: var(--white);
 		max-width: 700px;
+	}
+	#cookie-banner.centered {
+		top: 50%;
+		right: 0;
+		transform: translateY(-50%);
 	}
 }
 </style>

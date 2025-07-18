@@ -4,6 +4,7 @@ let initialCoordinates = $state({ latitude: null, longitude: null });
 let coordinates = $state({ latitude: null, longitude: null });
 let animatedCoordinates = $state({ latitude: null, longitude: null });
 let visible = $state(true)
+let reset = $state(false)
 
 function formatNumber(num) {
 	let [intPart, decPart = ''] = (Math.round(num * 1e5) / 1e5).toFixed(5).split('.');
@@ -39,6 +40,10 @@ export function getCoordinates() {
 		initialCoordinates = { latitude: newLat, longitude: newLng };
 	}
 
+	function setReset(r) {
+		reset = r
+	}
+
 	return {
 		get visible() {
 			return visible;
@@ -52,7 +57,11 @@ export function getCoordinates() {
 		get formattedCoordinates() {
 			return { latitude: formatNumber(coordinates.latitude), longitude: formatNumber(coordinates.longitude) };
 		},
+		get reset() {
+			return reset;
+		},
 		setCoordinates,
 		setInitialCoordinates,
+		setReset,
 	};
 }

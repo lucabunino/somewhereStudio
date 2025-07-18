@@ -20,9 +20,6 @@ let tagger = getTags()
 import { getHeader } from '$lib/stores/header.svelte.js';
 let header = getHeader()
 
-import { getBg } from '$lib/stores/bg.svelte.js';
-let bger = getBg()
-
 let { data } = $props()
 let initialModules = $derived(applyInitialSpiderfy(data.modules))
 
@@ -31,45 +28,51 @@ let oldsearchTags;
 let map;
 let mapContainer;
 let activeModule = $state(undefined);
+let showMap = $derived(localStorage.getItem('cookieConsent') === 'accepted' ? true : false);
+$inspect(showMap)
 let clusterMarkers = [];
 let singleMarkers = [];
 let moveEndTimeout;
 const moveEndDelay = 200;
 
-onMount(() => {
-	bger.setBg('#222')
+onMount (() => {
 	tagger.setTags(data.tags, { keepHierarchy: false })
 	tagger.setMaxTags(tagger.firstMaxTags)
 	if (data.searchTags.length > tagger.firstMaxTags) {
 		tagger.setMaxTags(data.searchTags.length)
 	};
-	createMap()
 	header.setBlurred(true);
 });
 
 $effect(() => {
-	if (data.searchTags !== oldsearchTags) {
-		if (map) {
-			map.remove();	
+	console.log(showMap, zoomer.mapZoom, coordinater.coordinates.longitude, coordinater.coordinates.latitude);
+	if (showMap) {
+		if (data.searchTags !== oldsearchTags) {
+			if (map) {
+				map.remove();	
+			}
+			createMap(map);
+			updateMarkers();
 		}
-		createMap(map);
-		updateMarkers();
-	}
-	if (map) {
-		map.flyTo({
-			zoom: zoomer.mapZoom,
-			essential: true,
-			duration: 500,
-		});	
+		if (map) {
+			map.flyTo({
+				center: [coordinater.coordinates.longitude, coordinater.coordinates.latitude],
+				zoom: zoomer.mapZoom,
+				essential: true,
+				duration: 500,
+			});
+		}
 	}
 });
 
 onDestroy(() => {
-	map.remove();
-	bger.setBg(null)
+	if (map) {
+		map.remove();	
+	}
 });
 
-function createMap() {	
+async function createMap() {
+	await tick();
 	map = new mapboxgl.Map({
 		container: mapContainer,
 		style: 'mapbox://styles/lucabunino-com/cm6qt0ddx00rj01sd8lek6ucf',
@@ -79,6 +82,7 @@ function createMap() {
 		minZoom: zoomer.mapMinZoom,
 		maxZoom: zoomer.mapMaxZoom,
 		projection: 'mercator',
+		telemetryDisabled: true,
 	});
 
 	initialModules.forEach((module, i) => {
@@ -138,15 +142,13 @@ function createMap() {
 			for (const f of clusterFeatures) {
 				const pixel = map.project(f.geometry.coordinates);
 				const dist = Math.hypot(pixel.x - e.point.x, pixel.y - e.point.y);
-				if (dist < 30) { // 30 px radius
+				if (dist < 10) {
 					const clusterId = f.properties.cluster_id;
 					map.getSource('modules').getClusterExpansionZoom(clusterId, (err, zoom) => {
-						zoom += 3;
+						zoom += 2;
 						if (err) return;
-						map.easeTo({
-							center: f.geometry.coordinates,
-							zoom,
-						});
+						coordinater.setCoordinates(f.geometry.coordinates[1], f.geometry.coordinates[0]);
+						zoomer.setMapZoom(zoom);
 					});
 					return;
 				}
@@ -164,12 +166,6 @@ function createMap() {
 				coordinater.coordinates.longitude !== coords[0]
 			) {
 				coordinater.setCoordinates(coords[1], coords[0]);
-				map.flyTo({
-					center: [coordinater.coordinates.longitude, coordinater.coordinates.latitude],
-					zoom: zoomer.mapZoom,
-					essential: true,
-					duration: 500,
-				});
 			}
 		}
 
@@ -209,7 +205,7 @@ function updateMarkers() {
 	singleMarkers.forEach(m => m.remove());
 	singleMarkers = [];
 
-	const source = map.getSource('modules');
+	const source = map?.getSource('modules');
 	if (!source) return;
 
 	// Query all clusters currently visible
@@ -249,17 +245,8 @@ function updateMarkers() {
 		el.addEventListener('click', (e) => {
 			e.stopPropagation();
 			activeModule = i;			
-			if (
-				coordinater.coordinates.latitude !== coords[1] ||
-				coordinater.coordinates.longitude !== coords[0]
-			) {
+			if ( coordinater.coordinates.latitude !== coords[1] || coordinater.coordinates.longitude !== coords[0]) {
 				coordinater.setCoordinates(coords[1], coords[0]);
-				map.flyTo({
-					center: [coordinater.coordinates.longitude, coordinater.coordinates.latitude],
-					zoom: zoomer.mapZoom,
-					essential: true,
-					duration: 500,
-				});
 			}
 		});
 
@@ -336,36 +323,57 @@ function updateData() {
 }
 </script>
 
-<!-- {#key data.searchTags} -->
-<div id="map" bind:this={mapContainer} onwheel={(e) => panHandler(e)}></div>
-<div id="map-ui">
-	<!-- <div id="cross">
-		<div class="line"></div>
-		<div class="line"></div>
-	</div> -->
-	<div class="line top"></div>
-	<div class="line right"></div>
-	<div class="line bottom"></div>
-	<div class="line left"></div>
+<svelte:head>
+	{#if data.seo.SEOTitle}<title>{data.seo.SEOTitle} — Map</title>{/if}
+	{#if data.seo.SEOTitle}<meta property="og:title" content={`${data.seo.SEOTitle} — Mappa`}>{/if}
+	{#if data.seo.SEOTitle}<meta property="og:site_name" content={`${data.seo.SEOTitle} — Mappa`}>{/if}
+</svelte:head>
+
+<div id="map-wrapper">
+{#if showMap}
+	<div id="map" bind:this={mapContainer} onwheel={(e) => panHandler(e)}></div>
+	<div id="map-ui">
+		<div class="line top"></div>
+		<div class="line right"></div>
+		<div class="line bottom"></div>
+		<div class="line left"></div>
+	</div>
+
+
+	{#each initialModules as module, i}
+		<div class="module-container" bind:this={modules[i]} class:active={activeModule === i}>
+			{#if activeModule == i}
+				<div style="transform: scale({innerWidth < 700 ? .9 : .5}); transform-origin: center; pointer-events: all;"
+				use:clickOutside onclick_outside={() => handleClickOutside()}>
+					{#if module.modules}
+							<Serie slides={module.modules} project={module.project} size={module.size} link={module.link}/>
+					{:else}
+							<Module module={module} i={i} delayed={false}/>
+					{/if}
+				</div>
+			{/if}
+		</div>
+	{/each}
+{:else}
+	<p id="cookieMessage" class="gaisyr-19">Per poter visualizzare la mappa devi acconsentire all'uso dei cookies di Mapbox, {innerWidth > 700 ? 'in basso a sinistra' : 'in alto a destra'}.</p>
+{/if}
 </div>
 
-
-{#each initialModules as module, i}
-	<div class="module-container" bind:this={modules[i]} class:active={activeModule === i}>
-		{#if activeModule == i}
-			<div style="transform: scale({innerWidth < 700 ? .9 : .5}); transform-origin: center; pointer-events: all;"
-			use:clickOutside onclick_outside={() => handleClickOutside()}>
-				{#if module.modules}
-						<Serie slides={module.modules} project={module.project} size={module.size} link={module.link}/>
-				{:else}
-						<Module module={module} i={i} delayed={false}/>
-				{/if}
-			</div>
-		{/if}
-	</div>
-{/each}
-
 <style>
+#map-wrapper {
+	width: 100vw;
+	height: 100dvh;
+	background-color: #222;
+}
+#cookieMessage {
+	color: var(--white);
+	justify-self: center;
+	position: relative;
+	top: 50%;
+	transform: translateY(-50%);
+	padding: var(--gutter);
+	text-align: center;
+}
 #map {
 	position: absolute;
 	width: 100%;
@@ -431,14 +439,6 @@ function updateData() {
 	pointer-events: all;
 	z-index: 3;
 }
-/* :global(.mapboxgl-map) {
-	font: unset;
-}
-:global(.mapboxgl-ctrl) {
-	font-family: Ronzino, Arial, Helvetica, sans-serif;
-    font-size: .7rem;
-    letter-spacing: .01em;
-} */
 :global(.custom-cluster-marker) {
 	background-color: var(--white);
 	color: var(--black);
@@ -461,5 +461,8 @@ function updateData() {
 	height: 1.5rem;
 	cursor: pointer;
 	z-index: 1;
+}
+:global(.mapboxgl-ctrl-bottom-left) {
+  display: none;
 }
 </style>

@@ -58,6 +58,11 @@ function handleScroll() {
 
 </script>
 
+<svelte:head>
+	{#if data.seo.SEOTitle}<title>{data.seo.SEOTitle} — Index</title>{/if}
+	{#if data.seo.SEOTitle}<meta property="og:title" content={`${data.seo.SEOTitle} — Index`}>{/if}
+	{#if data.seo.SEOTitle}<meta property="og:site_name" content={`${data.seo.SEOTitle} — Index`}>{/if}
+</svelte:head>
 <svelte:window bind:innerWidth bind:innerHeight onscroll={handleScroll}></svelte:window>
 
 <section id="index" class="gaisyr-34">

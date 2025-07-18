@@ -38,6 +38,12 @@ export default {
 			validation: (Rule) => Rule.required(),
 		},
 		{
+			name: 'SEODescription',
+			type: 'text',
+			rows: 5,
+			validation: Rule => Rule.max(160).warning('SEO Description should be 160 characters or fewer')
+		},
+		{
 			name: 'color',
 			type: 'color',
 			options: {
@@ -135,4 +141,22 @@ export default {
 			],
 		},
 	],
+	preview: {
+		select: {
+			title: 'title',
+			index: 'index',
+			singlePage: 'singlePage',
+			cover: 'cover',
+		},
+		prepare({ title, index, singlePage, cover }) {
+			const suffixes = []
+			if (index === false) suffixes.push('no index')
+			if (singlePage === false) suffixes.push('no single page')
+			const suffix = suffixes.length > 0 ? ` (${suffixes.join(', ')})` : ''
+			return {
+				title: `${title ?? 'Untitled'}${suffix}`,
+				media: cover,
+			}
+		},
+	}
 };

@@ -5,6 +5,7 @@ import Media from "$lib/components/Media.svelte";
 import { blur, slide } from "svelte/transition";
 import { onDestroy, onMount } from "svelte";
 import { isDark } from "$lib/utils/color";
+import { urlFor } from "$lib/utils/image";
 
 let { data } = $props();
 let domLoaded = $state(false)
@@ -74,6 +75,18 @@ function handleMouseEnter(latitude, longitude) {
 }
 </script>
 
+<svelte:head>
+	{#if data.seo.SEOTitle}<title>{data.seo.SEOTitle} — {data.project[0].title}</title>{/if}
+	{#if data.project[0].SEODescription}<meta name="description" content={data.project[0].SEODescription}>{/if}
+	{#if !data.project[0].singlePage}
+		<meta name="robots" content="index,follow">
+		<meta name="robots" content="noindex, nofollow" />
+	{/if}
+	{#if data.seo.SEOTitle}<meta property="og:title" content={`${data.seo.SEOTitle} — ${data.project[0].title}`}>{/if}
+	{#if data.project[0].SEODescription}<meta property="og:description" content={data.project[0].SEODescription}>{/if}
+	{#if data.project[0].cover}<meta property="og:image" content={urlFor(data.project[0].cover).width(2000).url()}>{/if}
+	{#if data.seo.SEOTitle}<meta property="og:site_name" content={`${data.seo.SEOTitle} — ${data.project[0].title}`}>{/if}
+</svelte:head>
 <svelte:body bind:this={body}/>
 <svelte:window bind:innerWidth bind:innerHeight></svelte:window>
 

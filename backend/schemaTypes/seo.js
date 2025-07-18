@@ -16,6 +16,7 @@ export default {
 			name: 'SEODescription',
 			type: 'text',
 			rows: 5,
+			validation: Rule => Rule.max(170).warning('SEO Description should be 170 characters or fewer')
 		},
 		{
 			name: 'SEOImage',
