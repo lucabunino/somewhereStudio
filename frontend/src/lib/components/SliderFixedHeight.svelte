@@ -40,7 +40,6 @@ grabCursor={true}
 
 <style>
 swiper-slide {
-	height: auto;
 	width: auto;
 }
 swiper-container {

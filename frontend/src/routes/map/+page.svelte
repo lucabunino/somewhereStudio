@@ -9,7 +9,6 @@ import { clickOutside } from '$lib/utils/clickOutside.js';
 
 import { getCoordinates } from '$lib/stores/coordinates.svelte.js';
 let coordinater = getCoordinates()
-$inspect(coordinater.coordinates)
 
 import { getZoom } from '$lib/stores/zoom.svelte.js';
 let zoomer = getZoom()
@@ -29,7 +28,6 @@ let map;
 let mapContainer;
 let activeModule = $state(undefined);
 let showMap = $derived(localStorage.getItem('cookieConsent') === 'accepted' ? true : false);
-$inspect(showMap)
 let clusterMarkers = [];
 let singleMarkers = [];
 let moveEndTimeout;

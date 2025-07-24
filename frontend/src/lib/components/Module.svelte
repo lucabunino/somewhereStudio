@@ -228,7 +228,7 @@ $effect(() => {
 	display: flex;
 }
 @media screen and (max-width: 700px) {
-	[data-kind="vimeo"] {
+	:global(:not(.serie)>*>*>[data-kind="vimeo"]) {
 		width: 100vw;
 	}
 	:global(.scattered [data-kind="vimeo"]) {

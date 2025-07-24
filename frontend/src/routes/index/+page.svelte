@@ -6,7 +6,6 @@ import { blur } from "svelte/transition";
 
 // Variables
 let { data } = $props()
-$inspect(data)
 let indexHover = $state(0)
 let projectHover = $derived(data.index[indexHover])
 let domLoaded = $state(false)
@@ -15,7 +14,6 @@ let innerHeight = $state(0)
 let projects = $state([])
 let projectHeights = $state([])
 let activeProjects = $state([])
-$inspect(activeProjects)
 
 // Tags
 import { getTags } from '$lib/stores/tag.svelte.js';

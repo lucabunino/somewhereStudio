@@ -26,6 +26,19 @@ export const myStructure = (S, context) => {
 						.params({ projectId })
 					)
 			),
+		S.listItem()
+			.title('Modules (by Tag)')
+			.icon(BlockElementIcon)
+			.child(
+				S.documentTypeList('tag')
+				.title('Tags')
+				.child(tagId =>
+					S.documentList()
+					.title('Modules')
+					.filter('_type == "module" && references($tagId)')
+					.params({ tagId })
+				)
+			),
 		S.documentTypeListItem('serie')
 			.title('Series (all)'),
 		S.listItem()
@@ -40,6 +53,19 @@ export const myStructure = (S, context) => {
 						.filter('_type == "serie" && _id in *[_type == "project" && _id == $projectId][0].modules[]._ref || _type == "serie" && references($projectId)')
 						.params({ projectId })
 					)
+			),
+		S.listItem()
+			.title('Series (by Tag)')
+			.icon(VersionsIcon)
+			.child(
+				S.documentTypeList('tag')
+				.title('Tags')
+				.child(tagId =>
+					S.documentList()
+					.title('Series')
+					.filter('_type == "serie" && references($tagId)')
+					.params({ tagId })
+				)
 			),
 		S.divider(),
 		S.documentTypeListItem('tag')

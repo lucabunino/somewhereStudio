@@ -47,6 +47,5 @@ li {
 	text-indent: 0;
 	list-style-type: "— ";
     list-style-position: inside;
-	
 }
 </style>

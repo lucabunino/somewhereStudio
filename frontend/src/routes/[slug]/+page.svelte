@@ -11,8 +11,6 @@ let header = getHeader()
 
 // Variables
 let { data } = $props()
-$inspect(data)
-
 
 onMount(() => {
 	header.setBlurred(true);

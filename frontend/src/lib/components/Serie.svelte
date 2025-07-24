@@ -29,7 +29,7 @@ $effect(() => {
 })
 </script>
 
-<div style="position: relative;" class="{size ? size : module.size} {position ? position : 'left'}">
+<div style="position: relative;" class="serie {size ? size : module.size} {position ? position : 'left'}">
 	<swiper-container
 	init="false"
 	bind:this={swiperEl}

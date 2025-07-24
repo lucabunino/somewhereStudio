@@ -28,7 +28,6 @@ let tagger = getTags()
 
 // Variables
 let { data } = $props()
-$inspect(data.searchString)
 let domLoaded = $state(false)
 let innerWidth = $state(0)
 let innerHeight = $state(0)

@@ -8,6 +8,7 @@ import { cubicOut } from 'svelte/easing';
 import { goto } from '$app/navigation';
 import { writable, derived } from 'svelte/store';
 import { slide, blur, fly } from "svelte/transition";
+import { pageIn, pageOut } from "$lib/utils/transition.js";
 import { onMount } from "svelte";
 import { clickOutside } from '$lib/utils/clickOutside.js';
 
@@ -477,10 +478,10 @@ function handleKey({key}) {if (key === 'G' && dev) {viewGrid = !viewGrid}}
 <!-- Main -->
 {#if domLoaded}
 	<div class="site-wrapper" style="background-color: {bger.bg};">
-		{#key data.pathname && cookieBanner}
+		{#key data.pathname + cookieBanner}
 			<main
-			in:blur|global={{ duration: 200, delay: 200 }}
-			out:blur|global={{ duration: 200, delay: 0 }}
+			in:pageIn|global={{ duration: 200, delay: 500 }}
+			out:pageOut|global={{ duration: 200, delay: 0 }}
 			>
 				{@render children()}
 			</main>
@@ -685,6 +686,12 @@ function handleKey({key}) {if (key === 'G' && dev) {viewGrid = !viewGrid}}
 	        flex-direction: column;
 	overflow-y: scroll;
 	z-index: 9;
+	-ms-overflow-style: none;
+    scrollbar-width: none;
+	overflow: -moz-scrollbars-none;
+}
+.container::-webkit-scrollbar { 
+    display: none;
 }
 #more-tags-mobile {
 	display: none;
