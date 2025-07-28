@@ -307,7 +307,7 @@ function cancelMomentum() {
 				<div class="module intro gaisyr-34"
 				in:blur|global={{ duration: 200, delay: 500 }}
 				out:blur|global={{ duration: 200}}
-				>{data.modules.length} Risultati {zoomer.zoom} per:
+				>{data.modules.length} Risultati per:
 					{#if data.searchString != undefined}
 						'{data.searchString}'{#if data.searchTags.length > 0}{@html ' in '}{/if}
 					{/if}
