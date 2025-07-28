@@ -76,13 +76,13 @@ function handleScroll() {
 	style={`--projectHeight: ${projectHeights[data.index.length - 1]}px`}
 	>
 		<div class="labels ronzino-12 medium uppercase">
-			<label>Anno</label>
-			<label>Progetto</label>
-			<label>Cliente/i</label>
-			<label>In collaborazione con</label>
-			<label>Format</label>
-			<label>Argomento/i</label>
-			<label>Location</label>
+			<span class="label">Anno</span>
+			<span class="label">Progetto</span>
+			<span class="label">Cliente/i</span>
+			<span class="label">In collaborazione con</span>
+			<span class="label">Format</span>
+			<span class="label">Argomento/i</span>
+			<span class="label">Location</span>
 		</div>
 		{#each data.index as project, i}
 			<li class="project" class:singlePage={project.singlePage} class:active={indexHover === i}

@@ -15,8 +15,8 @@ let {
 
 let domLoaded = $state(false);
 let minimumDomLoaded = $state(true);
-let imgEl;
-let videoEl;
+let imgEl = $state(undefined);
+let videoEl = $state(undefined);
 let fullresUrl = media?.asset ? urlFor(media.asset).width(width) : null;
 let captionHeight = $state(0)
 
@@ -55,7 +55,7 @@ $effect(() => {
 				src={media.mp4.asset.url}
 				poster={media.cover ? urlFor(media.cover.asset).width(1080) : ""}
 				style="aspect-ratio: {aspectRatio}"
-				on:playing={() => {domLoaded = true}}
+				onplaying={() => {domLoaded = true}}
 			></video>
 		{:else if media?.asset}
 			<img
@@ -117,11 +117,8 @@ img, video {
     -o-object-fit: cover;
        object-fit: cover;
 }
-.autoWidth img, .autoWidth .video {
+:global(.autoWidth img), :global(.autoWidth .video) {
 	width: auto;
-}
-:global(.homepage img, .homepage video) {
-	/* max-height: 145vh; */
 }
 .media.cover img {
 	height: 100%;
@@ -147,6 +144,7 @@ img, video {
 	.caption {
 		text-indent: var(--gutter);
 		margin-top: .3rem;
+		margin-left: var(--gutter);
 	}
 }
 </style>

@@ -383,9 +383,4 @@ $effect(() => {
 .homepage[data-kind="composition"] .media-container.fixedHeight {
 	max-width: 80vw;
 }
-@media screen and (max-width: 700px) {
-	.module {
-		/* padding-top: var(--gutter); */
-	}
-}
 </style>

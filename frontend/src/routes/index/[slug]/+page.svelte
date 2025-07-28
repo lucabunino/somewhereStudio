@@ -116,7 +116,7 @@ function handleMouseEnter(latitude, longitude) {
 			{/if}
 		</div>
 		{#each data.project[0].modules as module, i (module._id)}
-			<div class="module-container"
+			<div class="module-container" role="group"
 			in:blur|global={{ duration: 200, delay: 500 + 100*i }}
 			out:blur|global={{ duration: 200}}
 			data-kind={module.kind}
@@ -132,8 +132,14 @@ function handleMouseEnter(latitude, longitude) {
 	</section>
 	{#if data.project[0].extra}
 		<section id="extra"
+		role="button"
+		tabindex="0"
 		class:open={extraer.extraOpen}
 		onclick={() => {!extraer.extraOpen && extraer.setExtraOpen(true)}}
+		onkeydown={(e) => {if ((e.key === 'Enter' || e.key === ' ') && !extraer.extraOpen) {
+			e.preventDefault();
+			extraer.setExtraOpen(true);
+		}}}
 		in:slide|global={{ axis: 'x', duration: 200, delay: 500 }}
 		out:slide|global={{ axis: 'x', duration: 200}}
 		style={`--introHeight: ${0}px`}
@@ -171,8 +177,14 @@ function handleMouseEnter(latitude, longitude) {
 					{/each}
 				</div>
 		</section>
-		<div id="extraSwitch" class:open={extraer.extraOpen}
+		<div role="button" tabindex="0" id="extraSwitch" class:open={extraer.extraOpen}
 		onclick={() => {extraer.extraOpen && extraer.setExtraOpen(false)}}
+		onkeydown={(e) => {
+			if ((e.key === 'Enter' || e.key === ' ') && !extraer.extraOpen) {
+				e.preventDefault();
+				extraer.setExtraOpen(true);
+			}
+		}}
 		style={`--introHeight: ${introHeight}px`}
 		></div>
 	{/if}
@@ -226,18 +238,6 @@ function handleMouseEnter(latitude, longitude) {
 	-ms-flex-item-align: center;
 	    -ms-grid-row-align: center;
 	    align-self: center;
-}
-.tags {
-	margin-top: var(--gutter);
-	list-style: none;
-	padding: 0;
-	display: -webkit-box;
-	display: -ms-flexbox;
-	display: flex;
-	-webkit-box-orient: vertical;
-	-webkit-box-direction: normal;
-	    -ms-flex-direction: column;
-	        flex-direction: column;
 }
 #extra {
 	width: 20vw;

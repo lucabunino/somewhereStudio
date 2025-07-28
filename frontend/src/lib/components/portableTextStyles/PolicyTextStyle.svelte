@@ -29,9 +29,6 @@ let {style, listItem, markDefs} = $derived(value);
 	text-decoration: underline;
 	cursor: pointer;
 }
-.link.blank::after {
-	content: 'AA';
-}
 .link:hover {
 	color: var(--darkGray);
 }

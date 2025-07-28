@@ -24,8 +24,8 @@ let initialModules = $derived(applyInitialSpiderfy(data.modules))
 
 let modules = $state([data.modules])
 let oldsearchTags;
-let map;
-let mapContainer;
+let map = $state(undefined);
+let mapContainer = $state(undefined);
 let activeModule = $state(undefined);
 let showMap = $derived(localStorage.getItem('cookieConsent') === 'accepted' ? true : false);
 let clusterMarkers = [];
@@ -43,7 +43,6 @@ onMount (() => {
 });
 
 $effect(() => {
-	console.log(showMap, zoomer.mapZoom, coordinater.coordinates.longitude, coordinater.coordinates.latitude);
 	if (showMap) {
 		if (data.searchTags !== oldsearchTags) {
 			if (map) {
@@ -170,10 +169,7 @@ async function createMap() {
 		updateMarkers();
 	});
 	oldsearchTags = data.searchTags;
-	console.log("map loaded");
-	
 }
-
 
 // Converts your modules array to GeoJSON FeatureCollection with properties for clustering
 function modulesToGeoJSON(modules) {
@@ -203,7 +199,13 @@ function updateMarkers() {
 	singleMarkers.forEach(m => m.remove());
 	singleMarkers = [];
 
-	const source = map?.getSource('modules');
+	let source;
+	try {
+	source = map.getSource('modules');
+	} catch (e) {
+	console.warn('Source "modules" not found yet or map not ready', e);
+	return;
+	}
 	if (!source) return;
 
 	// Query all clusters currently visible
@@ -423,35 +425,6 @@ function updateData() {
 	-webkit-transform: translateX(50%);
 	    -ms-transform: translateX(50%);
 	        transform: translateX(50%);
-}
-#cross {
-	position: fixed;
-	top: 50%;
-	left: 50%;
-	-webkit-transform: translateX(-50%) translateY(-50%);
-	    -ms-transform: translateX(-50%) translateY(-50%);
-	        transform: translateX(-50%) translateY(-50%);
-	width: auto;
-	height: auto;
-	display: -webkit-box;
-	display: -ms-flexbox;
-	display: flex;
-	-webkit-box-align: center;
-	    -ms-flex-align: center;
-	        align-items: center;
-	-webkit-box-pack: center;
-	    -ms-flex-pack: center;
-	        justify-content: center;
-	z-index: 2;
-	mix-blend-mode: difference;
-}
-#cross .line {
-	position: absolute;
-}
-#cross .line:nth-child(2) {
-	-webkit-transform: rotate(90deg);
-	    -ms-transform: rotate(90deg);
-	        transform: rotate(90deg);
 }
 .module-container {
 	position: absolute;

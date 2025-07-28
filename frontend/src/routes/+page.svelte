@@ -58,7 +58,11 @@ let bufferY = $derived(innerHeight / zoomer.zoom * preloadFactor * sizerY)
 
 // Lifecycle
 onMount(() => {
-	zoomer.setZoom(zoomer.initialZoom - 2)
+	if (data.searchTags.length > 0) {
+		zoomer.setZoom(zoomer.initialZoom)
+	} else {
+		zoomer.setZoom(zoomer.initialZoom - 2)
+	}
 	tagger.setTags(data.tags, { keepHierarchy: false })
 	tagger.setMaxTags(tagger.firstMaxTags)
 	if (data.searchTags.length > tagger.firstMaxTags) {
@@ -68,7 +72,7 @@ onMount(() => {
 $effect(() => {
 	domLoaded = true;
 	if (innerWidth < 700) {
-		zoomer.setZoom(5)
+		zoomer.setZoom(zoomer.initialZoom)
 	}
 	if (data.searchTags.length !== lastLength) {
 		lastLength = data.searchTags.length;
@@ -124,8 +128,9 @@ function updatePosition(deltaX, deltaY, baseSpeed = 1) {
 	positionY += deltaY * baseSpeed / (zoomer.scale * sizerY);
 }
 
-function handleScroll(e) {	
+function handleScroll(e) {
 	if (data.searchTags.length === 0) {
+		e.preventDefault()
 		updatePosition(-e.deltaX, -e.deltaY, 1);
 		header.setBlurred(true)
 	}
@@ -302,7 +307,7 @@ function cancelMomentum() {
 				<div class="module intro gaisyr-34"
 				in:blur|global={{ duration: 200, delay: 500 }}
 				out:blur|global={{ duration: 200}}
-				>{data.modules.length} Risultati per:
+				>{data.modules.length} Risultati {zoomer.zoom} per:
 					{#if data.searchString != undefined}
 						'{data.searchString}'{#if data.searchTags.length > 0}{@html ' in '}{/if}
 					{/if}
@@ -417,16 +422,6 @@ function cancelMomentum() {
 	-webkit-box-pack: center;
 	    -ms-flex-pack: center;
 	        justify-content: center;
-}
-.scattered .module-container div {
-	/* max-height: 90vh; */
-}
-.slide {
-	background-color: var(--white);
-}
-.project {
-	padding: .5em;
-	text-align: right;
 }
 
 @media screen and (max-width: 700px) {

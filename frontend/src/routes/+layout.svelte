@@ -119,12 +119,11 @@ function toggleTag(tagSlug) {
 	if (url.searchParams.size > 0) {
 		setTimeout(() => {
 			zoomer.setZoom(zoomer.initialZoom)
-		}, 500);
+		}, 200);
 	} else {
-		zoomer.setZoom(zoomer.initialZoom - 2)
 		setTimeout(() => {
 			zoomer.setZoom(zoomer.initialZoom - 2)
-		}, 500);
+		}, 200);
 	}
 	goto($page.url.pathname === "/" || $page.url.pathname === "/map" ? `?${url.searchParams.toString()}` : `/?${url.searchParams.toString()}`, { preload: true, replaceState: false });
 }
@@ -196,7 +195,6 @@ function handleReset(e) {
 }
 function handleSearchBtnMobile() {
 	if (searchActiveMobile) {
-		console.log("close");
 		searchActiveMobile = false
 		search = undefined
 	} else {
@@ -278,6 +276,7 @@ function handleKey({key}) {if (key === 'G' && dev) {viewGrid = !viewGrid}}
 		{/if}
 		<ul class="menu gaisyr-34 mobile-gaisyr-30"
 		class:blurred={header.blurred}
+		aria-hidden={header.blurred}
 		onclick={() => {menuActive = false}}
 		onmouseenter={() => {header.setBlurred(false); clearTimeout(blurredTimeout);}}
 		onmouseleave={() => {clearTimeout(blurredTimeout); blurredTimeout = setTimeout(() => {header.setBlurred(true)}, 2000);}}
@@ -318,7 +317,7 @@ function handleKey({key}) {if (key === 'G' && dev) {viewGrid = !viewGrid}}
 			{/if}
 			{#if !($page.url.pathname === "/index" || $page.url.pathname === "/about")}
 				<div id="zoom" class:extra={extraer.extra} class="shadow">
-					<button id="zoom-out" class="btn" class:off={($page.url.pathname === '/' && zoomer.zoom == zoomer.minZoom) || ($page.url.pathname.includes('/index/') && zoomer.zoom == zoomer.minZoom) || ($page.url.pathname === '/map' && zoomer.mapZoom <= zoomer.mapMinZoom + .1)}
+					<button aria-label="Zoom-out" id="zoom-out" class="btn" class:off={($page.url.pathname === '/' && zoomer.zoom == zoomer.minZoom) || ($page.url.pathname.includes('/index/') && zoomer.zoom == zoomer.minZoom) || ($page.url.pathname === '/map' && zoomer.mapZoom <= zoomer.mapMinZoom + .1)}
 					onclick={() => {$page.url.pathname === "/map" ? zoomer.decreaseMapZoom() : zoomer.decreaseZoom()}}
 					in:slide|global={{ axis: "x", duration: 300, delay: 50 }}
 					out:slide|global={{ axis: "x", duration: 300, delay: 500 }}
@@ -329,7 +328,7 @@ function handleKey({key}) {if (key === 'G' && dev) {viewGrid = !viewGrid}}
 							<path d="M16.9 17 12 12.2"/>
 						</svg>
 					</button>
-					<button id="zoom-in" class="btn" class:off={($page.url.pathname === '/' && zoomer.zoom == zoomer.maxZoom) || ($page.url.pathname.includes('/index/') && zoomer.zoom == zoomer.maxZoom) || ($page.url.pathname === '/map' && zoomer.mapZoom >= zoomer.mapMaxZoom - .1)}
+					<button aria-label="Zoom-in" id="zoom-in" class="btn" class:off={($page.url.pathname === '/' && zoomer.zoom == zoomer.maxZoom) || ($page.url.pathname.includes('/index/') && zoomer.zoom == zoomer.maxZoom) || ($page.url.pathname === '/map' && zoomer.mapZoom >= zoomer.mapMaxZoom - .1)}
 					onclick={() => {$page.url.pathname === "/map" ? zoomer.increaseMapZoom() : zoomer.increaseZoom()}}
 					in:slide|global={{ axis: "x", duration: 300 }}
 					out:slide|global={{ axis: "x", duration: 300, delay: 500 }}
@@ -380,12 +379,12 @@ function handleKey({key}) {if (key === 'G' && dev) {viewGrid = !viewGrid}}
 
 <!-- Tags -->
 {#if domLoaded}
-	<div class="tags"
+	<div class="tags" role="group"
 	onmouseleave={() => handleMouseLeave()}
 	onmouseenter={() => handleMouseEnter()}
 	>
 	{#if $page.url.pathname !== '/map'}
-		<div id="search-bar-desktop" class="shadow">
+		<div id="search-bar-desktop" role="search" class="shadow">
 			<input id="search-desktop" name="search" type="text" class="btn search"
 			placeholder="Cerca nel sito"
 			use:clickOutside onclick_outside={() => handleClickOutside()}
@@ -576,7 +575,7 @@ function handleKey({key}) {if (key === 'G' && dev) {viewGrid = !viewGrid}}
 	position: absolute;
 	margin-top: -1.1em;
 }
-.menu-item a, .menu-item button {
+.menu-item a {
 	pointer-events: all;
 	-webkit-transition: var(--transition);
 	-o-transition: var(--transition);
@@ -690,7 +689,7 @@ function handleKey({key}) {if (key === 'G' && dev) {viewGrid = !viewGrid}}
     scrollbar-width: none;
 	overflow: -moz-scrollbars-none;
 }
-.container::-webkit-scrollbar { 
+.tags::-webkit-scrollbar { 
     display: none;
 }
 #more-tags-mobile {
@@ -711,10 +710,6 @@ function handleKey({key}) {if (key === 'G' && dev) {viewGrid = !viewGrid}}
 	        justify-content: center;
 	color: var(--darkGray);
 	overflow: hidden;
-}
-#coordinates-desktop.off {
-	width: 0;
-	padding: 0;
 }
 #coordinates-desktop .cta {
 	opacity: 0;

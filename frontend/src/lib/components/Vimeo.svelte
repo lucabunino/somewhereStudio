@@ -46,7 +46,7 @@ function inView(callback, options = {}) {
 		observer = new IntersectionObserver(([entry]) => {
 			if (entry.isIntersecting) {
 				callback();
-				observer.unobserve(node); // Only trigger once
+				observer.unobserve(node);
 			}
 		}, options);
 		observer.observe(node);
@@ -68,6 +68,7 @@ function inView(callback, options = {}) {
 		</div>
 		{#if isPlaying}
 			<iframe
+				title="Vimeo embed for {title}"
 				src={embed}
 				width="100%"
 				frameborder="0"
@@ -75,7 +76,7 @@ function inView(callback, options = {}) {
 				allowfullscreen
 			></iframe>
 		{:else}
-			<button id="player-icon" onclick={(e) => {e.preventDefault(); isPlaying = true; header.setBlurred(true)}}>
+			<button aria-label="Player icon" id="player-icon" onclick={(e) => {e.preventDefault(); isPlaying = true; header.setBlurred(true)}}>
 				<svg class="shadow" width="45" height="47" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 45 47">
 					<path d="M41 19.501 4.25 38.986V.016L41 19.5Z"/>
 				</svg>
@@ -84,7 +85,7 @@ function inView(callback, options = {}) {
 				<div class="vimeo-info">
 					{#if title}<h3 class="gaisyr-19">{title}</h3>{/if}
 					{#if text1}
-						<p class="ronzino-12">{toPlainText(text1)}</p>
+						<p class="ronzino-12 mobile-trim">{toPlainText(text1)}</p>
 					{/if}
 				</div>
 			{/if}
@@ -150,7 +151,7 @@ iframe {
 	text-indent: 5rem;
 	max-width: 450px;
 }
-@media screen and (max-width: 700px) {
+/* @media screen and (max-width: 700px) {
 	#player-icon {
 		position: absolute;
 		fill: var(--white);
@@ -165,6 +166,16 @@ iframe {
 	#player-icon svg {
 		width: 2.5rem;
 		height: 2.5rem;
+	}
+} */
+@media screen and (max-width: 400px) {
+	.mobile-trim {
+		display: -webkit-box;
+		-webkit-box-orient: vertical;
+		-webkit-line-clamp: 3;
+		line-clamp: 3;
+		overflow: hidden;
+		text-overflow: ellipsis;
 	}
 }
 </style>
