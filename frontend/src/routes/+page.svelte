@@ -50,8 +50,17 @@ let dragStart = { x: 0, y: 0 };
 let positionStart = { x: 0, y: 0 };
 let checkCellTimer = $state();
 let preloadFactor = $derived(innerWidth > 700 ? 10 : 12)
-const sizerX = $derived(innerWidth > 700 ? 1 : 1.2)
-const sizerY = $derived(innerWidth > 700 ? 1.1 : .6)
+// const sizerX = $derived(innerWidth > 700 ? 1 : 1.2)
+let sizerX = $derived.by(() => {
+	if (innerWidth > 1280 && innerWidth / innerHeight > 1.6) {
+		return 0.9;
+	} else if (innerWidth <= 700) {
+		return 1.2;
+	} else {
+		return 1;
+	}
+});
+const sizerY = $derived(innerWidth > 700 ? 1.2 : .6)
 const randomFactor = $derived(innerWidth > 700 ? .2 : .1)
 let bufferX = $derived(innerWidth / zoomer.zoom * preloadFactor * sizerX)
 let bufferY = $derived(innerHeight / zoomer.zoom * preloadFactor * sizerY)
