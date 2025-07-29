@@ -43,7 +43,7 @@ $effect(() => {
 		{/each}
 	</swiper-container>
 	
-	{#if project && !hiddenProject}
+	{#if project && hiddenProject}
 		<p
 		in:blur|global={{ duration: 200, delay: delayed ? 500 : 500 }}
 		out:blur|global={{ duration: 200 }}

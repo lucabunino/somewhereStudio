@@ -129,7 +129,7 @@ function updatePosition(deltaX, deltaY, baseSpeed = 1) {
 }
 
 function handleScroll(e) {
-	if (data.searchTags.length === 0) {
+	if (data.searchTags.length === 0 && !data.searchString) {
 		e.preventDefault()
 		updatePosition(-e.deltaX, -e.deltaY, 1);
 		header.setBlurred(true)
