@@ -1,9 +1,9 @@
 /* Font import */
 @font-face {
 	font-family: Gaisyr;
-	src:	url('/fonts/ABCGaisyrSemi-Mono-Book-Trial.otf') format("opentype"),
-				url('/fonts/ABCGaisyrSemi-Mono-Book-Trial.woff') format("woff"),
-				url('/fonts/ABCGaisyrSemi-Mono-Book-Trial.woff2') format("woff2");
+	src:	url('/fonts/ABCGaisyrSemi-Mono-Book.otf') format("opentype"),
+				url('/fonts/ABCGaisyrSemi-Mono-Book.woff') format("woff"),
+				url('/fonts/ABCGaisyrSemi-Mono-Book.woff2') format("woff2");
 	font-weight: 400;
 	font-style: normal;
 }
