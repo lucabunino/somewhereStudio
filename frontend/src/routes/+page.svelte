@@ -49,7 +49,6 @@ let isDragging = false;
 let dragStart = { x: 0, y: 0 };
 let positionStart = { x: 0, y: 0 };
 let checkCellTimer = $state();
-let preloadFactor = $derived(innerWidth > 700 ? 10 : 12)
 // const sizerX = $derived(innerWidth > 700 ? 1 : 1.2)
 let sizerX = $derived.by(() => {
 	if (innerWidth > 1280 && innerWidth / innerHeight > 1.6) {
@@ -62,8 +61,6 @@ let sizerX = $derived.by(() => {
 });
 const sizerY = $derived(innerWidth > 700 ? 1.2 : .6)
 const randomFactor = $derived(innerWidth > 700 ? .2 : .1)
-let bufferX = $derived(innerWidth / zoomer.zoom * preloadFactor * sizerX)
-let bufferY = $derived(innerHeight / zoomer.zoom * preloadFactor * sizerY)
 
 // Lifecycle
 onMount(() => {
@@ -90,20 +87,36 @@ $effect(() => {
 		if (checkCellTimer) return;
 		checkCellTimer = requestAnimationFrame(() => {
 			checkCellTimer = null;
-			const gridX = Math.floor(-positionX / (innerWidth * sizerX));
-			const gridY = Math.floor(-positionY / (innerHeight * sizerY));
-			const key = `${gridX},${gridY}`;
-			// const spiralCoords = getSpiralCoords(data.modules.length);
-			const spiralCoords = getSpiralCoords(3);
+			
+			// Calculate the grid cell that is at the center of the current viewport
+			const centerX = innerWidth / (2 * zoomer.scale) - innerWidth / 2 - positionX;
+			const centerY = innerHeight / (2 * zoomer.scale) - innerHeight / 2 - positionY;
+			const gridX = Math.round(centerX / (innerWidth * sizerX));
+			const gridY = Math.round(centerY / (innerHeight * sizerY));
+			
+			// Calculate range based on zoom level with an extra safety margin
+			const rangeX = Math.ceil(1 / (zoomer.scale * sizerX)) + 2;
+			const rangeY = Math.ceil(1 / (zoomer.scale * sizerY)) + 2;
+			const range = Math.max(rangeX, rangeY, 5);
+			
+			const spiralCoords = getSpiralCoords(range);
 			for (const [dx, dy] of spiralCoords) {
 				const x = gridX + dx;
 				const y = gridY + dy;
 				const k = `${x},${y}`;
+				// For new potential modules, we don't have an offset yet, 
+				// but isInView will use a safe margin.
 				if (!visitedCells.includes(k) && isInView(x, y)) {
 					addModule(x, y);
 				}
-				if (!isInView(x, y)) {
-					removeModule(x, y);
+			}
+
+			// Clean up modules that are no longer in view
+			for (let i = activeModules.length - 1; i >= 0; i--) {
+				const m = activeModules[i];
+				// Pass the specific module's offset to isInView for accurate removal
+				if (!isInView(m.gridX, m.gridY, m.offsetX, m.offsetY)) {
+					removeModule(m.gridX, m.gridY);
 				}
 			}
 		});
@@ -164,18 +177,24 @@ function handleMouseMove(e) {
 function handleMouseUp() {
 	isDragging = false;
 }
-function isInView(gridX, gridY) {
-	const scaledInnerWidth = innerWidth / zoomer.zoom;
-	const scaledInnerHeight = innerHeight / zoomer.zoom;
+function isInView(gridX, gridY, offsetX = 0, offsetY = 0) {
+	// Calculate the center position of the module in screen coordinates, including its random offset
+	const centerX = (gridX * innerWidth * sizerX + innerWidth/2 + positionX + offsetX) * zoomer.scale;
+	const centerY = (gridY * innerHeight * sizerY + innerHeight/2 + positionY + offsetY) * zoomer.scale;
 
-	const x = gridX * innerWidth * sizerX + positionX;
-	const y = gridY * innerHeight * sizerY + positionY;
+	// Use a very large buffer for the X axis to prevent early disappearance
+	const bufferX = 1200; 
+	const bufferY = 600;
+	
+	// Use full innerWidth/innerHeight for the margin to be safe (since modules are at most 100vw/vh)
+	const marginX = (innerWidth * zoomer.scale) / 2 + bufferX;
+	const marginY = (innerHeight * zoomer.scale) / 2 + bufferY;
 
 	return (
-		x + scaledInnerWidth * preloadFactor > 0 &&
-		x - scaledInnerWidth * preloadFactor < innerWidth &&
-		y + scaledInnerHeight * preloadFactor > 0 &&
-		y - scaledInnerHeight * preloadFactor < innerHeight
+		centerX + marginX > 0 &&
+		centerX - marginX < innerWidth &&
+		centerY + marginY > 0 &&
+		centerY - marginY < innerHeight
 	);
 }
 
