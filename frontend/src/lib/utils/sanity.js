@@ -30,6 +30,7 @@ media[]{
 },
 id,
 hash,
+vimeoData{ title, width, height, thumbnail{ asset->{ _ref, _id, _type, metadata {dimensions, lqip} } } },
 latitude,
 longitude,
 location->{
@@ -58,6 +59,7 @@ modules[]->{
 	},
 	id,
 	hash,
+	vimeoData{ title, width, height, thumbnail{ asset->{ _ref, _id, _type, metadata {dimensions, lqip} } } },
 	latitude,
 	longitude,
 	location->{

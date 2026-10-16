@@ -13,6 +13,7 @@ let header = getHeader()
 let {
 	id,
 	hash = null,
+	vimeoData = null,
 	autoplay = true,
 	loop = false,
 	title = null,
@@ -32,7 +33,16 @@ $effect(() => {
 	domLoaded = true;
 })
 
+// data fetched into Sanity by the studio (title, size, thumbnail): no Vimeo request until play
+const fromSanity = $derived(!!vimeoData?.thumbnail?.asset);
+const sanityAspectRatio = $derived(vimeoData?.width && vimeoData?.height ? vimeoData.width / vimeoData.height : undefined);
+const sanityEmbed = $derived(
+	`https://player.vimeo.com/video/${id}?${hash ? `h=${hash}&` : ''}autoplay=1&muted=0&loop=1&title=0&byline=0&portrait=0&dnt=1`
+);
+
+// fallback for modules not filled from Vimeo yet
 async function loadVimeo() {
+	if (fromSanity) return;
 	const response = await fetch(`/api/vimeo/${id}`);
 	const data = await response.json();
 	aspectRatio = data.width / data.height;
@@ -62,14 +72,18 @@ function inView(callback, options = {}) {
 {#if domLoaded}
 	<div bind:this={container} use:inView={loadVimeo()}
 	class="vimeo-container" class:homepage={$page.url.pathname === "/"}
-	style="aspect-ratio: {aspectRatio};">
+	style="aspect-ratio: {fromSanity ? sanityAspectRatio : aspectRatio};">
 		<div class="media-container">
-			<Media thumbnail={thumbnail} cover={true}/>
+			{#if fromSanity}
+				<Media media={{ asset: vimeoData.thumbnail.asset }} cover={true}/>
+			{:else}
+				<Media thumbnail={thumbnail} cover={true}/>
+			{/if}
 		</div>
 		{#if isPlaying}
 			<iframe
 				title="Vimeo embed for {title}"
-				src={embed}
+				src={fromSanity ? sanityEmbed : embed}
 				width="100%"
 				frameborder="0"
 				allow="autoplay; fullscreen; picture-in-picture"

@@ -53,7 +53,7 @@ $effect(() => {
 		<Slider slides={module.media} size={module.size} key={module._id}/>
 	{:else if ['vimeo'].includes(module.kind)}
 		<div class="media-container">
-			<Vimeo id={module.id} hash={module.hash} cover={module.cover} title={module.textTitle}  text1={module.text1}/>
+			<Vimeo id={module.id} hash={module.hash} vimeoData={module.vimeoData} cover={module.cover} title={module.textTitle}  text1={module.text1}/>
 		</div>
 	{:else if ['box'].includes(module.kind)}
 		<!-- <div class="media-container" style="background-color: {color ? 'var(--white)' : module.color?.hex}; color: {isDark(module.color?.hex) && !color ? "var(--white)" : "var(--black)"}"> -->

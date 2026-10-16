@@ -1,3 +1,4 @@
+import {VimeoDataInput} from '../components/VimeoDataInput.jsx'
 import media from './objects/media';
 import {BlockElementIcon, BlockquoteIcon} from '@sanity/icons'
 
@@ -131,6 +132,24 @@ export default {
 			type: 'string',
 			fieldset: 'vimeo',
 			hidden: ({ parent }) => !['vimeo'].includes(parent?.kind)
+		},
+		{
+			name: 'vimeoData',
+			title: 'From Vimeo',
+			description: 'Filled automatically from the id / hash. The website shows this until play is pressed.',
+			type: 'object',
+			fieldset: 'vimeo',
+			hidden: ({ parent }) => !['vimeo'].includes(parent?.kind),
+			components: { input: VimeoDataInput },
+			fields: [
+				{ name: 'title', type: 'string' },
+				{ name: 'width', type: 'number' },
+				{ name: 'height', type: 'number' },
+				{ name: 'duration', type: 'number' },
+				{ name: 'thumbnail', type: 'image' },
+				{ name: 'source', type: 'string' },
+				{ name: 'fetchedAt', type: 'datetime' },
+			],
 		},
 		{
 			name: 'side',
@@ -283,21 +302,16 @@ export default {
 			title: 'title',
 			kind: 'kind',
 			size: 'size',
-			media: 'media'
+			// only the first media item, not the whole array, for every module in every list
+			image: 'media.0.asset',
+			cover: 'media.0.cover.asset',
+			vimeoThumbnail: 'vimeoData.thumbnail.asset',
 		},
-		prepare({ title, kind, size, media }) {
-			let mediaUsed
-			if (media) {
-				if (media[0].asset) {
-					mediaUsed = media[0].asset
-				} else {
-					mediaUsed = media[0].cover.asset
-				} 
-			}
+		prepare({ title, kind, size, image, cover, vimeoThumbnail }) {
 			return {
 				title,
-				subtitle: `[${size.toUpperCase()}] ${getKindTitle(kind)}`,
-				media: mediaUsed,
+				subtitle: `[${(size ?? '').toUpperCase()}] ${getKindTitle(kind)}`,
+				media: image ?? cover ?? vimeoThumbnail,
 			};
 		}
 	}
