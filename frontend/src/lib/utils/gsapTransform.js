@@ -1,46 +1,28 @@
 import { gsap } from "gsap";
 
+// Places a node from getTransform() on every gsap tick. The easing happens once, upstream, in the
+// shared camera the getter reads, so all nodes move in lockstep (no per-node tweens, no parallax).
 export function gsapTransform(node, getTransform) {
 	let prev = {};
-	let frame;
-	let firstRun = true;
 
-	function loop() {
+	function tick() {
 		const { x, y, scale } = getTransform();
-		// Only animate if something changed
-		const hasChanged = (
-			x !== prev.x || y !== prev.y || scale !== prev.scale
-		);
-
-		if (hasChanged) {
-			if (firstRun) {
-				gsap.set(node, {
-					x, y, scale,
-					transformOrigin: "center center"
-				});
-				firstRun = false;
-			} else {
-				gsap.to(node, {
-					x, y, scale,
-					duration: .4,
-					ease: "power5.out",
-					transformOrigin: "center center"
-				});
-			}
-			prev = { x, y, scale };
-		}
-
-		frame = requestAnimationFrame(loop);
+		// Only write if something changed
+		if (x === prev.x && y === prev.y && scale === prev.scale) return;
+		node.style.transform = `translate3d(${x}px, ${y}px, 0) scale(${scale})`;
+		prev = { x, y, scale };
 	}
 
-	loop();
+	// shared gsap ticker for all modules instead of a requestAnimationFrame loop each
+	tick();
+	gsap.ticker.add(tick);
 
 	return {
 		update(newGetter) {
 			getTransform = newGetter;
 		},
 		destroy() {
-			cancelAnimationFrame(frame);
+			gsap.ticker.remove(tick);
 		}
 	};
 }

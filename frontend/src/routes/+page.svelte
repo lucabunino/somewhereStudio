@@ -6,6 +6,7 @@ import { onMount } from "svelte";
 import { quadOut } from 'svelte/easing';
 import { blur } from "svelte/transition";
 import { flip } from "svelte/animate";
+import { gsap } from "gsap";
 import { gsapTransform } from "$lib/utils/gsapTransform.js";
 import { gsapScale } from "$lib/utils/gsapScale.js";
 
@@ -35,20 +36,25 @@ let enableAnimation = $state(false)
 let mouse = $state({ x: 0, y: 0 });
 let index = -1
 let modulesHeight = $state()
-let activeModules = $state([])
+// raw: module data is big, only the array itself needs to be reactive
+let activeModules = $state.raw([])
 let positionX = $state(0)
 let positionY = $state(0)
 let lastLength = -1;
 let lastGridX = 0;
 let lastGridY = 0;
-let visitedCells = $state([]);
+let visitedCells = new Set();
 let lastX = 0;
 let lastY = 0;
 let animationFrame;
 let isDragging = false;
 let dragStart = { x: 0, y: 0 };
 let positionStart = { x: 0, y: 0 };
-let checkCellTimer = $state();
+let lastViewKey = '';
+// smoothed view all modules are placed from: position and scale ease together, once per frame
+const camera = { x: 0, y: 0, scale: 1, ready: false };
+const CAMERA_EASE_MS = 90;
+const spiralCache = new Map();
 // const sizerX = $derived(innerWidth > 700 ? 1 : 1.2)
 let sizerX = $derived.by(() => {
 	if (innerWidth > 1280 && innerWidth / innerHeight > 1.6) {
@@ -77,73 +83,85 @@ onMount(() => {
 })
 $effect(() => {
 	domLoaded = true;
-	if (innerWidth < 700) {
-		zoomer.setZoom(zoomer.initialZoom)
-	}
 	if (data.searchTags.length !== lastLength) {
 		lastLength = data.searchTags.length;
 	}
-	if (data.searchTags.length == 0) {
-		if (checkCellTimer) return;
-		checkCellTimer = requestAnimationFrame(() => {
-			checkCellTimer = null;
-			
-			// Calculate the grid cell that is at the center of the current viewport
-			const centerX = innerWidth / (2 * zoomer.scale) - innerWidth / 2 - positionX;
-			const centerY = innerHeight / (2 * zoomer.scale) - innerHeight / 2 - positionY;
-			const gridX = Math.round(centerX / (innerWidth * sizerX));
-			const gridY = Math.round(centerY / (innerHeight * sizerY));
-			
-			// Calculate range based on zoom level with an extra safety margin
-			const rangeX = Math.ceil(1 / (zoomer.scale * sizerX)) + 2;
-			const rangeY = Math.ceil(1 / (zoomer.scale * sizerY)) + 2;
-			const range = Math.max(rangeX, rangeY, 5);
-			
-			const spiralCoords = getSpiralCoords(range);
-			for (const [dx, dy] of spiralCoords) {
-				const x = gridX + dx;
-				const y = gridY + dy;
-				const k = `${x},${y}`;
-				// For new potential modules, we don't have an offset yet, 
-				// but isInView will use a safe margin.
-				if (!visitedCells.includes(k) && isInView(x, y)) {
-					addModule(x, y);
-				}
-			}
-
-			// Clean up modules that are no longer in view
-			for (let i = activeModules.length - 1; i >= 0; i--) {
-				const m = activeModules[i];
-				// Pass the specific module's offset to isInView for accurate removal
-				if (!isInView(m.gridX, m.gridY, m.offsetX, m.offsetY)) {
-					removeModule(m.gridX, m.gridY);
-				}
-			}
-		});
-	}
 })
-function addModule(gridX, gridY) {
+// one shared tick: ease the camera towards the target view, then refresh which cells need modules
+// (only when the view moved). Modules read the camera in the same frame, so they move in lockstep
+onMount(() => {
+	function tick(time, deltaTime) {
+		if (data.searchTags.length == 0) {
+			if (innerWidth < 700 && zoomer.zoom !== zoomer.initialZoom) {
+				zoomer.setZoom(zoomer.initialZoom)
+			}
+			if (!camera.ready) {
+				Object.assign(camera, { x: positionX, y: positionY, scale: zoomer.scale, ready: true });
+			} else {
+				const k = 1 - Math.exp(-deltaTime / CAMERA_EASE_MS);
+				camera.x = approach(camera.x, positionX, k, 0.05);
+				camera.y = approach(camera.y, positionY, k, 0.05);
+				camera.scale = approach(camera.scale, zoomer.scale, k, 0.0005);
+			}
+			const key = `${camera.x}|${camera.y}|${camera.scale}|${innerWidth}|${innerHeight}`;
+			if (key !== lastViewKey) {
+				lastViewKey = key;
+				checkCells();
+			}
+		} else {
+			lastViewKey = '';
+		}
+	}
+	gsap.ticker.add(tick);
+	return () => gsap.ticker.remove(tick);
+})
+function approach(value, target, k, epsilon) {
+	const next = value + (target - value) * k;
+	return Math.abs(target - next) < epsilon ? target : next;
+}
+function checkCells() {
+	// Calculate the grid cell that is at the center of the current viewport
+	const centerX = innerWidth / (2 * camera.scale) - innerWidth / 2 - camera.x;
+	const centerY = innerHeight / (2 * camera.scale) - innerHeight / 2 - camera.y;
+	const gridX = Math.round(centerX / (innerWidth * sizerX));
+	const gridY = Math.round(centerY / (innerHeight * sizerY));
+
+	// Calculate range based on zoom level with an extra safety margin
+	const rangeX = Math.ceil(1 / (camera.scale * sizerX)) + 2;
+	const rangeY = Math.ceil(1 / (camera.scale * sizerY)) + 2;
+	const range = Math.max(rangeX, rangeY, 5);
+
+	// For new potential modules, we don't have an offset yet, isInView uses a safe margin
+	const added = [];
+	for (const [dx, dy] of getSpiralCoords(range)) {
+		const x = gridX + dx;
+		const y = gridY + dy;
+		if (!visitedCells.has(`${x},${y}`) && isInView(x, y)) {
+			added.push(createModule(x, y));
+		}
+	}
+
+	// Clean up modules that are no longer in view, using each module's own offset
+	const next = [];
+	for (const m of [...activeModules, ...added]) {
+		if (isInView(m.gridX, m.gridY, m.offsetX, m.offsetY)) next.push(m);
+		else visitedCells.delete(`${m.gridX},${m.gridY}`);
+	}
+	if (next.length !== activeModules.length || next.some((m, i) => m !== activeModules[i])) {
+		activeModules = next;
+	}
+}
+function createModule(gridX, gridY) {
 	index++;
-	activeModules.push({
+	visitedCells.add(`${gridX},${gridY}`);
+	return {
 		...data.modules[index % data.modules.length],
 		gridX,
 		gridY,
 		index,
 		offsetX: (Math.random() - 0.5) * innerWidth * randomFactor,
 		offsetY: (Math.random() - 0.5) * innerHeight * randomFactor,
-	});
-	visitedCells.push(`${gridX},${gridY}`);
-}
-function removeModule(gridX, gridY) {
-	const key = `${gridX},${gridY}`;
-	const index = activeModules.findIndex(m => m.gridX === gridX && m.gridY === gridY);
-	if (index !== -1) {
-		activeModules.splice(index, 1);
-	}
-	const visitedIndex = visitedCells.indexOf(key);
-	if (visitedIndex !== -1) {
-		visitedCells.splice(visitedIndex, 1);
-	}
+	};
 }
 function updatePosition(deltaX, deltaY, baseSpeed = 1) {
 	positionX += deltaX * baseSpeed / (zoomer.scale * sizerX);
@@ -178,17 +196,21 @@ function handleMouseUp() {
 	isDragging = false;
 }
 function isInView(gridX, gridY, offsetX = 0, offsetY = 0) {
-	// Calculate the center position of the module in screen coordinates, including its random offset
-	const centerX = (gridX * innerWidth * sizerX + innerWidth/2 + positionX + offsetX) * zoomer.scale;
-	const centerY = (gridY * innerHeight * sizerY + innerHeight/2 + positionY + offsetY) * zoomer.scale;
+	// Calculate the center position of the module in screen coordinates, including its random offset.
+	// The translate moves the container from its resting place: horizontally centered in #modules,
+	// top at 0, so its on-screen center is translate + (innerWidth/2, containerHeight/2)
+	const containerHeight = innerHeight * (innerWidth <= 700 ? .7 : .8);
+	const centerX = (gridX * innerWidth * sizerX + innerWidth/2 + camera.x + offsetX) * camera.scale + innerWidth/2;
+	const centerY = (gridY * innerHeight * sizerY + innerHeight/2 + camera.y + offsetY) * camera.scale + containerHeight/2;
 
-	// Use a very large buffer for the X axis to prevent early disappearance
-	const bufferX = 1200; 
-	const bufferY = 600;
+	// Use a very large buffer for the X axis to prevent early disappearance,
+	// but never more than one grid cell: a fixed buffer keeps ~150 modules alive when zoomed out
+	const bufferX = Math.min(1200, innerWidth * sizerX * camera.scale);
+	const bufferY = Math.min(600, innerHeight * sizerY * camera.scale);
 	
 	// Use full innerWidth/innerHeight for the margin to be safe (since modules are at most 100vw/vh)
-	const marginX = (innerWidth * zoomer.scale) / 2 + bufferX;
-	const marginY = (innerHeight * zoomer.scale) / 2 + bufferY;
+	const marginX = (innerWidth * camera.scale) / 2 + bufferX;
+	const marginY = (innerHeight * camera.scale) / 2 + bufferY;
 
 	return (
 		centerX + marginX > 0 &&
@@ -202,9 +224,9 @@ function getTransformFn(module, index = 0) {
 	return () => {
 		const baseX = module.gridX * innerWidth * sizerX + innerWidth/2;
 		const baseY = module.gridY * innerHeight * sizerY + innerHeight/2;
-		const x = (baseX + positionX + module.offsetX) * zoomer.scale;
-		const y = (baseY + positionY + module.offsetY) * zoomer.scale;
-		return { x, y, scale: zoomer.scale };
+		const x = (baseX + camera.x + module.offsetX) * camera.scale;
+		const y = (baseY + camera.y + module.offsetY) * camera.scale;
+		return { x, y, scale: camera.scale };
 	};
 }
 function applyZoom() {
@@ -220,6 +242,7 @@ function applyZoom() {
 	oldScale = zoomer.scale;
 }
 function getSpiralCoords(range) {
+	if (spiralCache.has(range)) return spiralCache.get(range);
 	const coords = [];
 	for (let r = 1; r <= range; r++) {
 		// Top and bottom rows
@@ -234,6 +257,7 @@ function getSpiralCoords(range) {
 		}
 	}
 	coords.unshift([0, 0]);
+	spiralCache.set(range, coords);
 	return coords;
 }
 
