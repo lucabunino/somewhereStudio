@@ -22,7 +22,9 @@ let header = getHeader()
 let { data } = $props()
 let initialModules = $derived(applyInitialSpiderfy(data.modules))
 
-let modules = $state([data.modules])
+// one marker carries the open module card, instead of one (empty) marker per module repositioned every frame
+let activeEl = $state(undefined);
+let activeMarker;
 let oldsearchTags;
 let map = $state(undefined);
 let mapContainer = $state(undefined);
@@ -46,10 +48,12 @@ $effect(() => {
 	if (showMap) {
 		if (data.searchTags !== oldsearchTags) {
 			if (map) {
-				map.remove();	
+				// filtering: keep the map (style, tiles, position), only swap the clustered points
+				refreshModules();
+			} else {
+				createMap();
+				updateMarkers();
 			}
-			createMap(map);
-			updateMarkers();
 		}
 		if (map) {
 			map.flyTo({
@@ -60,6 +64,18 @@ $effect(() => {
 			});
 		}
 	}
+});
+
+// move the single card marker to the active module
+$effect(() => {
+	if (!map || !activeEl) return;
+	const active = activeModule !== undefined ? initialModules[activeModule] : null;
+	if (!active) {
+		activeMarker?.remove();
+		return;
+	}
+	activeMarker ??= new mapboxgl.Marker(activeEl);
+	activeMarker.setLngLat([active.longitude, active.latitude]).addTo(map);
 });
 
 onDestroy(() => {
@@ -82,13 +98,7 @@ async function createMap() {
 		telemetryDisabled: true,
 	});
 
-	initialModules.forEach((module, i) => {
-		if (module.latitude != null && module.longitude != null) {
-			new mapboxgl.Marker(modules[i])
-				.setLngLat([module.longitude, module.latitude])
-				.addTo(map);
-		}
-	});
+	activeMarker = undefined;
 
 	map.on('load', () => {
 		// Add clustered source
@@ -121,9 +131,14 @@ async function createMap() {
 		map.on('dragend', updateData);
 	});
 
-	map.once('idle', () => {
+	// draw markers as soon as the clustered source has rendered features, not when every tile has loaded ('idle')
+	function onFirstFeatures() {
+		if (!map.getSource('modules') || !map.isSourceLoaded('modules')) return;
+		if (map.querySourceFeatures('modules').length === 0) return;
+		map.off('render', onFirstFeatures);
 		updateMarkers();
-	});
+	}
+	map.on('render', onFirstFeatures);
 
 	// Cluster click: zoom into cluster
 	map.on('click', (e) => {
@@ -169,6 +184,15 @@ async function createMap() {
 		updateMarkers();
 	});
 	oldsearchTags = data.searchTags;
+}
+
+function refreshModules() {
+	oldsearchTags = data.searchTags;
+	activeModule = undefined;
+	const source = map.getSource('modules');
+	if (!source) return; // map still loading: its 'load' handler uses the current modules
+	source.setData(modulesToGeoJSON(initialModules));
+	map.once('idle', updateMarkers);
 }
 
 // Converts your modules array to GeoJSON FeatureCollection with properties for clustering
@@ -324,6 +348,8 @@ function updateData() {
 </script>
 
 <svelte:head>
+	<!-- start the connection to Mapbox (style, tiles, sprites) while the page loads -->
+	<link rel="preconnect" href="https://api.mapbox.com" crossorigin="anonymous">
 	{#if data.seo.SEOTitle}<title>{data.seo.SEOTitle} — Map</title>{/if}
 	{#if data.seo.SEOTitle}<meta property="og:title" content={`${data.seo.SEOTitle} — Mappa`}>{/if}
 	{#if data.seo.SEOTitle}<meta property="og:site_name" content={`${data.seo.SEOTitle} — Mappa`}>{/if}
@@ -340,20 +366,21 @@ function updateData() {
 	</div>
 
 
-	{#each initialModules as module, i}
-		<div class="module-container" bind:this={modules[i]} class:active={activeModule === i}>
-			{#if activeModule == i}
+	<div class="module-container" bind:this={activeEl} class:active={activeModule !== undefined}>
+		{#if activeModule !== undefined}
+			{@const module = initialModules[activeModule]}
+			{#key activeModule}
 				<div style="-webkit-transform: scale({innerWidth < 700 ? .9 : .5}); -ms-transform: scale({innerWidth < 700 ? .9 : .5}); transform: scale({innerWidth < 700 ? .9 : .5}); -webkit-transform-origin: center; -ms-transform-origin: center; transform-origin: center; pointer-events: all;"
 				use:clickOutside onclick_outside={() => handleClickOutside()}>
 					{#if module.modules}
 							<Serie slides={module.modules} project={module.project} size={module.size} link={module.link}/>
 					{:else}
-							<Module module={module} i={i} delayed={false}/>
+							<Module module={module} i={activeModule} delayed={false}/>
 					{/if}
 				</div>
-			{/if}
-		</div>
-	{/each}
+			{/key}
+		{/if}
+	</div>
 {:else}
 	<p id="cookie-message" class:blurred={!header.blurred} class="gaisyr-19">Per poter visualizzare la mappa è necessario acconsentire all'uso dei cookie, {innerWidth > 700 ? 'in basso a sinistra' : 'in alto a destra'}.</p>
 {/if}

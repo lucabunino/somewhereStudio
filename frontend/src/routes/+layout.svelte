@@ -5,15 +5,35 @@ import { dev } from '$app/environment';
 import { page } from '$app/stores';
 import { urlFor } from '$lib/utils/image';
 import { cubicOut } from 'svelte/easing';
-import { goto } from '$app/navigation';
+import { goto, preloadData } from '$app/navigation';
+import { navigating } from '$app/state';
 import { writable, derived } from 'svelte/store';
-import { slide, blur, fly } from "svelte/transition";
+import { slide, blur, fly, fade } from "svelte/transition";
 import { pageIn, pageOut } from "$lib/utils/transition.js";
 import { onMount } from "svelte";
 import { clickOutside } from '$lib/utils/clickOutside.js';
 
 // Variables
 let { data, children } = $props();
+
+// tags toggled but not loaded yet: the tag list reacts on click instead of when the new data arrives
+let pendingTags = $state(null);
+const activeTags = $derived(pendingTags ?? data.searchTags);
+$effect(() => {
+	data.searchTags;
+	pendingTags = null;
+});
+
+// loading feedback: thin line on top while a navigation / filter loads (after 120ms, so fast loads don't flicker)
+let showLoader = $state(false);
+$effect(() => {
+	if (!navigating.to) {
+		showLoader = false;
+		return;
+	}
+	const timer = setTimeout(() => (showLoader = true), 120);
+	return () => clearTimeout(timer);
+});
 // $inspect(data)
 let mouse = $state([])
 let domLoaded = $state(false)
@@ -89,7 +109,23 @@ function handleMousemove(event) {
 	mouse.x = event.clientX;
 	mouse.y = event.clientY;
 }
+// where toggling a tag navigates to (shared by click and hover-preload)
+function tagHref(tagSlug) {
+	const url = new URL(window.location.href);
+	const tags = url.searchParams.getAll('tag');
+	if (tags.includes(tagSlug)) {
+		url.searchParams.delete('tag');
+		tags.filter(t => t !== tagSlug).forEach(t => url.searchParams.append('tag', t));
+	} else {
+		url.searchParams.append('tag', tagSlug);
+	}
+	return $page.url.pathname === "/" || $page.url.pathname === "/map" ? `${$page.url.pathname}?${url.searchParams.toString()}` : `/?${url.searchParams.toString()}`;
+}
+function preloadTag(tagSlug) {
+	preloadData(tagHref(tagSlug)).catch(() => {});
+}
 function toggleTag(tagSlug) {
+	const href = tagHref(tagSlug);
 	const url = new URL(window.location.href);
 	const tags = url.searchParams.getAll('tag');
 
@@ -100,10 +136,10 @@ function toggleTag(tagSlug) {
 		const newTags = tags.filter(t => t !== tagSlug);
 		url.searchParams.delete('tag'); // clear all first
 		newTags.forEach(t => url.searchParams.append('tag', t));
-		if (data.searchTags.length > tagger.firstMaxTags) {
+		if (activeTags.length > tagger.firstMaxTags) {
 			tagger.setMaxTags(tagger.maxTags - 1)
 		} else {
-			if (data.searchTags.length === 1) {
+			if (activeTags.length === 1) {
 				tagger.setMaxTags(tagger.firstMaxTags)
 			} else {
 				tagger.setMaxTags(tagger.maxTags - 1)
@@ -112,8 +148,8 @@ function toggleTag(tagSlug) {
 	} else {
 		// Add the tag
 		url.searchParams.append('tag', tagSlug);
-		if (data.searchTags.length > tagger.firstMaxTags || innerWidth < 700) {
-			tagger.setMaxTags(data.searchTags.length + 1)
+		if (activeTags.length > tagger.firstMaxTags || innerWidth < 700) {
+			tagger.setMaxTags(activeTags.length + 1)
 		}
 	}
 	if (url.searchParams.size > 0) {
@@ -125,13 +161,18 @@ function toggleTag(tagSlug) {
 			zoomer.setZoom(zoomer.initialZoom - 2)
 		}, 200);
 	}
-	goto($page.url.pathname === "/" || $page.url.pathname === "/map" ? `?${url.searchParams.toString()}` : `/?${url.searchParams.toString()}`, { preload: true, replaceState: false });
+	pendingTags = url.searchParams.getAll('tag');
+	goto(href, { replaceState: false });
 }
 export function flipVertical(node, { from, to }) {
 	const style = getComputedStyle(node);
 	const fromTop = from.top - parseFloat(style.marginTop);
 	const toTop = to.top - parseFloat(style.marginTop);
 	const dy = fromTop - toTop;
+	// a tag being hidden stays where it was while its button slides out, instead of jumping to its new slot
+	if (node.dataset.leaving === 'true') {
+		return { delay: 0, duration: 500, css: () => `transform: translateY(${dy}px);` };
+	}
 	return {
 		delay: 0,
 		duration: 300,
@@ -428,7 +469,6 @@ function handleKey({key}) {if (key === 'G' && dev) {viewGrid = !viewGrid}}
 				.slice()
 				.filter(tag => !tag.hidden)
 				.sort((a, b) => {
-					const activeTags = data.searchTags;
 					const aActive = activeTags.includes(a.slug.current);
 					const bActive = activeTags.includes(b.slug.current);
 
@@ -444,10 +484,13 @@ function handleKey({key}) {if (key === 'G' && dev) {viewGrid = !viewGrid}}
 				}) as tag, i (tag.slug.current)}
 				<div class="tag shadow"
 				animate:flipVertical
-				class:active={data.searchTags.includes(tag.slug.current)}
+				class:active={activeTags.includes(tag.slug.current)}
+				data-leaving={!(tagger.open || i < tagger.maxTags)}
 				>
 					{#if tagger.open || i<tagger.maxTags}
 						<button onclick={() => toggleTag(tag.slug.current)}
+						onmouseenter={() => preloadTag(tag.slug.current)}
+						onfocus={() => preloadTag(tag.slug.current)}
 						in:slide|global={{ axis: "x", duration: 500, delay: 30 + i*30 }}
 						out:slide|global={{ axis: "x", duration: 500, delay: 0 }}
 						>
@@ -472,6 +515,10 @@ function handleKey({key}) {if (key === 'G' && dev) {viewGrid = !viewGrid}}
 				{/if}
 			</div>
 	</div>
+{/if}
+
+{#if showLoader}
+	<div class="loading-line" aria-hidden="true" transition:fade={{ duration: 150 }}></div>
 {/if}
 
 <!-- Main -->
@@ -826,6 +873,38 @@ nav[aria-label="ui-mobile"] {
 		-ms-flex-preferred-size: 20%;
 		    flex-basis: 20%;
 	}
+}
+
+/* Loading line */
+.loading-line {
+	position: fixed;
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: 1px;
+	z-index: 10000;
+	overflow: hidden;
+	pointer-events: none;
+	mix-blend-mode: difference;
+}
+.loading-line::after {
+	content: "";
+	position: absolute;
+	top: 0;
+	left: 0;
+	width: 30%;
+	height: 100%;
+	background-color: var(--white);
+	-webkit-animation: loading-line 1s ease-in-out infinite;
+	        animation: loading-line 1s ease-in-out infinite;
+}
+@-webkit-keyframes loading-line {
+	from { -webkit-transform: translateX(-100%); transform: translateX(-100%); }
+	to { -webkit-transform: translateX(340%); transform: translateX(340%); }
+}
+@keyframes loading-line {
+	from { -webkit-transform: translateX(-100%); transform: translateX(-100%); }
+	to { -webkit-transform: translateX(340%); transform: translateX(340%); }
 }
 
 /* Main */
