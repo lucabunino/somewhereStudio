@@ -1,5 +1,6 @@
 import { createClient } from '@sanity/client';
 import { PUBLIC_SANITY_DATASET, PUBLIC_SANITY_PROJECT_ID } from '$env/static/public';
+import { dev } from '$app/environment';
 
 const module = `
 ...,
@@ -8,16 +9,11 @@ quotes[] {
 	...,
 	author->{title}
 },
-"project": {
-	"title": coalesce(
-		*[_type == "project" && references(^._id)][0].title,
-		project->title,
-	),
-	"slug": coalesce(
-		*[_type == "project" && references(^._id)][0].slug,
-		project->slug,
-	)
-},
+"project": coalesce(
+	*[_type == "project" && references(^._id)][0]{title, slug},
+	project->{title, slug},
+	{"title": null, "slug": null}
+),
 media[]{
 	caption,
 	mp4 {
@@ -80,7 +76,7 @@ if (!PUBLIC_SANITY_PROJECT_ID || !PUBLIC_SANITY_DATASET) {
 export const client = createClient({
 	projectId: PUBLIC_SANITY_PROJECT_ID,
 	dataset: PUBLIC_SANITY_DATASET,
-	useCdn: false, // `false` if you want to ensure fresh data
+	useCdn: !dev,
 	apiVersion: '2025-04-23', // date of setup
 });
 
@@ -224,14 +220,8 @@ export async function getMapModules(tags) {
 // }
 export async function getTags() {
 	return await client.fetch(`
-		*[_type == "tag" && !(_id in path('drafts.**')) 
-		  && count(*[_type in ["module", "serie"] 
-		             && !(_id in path('drafts.**')) 
-		             && references(^._id)]) > 0] 
-		{
-			...,
-			"homepage": count(*[_type == "homepage" && !(_id in path('drafts.**'))][0].modules[]->tags[@->_id == ^._id]) > 0
-		}
+		*[_type == "tag" && !(_id in path('drafts.**'))
+		  && _id in *[_type in ["module", "serie"] && !(_id in path('drafts.**'))].tags[]._ref]
 		| order(hierarchy desc, title asc)
 	`);
 }
