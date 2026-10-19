@@ -29,6 +29,11 @@ let tagger = getTags()
 
 // Variables
 let { data } = $props()
+// keep this page's modules while it fades out: the next route's data (without `modules`) arrives first
+let modules = $state.raw(data.modules)
+$effect.pre(() => {
+	if (data.modules) modules = data.modules
+})
 let domLoaded = $state(false)
 let innerWidth = $state(0)
 let innerHeight = $state(0)
@@ -155,7 +160,7 @@ function createModule(gridX, gridY) {
 	index++;
 	visitedCells.add(`${gridX},${gridY}`);
 	return {
-		...data.modules[index % data.modules.length],
+		...modules[index % modules.length],
 		gridX,
 		gridY,
 		index,
@@ -359,7 +364,7 @@ function cancelMomentum() {
 				<div class="module intro gaisyr-34"
 				in:blur|global={{ duration: 200, delay: 500 }}
 				out:blur|global={{ duration: 200}}
-				>{data.modules.length} Risultati per:
+				>{modules.length} Risultati per:
 					{#if data.searchString != undefined}
 						'{data.searchString}'{#if data.searchTags.length > 0}{@html ' in '}{/if}
 					{/if}
@@ -369,7 +374,7 @@ function cancelMomentum() {
 				</div>
 			{:else}
 				<div class="module intro gaisyr-34"
-				>{data.modules.length} Risultati per:
+				>{modules.length} Risultati per:
 					{#if data.searchString != undefined}
 						'{data.searchString}'{#if data.searchTags.length > 0}{@html ' in '}{/if}
 					{/if}
@@ -378,7 +383,7 @@ function cancelMomentum() {
 					{/each}
 				</div>
 			{/if}
-			{#each data.modules as module, i}
+			{#each modules as module, i}
 				<div class="module-container">
 					<div onmouseenter={() => {handleMouseEnter(module.latitude || module.reference?.latitude || null, module.longitude || module.reference?.longitude || null)}}>
 						{#if module.modules}

@@ -1,5 +1,6 @@
 // Easing
 import { quadInOut } from 'svelte/easing'
+import { slide as svelteSlide } from 'svelte/transition'
 
 // Transitions
 export function pageIn(node, { delay, duration, marginTop }) {
@@ -36,4 +37,10 @@ export function pageOut(node, { delay, duration, marginTop }) {
 			`;
 		}
 	};
+}
+// svelte's slide measures the element; inside a hidden container (e.g. the mobile "..." button on desktop)
+// that measure is NaN and the browser warns "Invalid keyframe value". Hidden elements just skip it.
+export function slide(node, params) {
+	if (node.getClientRects().length === 0) return { duration: 0 };
+	return svelteSlide(node, params);
 }

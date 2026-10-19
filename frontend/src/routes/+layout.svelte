@@ -8,8 +8,8 @@ import { cubicOut } from 'svelte/easing';
 import { goto, preloadData } from '$app/navigation';
 import { navigating } from '$app/state';
 import { writable, derived } from 'svelte/store';
-import { slide, blur, fly, fade } from "svelte/transition";
-import { pageIn, pageOut } from "$lib/utils/transition.js";
+import { blur, fly, fade } from "svelte/transition";
+import { pageIn, pageOut, slide } from "$lib/utils/transition.js";
 import { onMount } from "svelte";
 import { clickOutside } from '$lib/utils/clickOutside.js';
 

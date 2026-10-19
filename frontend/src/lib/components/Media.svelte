@@ -22,6 +22,11 @@ let imgEl = $state(undefined);
 let videoEl = $state(undefined);
 let captionHeight = $state(0)
 
+// reserve the final size from the real dimensions: the blurred lqip (20px) has a slightly different
+// rounded ratio, which made the box change height when the full image swapped in
+const dims = $derived(media?.asset?.metadata?.dimensions ?? media?.cover?.asset?.metadata?.dimensions);
+const ratio = $derived(aspectRatio ?? (dims ? `${dims.width} / ${dims.height}` : undefined));
+
 // homepage zoom: images are sized to how big they are shown, videos pause when zoomed far out
 const isHome = $derived($page.url.pathname === '/');
 const scale = $derived(isHome || $page.url.pathname.includes('/index/') ? zoomer.scale : 1);
@@ -108,14 +113,14 @@ $effect(() => {
 				bind:this={videoEl}
 				src={media.mp4.asset.url}
 				poster={media.cover ? urlFor(media.cover.asset).width(1080) : ""}
-				style="aspect-ratio: {aspectRatio}"
+				style:aspect-ratio={ratio}
 				onplaying={() => {domLoaded = true}}
 			></video>
 		{:else if media?.asset}
 			<img
 				src={media.asset.metadata?.lqip}
 				alt=""
-				style="aspect-ratio: {aspectRatio}"
+				style:aspect-ratio={ratio}
 				bind:this={imgEl}
 			/>
 		{/if}
@@ -123,7 +128,7 @@ $effect(() => {
 			<img
 				src={thumbnail}
 				alt=""
-				style="aspect-ratio: {aspectRatio}"
+				style:aspect-ratio={ratio}
 				bind:this={imgEl}
 			/>
 		{/if}

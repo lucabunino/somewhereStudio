@@ -35,26 +35,31 @@ let zoomer = getZoom()
 import { getExtra } from '$lib/stores/extra.svelte.js';
 let extraer = getExtra()
 
-if (data.project[0]?.extra) {
+// keep this page's project while it fades out: the next route's data (without `project`) arrives first
+let projectList = $state.raw(data.project);
+$effect.pre(() => {
+	if (data.project) projectList = data.project;
+});
+
+if (projectList[0]?.extra) {
 	extraer.setExtra(true)
 }
 
 onMount(() => {
-	bger.setBg(data.project[0].color ? data.project[0].color.hex : null)
+	bger.setBg(projectList[0].color ? projectList[0].color.hex : null)
 	zoomer.setZoom(zoomer.initialZoom)
 	tagger.setMaxTags(0)
-	setTimeout(() => {
-		tagger.setTags(data.project[0].tags, { keepHierarchy: false, hierarchy: 99 });
-		tagger.setMaxTags(data.project[0].tags.length)
+	const tagsTimer = setTimeout(() => {
+		tagger.setTags(projectList[0].tags, { keepHierarchy: false, hierarchy: 99 });
+		tagger.setMaxTags(projectList[0].tags.length)
 	}, 1500);
+	return () => clearTimeout(tagsTimer);
 })
 $effect(() => {
 	domLoaded = true;
 	if (extraer.extraOpen == true) {
-		console.log("open");
 		body.style.overflow = 'hidden';
 	} else {
-		console.log("close");
 		body.style.overflow = '';
 	}
 })
@@ -76,22 +81,22 @@ function handleMouseEnter(latitude, longitude) {
 </script>
 
 <svelte:head>
-	{#if data.seo.SEOTitle}<title>{data.seo.SEOTitle} — {data.project[0].title}</title>{/if}
-	{#if data.project[0].SEODescription}<meta name="description" content={data.project[0].SEODescription}>{/if}
-	{#if !data.project[0].singlePage}
+	{#if data.seo.SEOTitle}<title>{data.seo.SEOTitle} — {projectList[0].title}</title>{/if}
+	{#if projectList[0].SEODescription}<meta name="description" content={projectList[0].SEODescription}>{/if}
+	{#if !projectList[0].singlePage}
 		<meta name="robots" content="index,follow">
 		<meta name="robots" content="noindex, nofollow" />
 	{/if}
-	{#if data.seo.SEOTitle}<meta property="og:title" content={`${data.seo.SEOTitle} — ${data.project[0].title}`}>{/if}
-	{#if data.project[0].SEODescription}<meta property="og:description" content={data.project[0].SEODescription}>{/if}
-	{#if data.project[0].cover}<meta property="og:image" content={urlFor(data.project[0].cover).width(2000).url()}>{/if}
-	{#if data.seo.SEOTitle}<meta property="og:site_name" content={`${data.seo.SEOTitle} — ${data.project[0].title}`}>{/if}
+	{#if data.seo.SEOTitle}<meta property="og:title" content={`${data.seo.SEOTitle} — ${projectList[0].title}`}>{/if}
+	{#if projectList[0].SEODescription}<meta property="og:description" content={projectList[0].SEODescription}>{/if}
+	{#if projectList[0].cover}<meta property="og:image" content={urlFor(projectList[0].cover).width(2000).url()}>{/if}
+	{#if data.seo.SEOTitle}<meta property="og:site_name" content={`${data.seo.SEOTitle} — ${projectList[0].title}`}>{/if}
 </svelte:head>
 <svelte:body bind:this={body}/>
 <svelte:window bind:innerWidth bind:innerHeight></svelte:window>
 
 {#if domLoaded}
-	<section id="singleProject" class:extra={data.project[0].extra}
+	<section id="singleProject" class:extra={projectList[0].extra}
 	bind:clientHeight={singleProjectHeight}
 	style={`margin-bottom: ${(singleProjectHeight - singleProjectHeight*zoomer.scale)*-1}px; -webkit-transform: scale(${zoomer.scale}); -ms-transform: scale(${zoomer.scale}); transform: scale(${zoomer.scale}); -webkit-transform-origin: center top; -ms-transform-origin: center top; transform-origin: center top;`}
 	>
@@ -100,22 +105,22 @@ function handleMouseEnter(latitude, longitude) {
 		out:blur|global={{ duration: 200}}
 		bind:clientHeight={introHeight}
 		>
-			<h1 class="project-title gaisyr-34 mobile-gaisyr-30 normalcase">{data.project[0].title}</h1>
-			{#if data.project[0].collaborations}
-				<p class="collaborations">In collaborazione con {#each data.project[0].collaborations as collaboration, j}{collaboration.title}{#if data.project[0].collaborations?.length - 1 > j}{@html ', '}{/if}{/each}</p>
+			<h1 class="project-title gaisyr-34 mobile-gaisyr-30 normalcase">{projectList[0].title}</h1>
+			{#if projectList[0].collaborations}
+				<p class="collaborations">In collaborazione con {#each projectList[0].collaborations as collaboration, j}{collaboration.title}{#if projectList[0].collaborations?.length - 1 > j}{@html ', '}{/if}{/each}</p>
 			{/if}
-			{#if data.project[0].date || data.project[0].locations}
+			{#if projectList[0].date || projectList[0].locations}
 				<p class="date-and-location">
-					{#if data.project[0].date}
-						<span class="date">{new Date(data.project[0].date).getFullYear()}{#if data.project[0].locations}{@html ', '}{/if}</span>
+					{#if projectList[0].date}
+						<span class="date">{new Date(projectList[0].date).getFullYear()}{#if projectList[0].locations}{@html ', '}{/if}</span>
 					{/if}
-					{#if data.project[0].locations}
-						<span class="locations">{#each data.project[0].locations as location, j}{location.title}{#if data.project[0].locations?.length - 1 > j}{@html ', '}{/if}{/each}</span>
+					{#if projectList[0].locations}
+						<span class="locations">{#each projectList[0].locations as location, j}{location.title}{#if projectList[0].locations?.length - 1 > j}{@html ', '}{/if}{/each}</span>
 					{/if}
 				</p>
 			{/if}
 		</div>
-		{#each data.project[0].modules as module, i (module._id)}
+		{#each projectList[0].modules as module, i (module._id)}
 			<div class="module-container" role="group"
 			in:blur|global={{ duration: 200, delay: 500 + 100*i }}
 			out:blur|global={{ duration: 200}}
@@ -123,14 +128,14 @@ function handleMouseEnter(latitude, longitude) {
 			onmouseenter={() => {handleMouseEnter(module.latitude, module.longitude)}}
 			>
 				{#if module.modules}
-					<Serie slides={module.modules} position={module.position} project={module.project} size={module.size} showProject={false} hiddenProject={true} link={false} color={data.project[0].color ? data.project[0].color : null} key={i}/>
+					<Serie slides={module.modules} position={module.position} project={module.project} size={module.size} showProject={false} hiddenProject={true} link={false} color={projectList[0].color ? projectList[0].color : null} key={i}/>
 				{:else}
-					<Module module={module} i={i} hiddenProject={true} link={false} showProject={false} color={data.project[0].color ? data.project[0].color : null}/>
+					<Module module={module} i={i} hiddenProject={true} link={false} showProject={false} color={projectList[0].color ? projectList[0].color : null}/>
 				{/if}
 			</div>
 		{/each}
 	</section>
-	{#if data.project[0].extra}
+	{#if projectList[0].extra}
 		<section id="extra"
 		role="button"
 		tabindex="0"
@@ -150,17 +155,17 @@ function handleMouseEnter(latitude, longitude) {
 		out:blur|global={{ duration: 200}}
 		bind:clientHeight={introHeight}
 		>
-			<h1 class="project-title gaisyr-34 mobile-gaisyr-30 normalcase">{data.project[0].title}</h1>
-			{#if data.project[0].collaborations}
-				<p class="collaborations">In collaborazione con {#each data.project[0].collaborations as collaboration, j}{collaboration.title}{#if data.project[0].collaborations?.length - 1 > j}{@html ', '}{/if}{/each}</p>
+			<h1 class="project-title gaisyr-34 mobile-gaisyr-30 normalcase">{projectList[0].title}</h1>
+			{#if projectList[0].collaborations}
+				<p class="collaborations">In collaborazione con {#each projectList[0].collaborations as collaboration, j}{collaboration.title}{#if projectList[0].collaborations?.length - 1 > j}{@html ', '}{/if}{/each}</p>
 			{/if}
-			{#if data.project[0].date || data.project[0].locations}
+			{#if projectList[0].date || projectList[0].locations}
 				<p class="date-and-location">
-					{#if data.project[0].date}
-						<span class="date">{new Date(data.project[0].date).getFullYear()}{#if data.project[0].locations}{@html ', '}{/if}</span>
+					{#if projectList[0].date}
+						<span class="date">{new Date(projectList[0].date).getFullYear()}{#if projectList[0].locations}{@html ', '}{/if}</span>
 					{/if}
-					{#if data.project[0].locations}
-						<span class="locations">{#each data.project[0].locations as location, j}{location.title}{#if data.project[0].locations?.length - 1 > j}{@html ', '}{/if}{/each}</span>
+					{#if projectList[0].locations}
+						<span class="locations">{#each projectList[0].locations as location, j}{location.title}{#if projectList[0].locations?.length - 1 > j}{@html ', '}{/if}{/each}</span>
 					{/if}
 				</p>
 			{/if}
@@ -168,7 +173,7 @@ function handleMouseEnter(latitude, longitude) {
 
 			<h4 class="ronzino-12 medium uppercase">Extra</h4>
 				<div class="extra-container">
-					{#each data.project[0].extra as extra, i}
+					{#each projectList[0].extra as extra, i}
 						{#if extra._type === "extraText"}
 							<p class="gaisyr-19">{extra.text}</p>
 						{:else if extra._type === "image"}
