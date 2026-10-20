@@ -11,6 +11,7 @@ import LongTextStyle from "$lib/components/portableTextStyles/LongTextStyle.svel
 import BoxTextStyle from "$lib/components/portableTextStyles/BoxTextStyle.svelte";
 import { PortableText } from '@portabletext/svelte'
 import { page } from '$app/stores';
+import { scrollText } from '$lib/utils/scrollText.js';
 let {
 	module,
 	i,
@@ -56,9 +57,9 @@ $effect(() => {
 			<Vimeo id={module.id} hash={module.hash} vimeoData={module.vimeoData} cover={module.cover} title={module.textTitle}  text1={module.text1}/>
 		</div>
 	{:else if ['box'].includes(module.kind)}
-		<!-- <div class="media-container" style="background-color: {color ? 'var(--white)' : module.color?.hex}; color: {isDark(module.color?.hex) && !color ? "var(--white)" : "var(--black)"}"> -->
+		<!-- <div class="media-container" style="background-color: {color ? 'var(--white)' : module.color?.hex}; --module-bg: {color ? 'var(--white)' : (module.color?.hex ?? 'var(--white)')}; color: {isDark(module.color?.hex) && !color ? "var(--white)" : "var(--black)"}"> -->
 		<div class="media-container {module.side ? `side-${module.side}` : ``}">
-			<div class="text">
+			<div class="text scroll-text" use:scrollText>
                 {#if module.textTitle}
 					<h3 class="ronzino-18">{module.textTitle}</h3>
 				{/if}
@@ -88,7 +89,7 @@ $effect(() => {
 		</div>
 	{:else if ['shortText'].includes(module.kind)}
         {#if module.text1}
-            <div class="text gaisyr-34">
+            <div class="text gaisyr-34 scroll-text" use:scrollText>
                 <PortableText
                 value={module.text1}
                 components={{
@@ -104,7 +105,7 @@ $effect(() => {
             </div>
         {/if}
 	{:else if ['longText'].includes(module.kind)}
-        <div class="text-container {module.side ? `side-${module.side}` : ``}">
+        <div class="text-container scroll-text {module.side ? `side-${module.side}` : ``}" use:scrollText>
             {#if module.text1}
                 <div class="text text-big gaisyr-34" class:noFloat={!module.text2}>
                     <PortableText
@@ -157,7 +158,7 @@ $effect(() => {
 		{#if innerWidth > 700}
 			<a class:homepage={$page.url.pathname === "/"} class="module {size ? size : module.size} {(module.kind === "composition" && module.fixedHeight) ? 'fixedHeight' : 'autoHeight'} {module.position ? module.position : 'left'}" data-kind={module.kind}
 			href={module.project?.slug ? `/index/${module.project.slug.current}` : ``}
-			style="background-color: {color ? 'var(--white)' : module.color?.hex}; color: {isDark(module.color?.hex) && !color ? "var(--white)" : "var(--black)"}"
+			style="background-color: {color ? 'var(--white)' : module.color?.hex}; --module-bg: {color ? 'var(--white)' : (module.color?.hex ?? 'var(--white)')}; color: {isDark(module.color?.hex) && !color ? "var(--white)" : "var(--black)"}"
 			in:blur|global={{ duration: 400, amount: 20, delay: delayed ? 400 + i*50 : 400 }}
 			out:blur|global={{ duration: 400, amount: 20 }}
 			>
@@ -166,7 +167,7 @@ $effect(() => {
 		{:else}
 			<a class:homepage={$page.url.pathname === "/"} class="module {size ? size : module.size} {(module.kind === "composition" && module.fixedHeight) ? 'fixedHeight' : 'autoHeight'} {module.position ? module.position : 'left'}" data-kind={module.kind}
 			href={module.project?.slug ? `/index/${module.project.slug.current}` : ``}
-			style="background-color: {color ? 'var(--white)' : module.color?.hex}; color: {isDark(module.color?.hex) && !color ? "var(--white)" : "var(--black)"}"
+			style="background-color: {color ? 'var(--white)' : module.color?.hex}; --module-bg: {color ? 'var(--white)' : (module.color?.hex ?? 'var(--white)')}; color: {isDark(module.color?.hex) && !color ? "var(--white)" : "var(--black)"}"
 			>
 				{@render moduleContent(module)}
 			</a>
@@ -174,7 +175,7 @@ $effect(() => {
 	{:else}
 		{#if innerWidth > 700}
 			<div class:homepage={$page.url.pathname === "/"} class="module {size ? size : module.size} {(module.kind === "composition" && module.fixedHeight) ? 'fixedHeight' : ''} {module.position ? module.position : 'left'}" data-kind={module.kind}
-			style="background-color: {color ? 'var(--white)' : module.color?.hex}; color: {isDark(module.color?.hex) && !color ? "var(--white)" : "var(--black)"}"
+			style="background-color: {color ? 'var(--white)' : module.color?.hex}; --module-bg: {color ? 'var(--white)' : (module.color?.hex ?? 'var(--white)')}; color: {isDark(module.color?.hex) && !color ? "var(--white)" : "var(--black)"}"
 			in:blur|global={{ duration: 200, amount: 100, delay: delayed ? 500 + i*50 : 500 }}
 			out:blur|global={{ duration: 200, amount: 100 }}
 			>
@@ -182,7 +183,7 @@ $effect(() => {
 			</div>
 		{:else}
 			<div class:homepage={$page.url.pathname === "/"} class="module {size ? size : module.size} {(module.kind === "composition" && module.fixedHeight) ? 'fixedHeight' : ''} {module.position ? module.position : 'left'}" data-kind={module.kind}
-			style="background-color: {color ? 'var(--white)' : module.color?.hex}; color: {isDark(module.color?.hex) && !color ? "var(--white)" : "var(--black)"}"
+			style="background-color: {color ? 'var(--white)' : module.color?.hex}; --module-bg: {color ? 'var(--white)' : (module.color?.hex ?? 'var(--white)')}; color: {isDark(module.color?.hex) && !color ? "var(--white)" : "var(--black)"}"
 			>
 				{@render moduleContent(module)}
 			</div>
@@ -373,9 +374,44 @@ $effect(() => {
 }
 
 /* General */
-:global(.scattered .text-container) {
-	max-height: 100vh;
-    overflow: scroll;
+/* on the scattered homepage texts scroll inside their module when they overflow */
+:global(.scattered) .scroll-text {
+	max-height: 70vh;
+	overflow-y: auto;
+	overscroll-behavior: contain;
+	scrollbar-width: none;
+}
+:global(.scattered) .scroll-text::-webkit-scrollbar {
+	display: none;
+}
+/* map card is scaled down: limit to ~60vh as seen on screen */
+:global(.card-content) .scroll-text {
+	max-height: calc(60vh / var(--card-scale, 1));
+	overflow-y: auto;
+	overscroll-behavior: contain;
+	scrollbar-width: none;
+}
+:global(.card-content) .scroll-text::-webkit-scrollbar {
+	display: none;
+}
+/* fade to the module background while there is more text below */
+.scroll-text.fade-bottom::after {
+	content: "";
+	display: block;
+	clear: both;
+	position: -webkit-sticky;
+	position: sticky;
+	bottom: 0;
+	height: 4rem;
+	margin-top: -4rem;
+	background: -webkit-gradient(linear, left bottom, left top, from(var(--module-bg, var(--white))), to(transparent));
+	background: linear-gradient(to top, var(--module-bg, var(--white)), transparent);
+	pointer-events: none;
+}
+@media screen and (max-width: 700px) {
+	:global(.scattered) .scroll-text {
+		max-height: 55vh;
+	}
 }
 .homepage[data-kind="slider"] {
 	width: 80vw;

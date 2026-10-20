@@ -8,6 +8,7 @@ import { blur } from "svelte/transition";
 import { flip } from "svelte/animate";
 import { gsap } from "gsap";
 import { gsapTransform } from "$lib/utils/gsapTransform.js";
+import { canScrollText } from "$lib/utils/scrollText.js";
 import { gsapScale } from "$lib/utils/gsapScale.js";
 
 // Zoom
@@ -174,6 +175,8 @@ function updatePosition(deltaX, deltaY, baseSpeed = 1) {
 }
 
 function handleScroll(e) {
+	// over a text that can still scroll that way: let it scroll instead of panning
+	if (canScrollText(e.target, e.deltaY)) return;
 	if (data.searchTags.length === 0 && !data.searchString) {
 		e.preventDefault()
 		updatePosition(-e.deltaX, -e.deltaY, 1);
@@ -279,6 +282,8 @@ let velocityY = 0;
 let momentumFrame;
 
 function handleTouchStart(e) {
+  // a drag starting on an overflowing text scrolls the text
+  if (canScrollText(e.target, 0)) return;
   isDragging = true;
   cancelMomentum();
   enableAnimation = false;
