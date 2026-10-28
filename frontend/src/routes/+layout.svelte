@@ -3,7 +3,6 @@
 import "../app.css";
 import { dev } from '$app/environment';
 import { page } from '$app/stores';
-import { urlFor } from '$lib/utils/image';
 import { cubicOut } from 'svelte/easing';
 import { goto, preloadData } from '$app/navigation';
 import { navigating } from '$app/state';
@@ -12,6 +11,7 @@ import { blur, fly, fade } from "svelte/transition";
 import { pageIn, pageOut, slide } from "$lib/utils/transition.js";
 import { onMount } from "svelte";
 import { clickOutside } from '$lib/utils/clickOutside.js';
+import Head from '$lib/components/Head.svelte';
 
 // Variables
 let { data, children } = $props();
@@ -294,19 +294,7 @@ function handleKey({key}) {if (key === 'G' && dev) {viewGrid = !viewGrid}}
 
 
 
-<svelte:head>
-	{#if data.seo.SEOTitle}<title>{data.seo.SEOTitle}</title>{/if}
-	{#if data.seo.SEODescription}<meta name="description" content={data.seo.SEODescription}>{/if}
-	<link rel="canonical" href={$page.url}>
-	<meta name="robots" content="index,follow">
-	<meta name="googlebot" content="index,follow">
-	{#if data.seo.SEOTitle}<meta property="og:title" content={data.seo.SEOTitle}>{/if}
-	{#if data.seo.SEODescription}<meta property="og:description" content={data.seo.SEODescription}>{/if}
-	{#if data.seo.SEOImage}<meta property="og:image" content={urlFor(data.seo.SEOImage).width(2000).url()}>{/if}
-	<meta property="og:url" content={$page.url}>
-	<meta property="og:type" content="website">
-	{#if data.seo.SEOTitle}<meta property="og:site_name" content={data.seo.SEOTitle}>{/if}
-</svelte:head>
+<Head />
 
 
 <header>

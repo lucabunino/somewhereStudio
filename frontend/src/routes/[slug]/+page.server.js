@@ -6,6 +6,7 @@ export async function load({ params }) {
 	if (policy) {
 		return {
 			policy,
+			seoSingle: { seoTitle: policy.title },
 		};
 	}
 	throw error(404, 'Not found');

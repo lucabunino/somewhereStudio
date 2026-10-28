@@ -6,6 +6,7 @@ export async function load() {
 	if (about) {
 		return {
 			about,
+			seoSingle: { seoTitle: 'About' },
 		};
 	}
 	throw error(404, 'Not found');

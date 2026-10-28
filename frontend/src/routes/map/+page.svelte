@@ -471,9 +471,6 @@ function updateData() {
 <svelte:head>
 	<!-- start the connection to Mapbox (style, tiles, sprites) while the page loads -->
 	<link rel="preconnect" href="https://api.mapbox.com" crossorigin="anonymous">
-	{#if data.seo.SEOTitle}<title>{data.seo.SEOTitle} — Map</title>{/if}
-	{#if data.seo.SEOTitle}<meta property="og:title" content={`${data.seo.SEOTitle} — Mappa`}>{/if}
-	{#if data.seo.SEOTitle}<meta property="og:site_name" content={`${data.seo.SEOTitle} — Mappa`}>{/if}
 </svelte:head>
 
 <div id="map-wrapper">

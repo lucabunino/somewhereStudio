@@ -12,6 +12,8 @@ export async function load({ url }) {
 	if (modules) {
 		return {
 			modules,
+			// search results are thin, near-duplicate pages: keep them out of the index
+			hidden: !!search,
 		};
 	}
 	throw error(404, 'Not found');

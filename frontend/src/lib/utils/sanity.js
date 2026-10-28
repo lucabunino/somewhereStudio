@@ -84,11 +84,10 @@ export const client = createClient({
 
 export async function getSeo() {
 	return await client.fetch(`
-		*[_type == "seo"][0] {
-			SEOTitle,
-			SEODescription,
-			SEOKeywords,
-			SEOImage,
+		*[_type == "seo" && !(_id in path('drafts.**'))][0] {
+			"seoTitle": SEOTitle,
+			"seoDescription": SEODescription,
+			"seoImage": SEOImage,
 		}`
 	);
 }
@@ -265,7 +264,7 @@ export async function getIndex() {
 }
 export async function getProject(slug) {
 	return await client.fetch(`
-		*[_type == "project" && slug.current == $slug] {
+		*[_type == "project" && slug.current == $slug && !(_id in path('drafts.**'))] {
 			...,
 			modules[]->{
 				${module}
@@ -286,4 +285,10 @@ export async function getProject(slug) {
 				title,
 			},
 		}`, { slug });
+}
+export async function getSitemapEntries() {
+	return await client.fetch(`{
+		"projects": *[_type == "project" && index == true && singlePage == true && defined(slug.current) && !(_id in path('drafts.**'))] | order(date desc){title, "slug": slug.current, "description": SEODescription, _updatedAt},
+		"policies": *[_type == "policy" && defined(kind) && !(_id in path('drafts.**'))]{title, kind, _updatedAt}
+	}`);
 }

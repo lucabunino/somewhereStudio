@@ -1,57 +1,33 @@
-import { getIndex } from '$lib/utils/sanity';
-import { urlFor } from '$lib/utils/image';
-let baseUrl = "https://www.somewhere.works"
+import { getSitemapEntries } from '$lib/utils/sanity';
 
-export async function GET() {
-  const index = await getIndex();
-  const indexSlugsXML = index.map(index => {
-	let imgSrc = index.cover.asset ? urlFor(index.cover.asset).url() : "";
-    return `
-      <url>
-        <loc>${baseUrl}/index/${index.slug.current}</loc>
-        <lastmod>${index._updatedAt}</lastmod>
-        <priority>0.80</priority>
-        <image:image>
-          <image:loc>${imgSrc}</image:loc>
-        </image:image>
-      </url>`;
-  }).join('');
+export const prerender = false
 
-  // Build the complete sitemap
-  return new Response(
-    `
-    <?xml version="1.0" encoding="UTF-8"?>
-    <urlset
-      xmlns="https://www.sitemaps.org/schemas/sitemap/0.9"
-      xmlns:image="https://www.google.com/schemas/sitemap-image/1.1"
-    >
-      <url>
-        <loc>${baseUrl}</loc>
-        <lastmod>${new Date().toISOString()}</lastmod>
-        <priority>1.00</priority>
-      </url>
-      <url>
-        <loc>${baseUrl}/map</loc>
-        <lastmod>${new Date().toISOString()}</lastmod>
-        <priority>0.80</priority>
-      </url>
-	  <url>
-        <loc>${baseUrl}/index</loc>
-        <lastmod>${new Date().toISOString()}</lastmod>
-        <priority>0.80</priority>
-      </url>
-	  ${indexSlugsXML}
-	  <url>
-        <loc>${baseUrl}/about</loc>
-        <lastmod>${new Date().toISOString()}</lastmod>
-        <priority>0.80</priority>
-      </url>
-    </urlset>`.trim(),
-    {
-		headers: {
-		'Content-Type': 'application/xml',
-		'Cache-Control': 's-maxage=3600'
-		}
-    }
-  );
+const STATIC_ROUTES = ['/', '/index', '/map', '/about']
+
+/** @param {{ url: URL }} event */
+export async function GET({ url }) {
+	const { projects, policies } = await getSitemapEntries()
+
+	/** @type {{loc: string, lastmod?: string}[]} */
+	const entries = [
+		...STATIC_ROUTES.map((path) => ({ loc: url.origin + path })),
+		...projects.map((/** @type {any} */ p) => ({ loc: `${url.origin}/index/${p.slug}`, lastmod: p._updatedAt })),
+		...policies.map((/** @type {any} */ p) => ({ loc: `${url.origin}/${p.kind}`, lastmod: p._updatedAt })),
+	]
+
+	const body = `<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+${entries
+	.map(
+		(entry) => `	<url>
+		<loc>${entry.loc}</loc>${entry.lastmod ? `\n		<lastmod>${entry.lastmod.slice(0, 10)}</lastmod>` : ''}
+	</url>`
+	)
+	.join('\n')}
+</urlset>
+`
+
+	return new Response(body, {
+		headers: { 'Content-Type': 'application/xml', 'Cache-Control': 's-maxage=3600' }
+	})
 }

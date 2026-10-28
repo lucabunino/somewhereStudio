@@ -6,6 +6,7 @@ export async function load() {
 	if (index) {
 		return {
 			index,
+			seoSingle: { seoTitle: 'Index' },
 		};
 	}
 	throw error(404, 'Not found');

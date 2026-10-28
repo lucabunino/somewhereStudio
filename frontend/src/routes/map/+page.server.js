@@ -8,6 +8,7 @@ export async function load({ url }) {
 	if (modules) {
 		return {
 			modules,
+			seoSingle: { seoTitle: 'Map' },
 		};
 	}
 	throw error(404, 'Not found');
