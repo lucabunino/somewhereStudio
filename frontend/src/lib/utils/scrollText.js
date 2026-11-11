@@ -6,7 +6,10 @@ export function scrollText(node) {
 	node.dataset.scrollText = '';
 
 	function update() {
-		const more = node.scrollHeight - node.scrollTop - node.clientHeight > 1;
+		// only where the block really scrolls (homepage, map card): elsewhere floated text overflows the
+		// box, and the fade's clearfix would grow it, remove the fade, shrink it... every frame
+		const scrolls = ['auto', 'scroll'].includes(getComputedStyle(node).overflowY);
+		const more = scrolls && node.scrollHeight - node.scrollTop - node.clientHeight > 1;
 		node.classList.toggle('fade-bottom', more);
 	}
 

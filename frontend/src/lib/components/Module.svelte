@@ -395,7 +395,8 @@ $effect(() => {
 	display: none;
 }
 /* fade to the module background while there is more text below */
-.scroll-text.fade-bottom::after {
+:global(.scattered) .scroll-text.fade-bottom::after,
+:global(.card-content) .scroll-text.fade-bottom::after {
 	content: "";
 	display: block;
 	clear: both;
