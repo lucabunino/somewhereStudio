@@ -4,6 +4,17 @@ export const prerender = false
 
 const STATIC_ROUTES = ['/', '/index', '/map', '/about']
 
+// <loc> must be a percent-encoded URL (e.g. "libertà" → "libert%C3%A0"), XML-escaped
+/** @param {string} url */
+function toLoc(url) {
+	return encodeURI(url)
+		.replace(/&/g, '&amp;')
+		.replace(/'/g, '&apos;')
+		.replace(/"/g, '&quot;')
+		.replace(/</g, '&lt;')
+		.replace(/>/g, '&gt;')
+}
+
 /** @param {{ url: URL }} event */
 export async function GET({ url }) {
 	const { projects, policies } = await getSitemapEntries()
@@ -20,7 +31,7 @@ export async function GET({ url }) {
 ${entries
 	.map(
 		(entry) => `	<url>
-		<loc>${entry.loc}</loc>${entry.lastmod ? `\n		<lastmod>${entry.lastmod.slice(0, 10)}</lastmod>` : ''}
+		<loc>${toLoc(entry.loc)}</loc>${entry.lastmod ? `\n		<lastmod>${entry.lastmod.slice(0, 10)}</lastmod>` : ''}
 	</url>`
 	)
 	.join('\n')}

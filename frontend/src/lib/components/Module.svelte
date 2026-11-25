@@ -22,12 +22,9 @@ let {
 	color = null,
 } = $props()
 
-let linkHeight = $state(0)
-let domLoaded = $state(false)
+import { innerWidth } from 'svelte/reactivity/window';
 
-$effect(() => {
-	domLoaded = true
-})
+let linkHeight = $state(0)
 </script>
 
 {#snippet moduleContent(module)}
@@ -153,9 +150,8 @@ $effect(() => {
 {/snippet}
 
 
-{#if domLoaded}
 	{#if link}
-		{#if innerWidth > 700}
+		{#if innerWidth.current > 700}
 			<a class:homepage={$page.url.pathname === "/"} class="module {size ? size : module.size} {(module.kind === "composition" && module.fixedHeight) ? 'fixedHeight' : 'autoHeight'} {module.position ? module.position : 'left'}" data-kind={module.kind}
 			href={module.project?.slug ? `/index/${module.project.slug.current}` : ``}
 			style="background-color: {color ? 'var(--white)' : module.color?.hex}; --module-bg: {color ? 'var(--white)' : (module.color?.hex ?? 'var(--white)')}; color: {isDark(module.color?.hex) && !color ? "var(--white)" : "var(--black)"}"
@@ -173,7 +169,7 @@ $effect(() => {
 			</a>
 		{/if}
 	{:else}
-		{#if innerWidth > 700}
+		{#if innerWidth.current > 700}
 			<div class:homepage={$page.url.pathname === "/"} class="module {size ? size : module.size} {(module.kind === "composition" && module.fixedHeight) ? 'fixedHeight' : ''} {module.position ? module.position : 'left'}" data-kind={module.kind}
 			style="background-color: {color ? 'var(--white)' : module.color?.hex}; --module-bg: {color ? 'var(--white)' : (module.color?.hex ?? 'var(--white)')}; color: {isDark(module.color?.hex) && !color ? "var(--white)" : "var(--black)"}"
 			in:blur|global={{ duration: 200, amount: 100, delay: delayed ? 500 + i*50 : 500 }}
@@ -189,7 +185,6 @@ $effect(() => {
 			</div>
 		{/if}
 	{/if}
-{/if}
 
 
 <style>

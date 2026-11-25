@@ -510,9 +510,9 @@ function handleKey({key}) {if (key === 'G' && dev) {viewGrid = !viewGrid}}
 {/if}
 
 <!-- Main -->
-{#if domLoaded}
-	<div class="site-wrapper" style="background-color: {bger.bg};">
-		{#key data.pathname + cookieBanner}
+<!-- Always server-rendered so crawlers get the content; hidden via CSS until the intro is done -->
+<div class="site-wrapper" class:ready={domLoaded} style="background-color: {bger.bg};">
+		{#key data.pathname + !!cookieBanner}
 			<main
 			in:pageIn|global={{ duration: 200, delay: 500 }}
 			out:pageOut|global={{ duration: 200, delay: 0 }}
@@ -556,7 +556,6 @@ function handleKey({key}) {if (key === 'G' && dev) {viewGrid = !viewGrid}}
 			</footer>
 		{/if}
 	</div>
-{/if}
 
 <div class="gaisyr-14 shadow" id="cookie-banner" class:centered={showBanner}>
 	{#if showBanner}
@@ -575,8 +574,12 @@ function handleKey({key}) {if (key === 'G' && dev) {viewGrid = !viewGrid}}
 .site-wrapper {
 	-webkit-transition: var(--transition);
 	-o-transition: var(--transition);
-	transition: var(--transition);
+	transition: var(--transition), opacity 400ms ease-in-out;
 	min-height: 100vh;
+}
+.site-wrapper:not(.ready) {
+	opacity: 0;
+	pointer-events: none;
 }
 /* Header */
 .menu {

@@ -3,6 +3,8 @@ import mapboxgl from 'mapbox-gl';
 import 'mapbox-gl/dist/mapbox-gl.css';
 import { PUBLIC_MAPBOX_TOKEN } from '$env/static/public';
 import { onMount, onDestroy, tick } from "svelte";
+import { browser } from '$app/environment';
+import { innerWidth } from 'svelte/reactivity/window';
 import Module from '$lib/components/Module.svelte';
 import Serie from '$lib/components/Serie.svelte';
 import { clickOutside } from '$lib/utils/clickOutside.js';
@@ -34,7 +36,8 @@ let mapContainer = $state(undefined);
 let activeModule = $state(undefined);
 // spiderfy: the stacked spot currently fanned out (its pins sit at fixed pixel offsets around the true location)
 let spider = null;
-let showMap = $derived(localStorage.getItem('cookieConsent') === 'accepted' ? true : false);
+// read on the client only: this page now renders on the server too
+let showMap = $derived(browser && localStorage.getItem('cookieConsent') === 'accepted');
 // markers by key ("c<cluster_id>" / "s<spotIndex>"), updated by diff so they don't flicker while moving
 const markers = new Map();
 let markersZoom = null;
@@ -488,7 +491,7 @@ function updateData() {
 		{#if activeModule !== undefined}
 			{@const module = initialModules[activeModule]}
 			<!-- svelte-ignore a11y_no_static_element_interactions -->
-			<div class="card" style:--card-scale={innerWidth < 700 ? .9 : .5} use:clickOutside onclick_outside={() => handleClickOutside()}
+			<div class="card" style:--card-scale={innerWidth.current < 700 ? .9 : .5} use:clickOutside onclick_outside={() => handleClickOutside()}
 			onwheel={(e) => { if (canScrollText(e.target, e.deltaY)) e.stopPropagation() }}
 			ontouchstart={(e) => { if (canScrollText(e.target, 0)) e.stopPropagation() }}
 			ontouchmove={(e) => { if (canScrollText(e.target, 0)) e.stopPropagation() }}>
@@ -505,7 +508,7 @@ function updateData() {
 		{/if}
 	</div>
 {:else}
-	<p id="cookie-message" class:blurred={!header.blurred} class="gaisyr-19">Per poter visualizzare la mappa è necessario acconsentire all'uso dei cookie, {innerWidth > 700 ? 'in basso a sinistra' : 'in alto a destra'}.</p>
+	<p id="cookie-message" class:blurred={!header.blurred} class="gaisyr-19">Per poter visualizzare la mappa è necessario acconsentire all'uso dei cookie, {(innerWidth.current ?? 1000) > 700 ? 'in basso a sinistra' : 'in alto a destra'}.</p>
 {/if}
 </div>
 

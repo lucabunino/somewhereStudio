@@ -7,7 +7,6 @@ import { onDestroy, onMount } from "svelte";
 import { isDark } from "$lib/utils/color";
 
 let { data } = $props();
-let domLoaded = $state(false)
 let innerWidth = $state()
 let innerHeight = $state()
 let singleProjectHeight = $state()
@@ -55,7 +54,6 @@ onMount(() => {
 	return () => clearTimeout(tagsTimer);
 })
 $effect(() => {
-	domLoaded = true;
 	if (extraer.extraOpen == true) {
 		body.style.overflow = 'hidden';
 	} else {
@@ -66,7 +64,8 @@ $effect(() => {
 onDestroy(() => {
 	extraer.setExtra(false)
 	extraer.setExtraOpen(false)
-	body.style.overflow = '';
+	// onDestroy also runs on the server, where there is no body
+	if (body) body.style.overflow = '';
 	bger.setBg(null)
 })
 
@@ -82,8 +81,7 @@ function handleMouseEnter(latitude, longitude) {
 <svelte:body bind:this={body}/>
 <svelte:window bind:innerWidth bind:innerHeight></svelte:window>
 
-{#if domLoaded}
-	<section id="singleProject" class:extra={projectList[0].extra}
+<section id="singleProject" class:extra={projectList[0].extra}
 	bind:clientHeight={singleProjectHeight}
 	style={`margin-bottom: ${(singleProjectHeight - singleProjectHeight*zoomer.scale)*-1}px; -webkit-transform: scale(${zoomer.scale}); -ms-transform: scale(${zoomer.scale}); transform: scale(${zoomer.scale}); -webkit-transform-origin: center top; -ms-transform-origin: center top; transform-origin: center top;`}
 	>
@@ -180,7 +178,6 @@ function handleMouseEnter(latitude, longitude) {
 		style={`--introHeight: ${introHeight}px`}
 		></div>
 	{/if}
-{/if}
 
 <style>
 #singleProject {

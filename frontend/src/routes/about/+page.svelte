@@ -4,7 +4,6 @@ import { onMount } from "svelte";
 
 // Variables
 let { data } = $props()
-let domLoaded = $state(false)
 let innerWidth = $state(0)
 let innerHeight = $state(0)
 
@@ -19,7 +18,6 @@ onMount(() => {
 })
 
 $effect(() => {
-	domLoaded = true
 	tagger.setMaxTags(0)
 })
 </script>
@@ -30,8 +28,7 @@ $effect(() => {
 	{#if data.about.about}
 		<p class="about">{data.about.about}</p>
 	{/if}
-	{#if domLoaded}
-		<div class="contacts ronzino-12 uppercase">
+	<div class="contacts ronzino-12 uppercase">
 			{#if data.info.email}
 				<div class="tag">
 					<a class="btn" href="mailto:{data.info.email}"
@@ -47,7 +44,6 @@ $effect(() => {
 				</div>
 			{/each}
 		</div>
-	{/if}
 	{#if data.about.people}
 		<div class="people">
 			{#each data.about.people as person}
