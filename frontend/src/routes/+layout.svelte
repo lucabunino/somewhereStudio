@@ -304,8 +304,8 @@ function handleKey({key}) {if (key === 'G' && dev) {viewGrid = !viewGrid}}
 			<div class="menu-bg"></div>
 		{/if}
 		<ul class="menu gaisyr-34 mobile-gaisyr-30"
-		class:blurred={header.blurred}
-		aria-hidden={header.blurred}
+		class:blurred={header.blurred && domLoaded}
+		aria-hidden={header.blurred && domLoaded}
 		onclick={() => {menuActive = false}}
 		onmouseenter={() => {header.setBlurred(false); clearTimeout(blurredTimeout);}}
 		onmouseleave={() => {clearTimeout(blurredTimeout); blurredTimeout = setTimeout(() => {header.setBlurred(true)}, 2000);}}
